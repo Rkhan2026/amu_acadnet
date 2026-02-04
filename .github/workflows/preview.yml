@@ -1,9 +1,8 @@
 name: Preview
 
 on:
-  pull_request:
-    types: [opened, synchronize]
-    branches: [main]
+  push:
+    branches: [testing]
 
 jobs:
   build-and-test:
