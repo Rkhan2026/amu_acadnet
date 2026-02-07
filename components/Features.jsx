@@ -57,9 +57,9 @@ const features = [
 
 const Features = () => {
   return (
-    <section id="features" className="py-24 bg-white">
+    <section id="features" className="py-12 bg-white scroll-mt-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-10">
           <h2 className="text-base text-amu-green font-semibold tracking-wide uppercase">
             Key Modules
           </h2>
@@ -81,7 +81,7 @@ const Features = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="p-8 rounded-3xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+              className="p-8 rounded-3xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col items-center text-center"
             >
               <div
                 className={`w-14 h-14 ${feature.color} rounded-2xl flex items-center justify-center mb-6`}
@@ -91,7 +91,7 @@ const Features = () => {
               <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-amu-green transition-colors">
                 {feature.title}
               </h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-600 leading-relaxed text-justify w-full">
                 {feature.description}
               </p>
             </motion.div>

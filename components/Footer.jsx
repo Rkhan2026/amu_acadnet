@@ -104,6 +104,15 @@ const Footer = () => {
               className="text-amu-green hover:text-white transition-colors font-medium"
             >
               Mohd Rameez Khan
+            </a>{" "}
+            as part of{" "}
+            <a
+              href="https://github.com/Rkhan2026/amu_acadnet"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-amu-green hover:text-white transition-colors font-medium"
+            >
+              CAMS-4D01 Dissertation Project
             </a>
           </p>
         </div>

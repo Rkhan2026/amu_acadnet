@@ -6,9 +6,12 @@ import Link from "next/link";
 
 const Hero = () => {
   return (
-    <div className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-linear-to-b from-amu-green/5 to-white">
+    <div
+      id="about"
+      className="relative pt-24 pb-12 lg:pt-32 lg:pb-16 overflow-hidden bg-white scroll-mt-24"
+    >
       {/* Background decoration */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 bg-linear-to-b from-amu-green/5 to-white">
         <div className="absolute -top-[20%] -right-[10%] w-150 h-150 rounded-full bg-amu-green/10 blur-[100px]" />
         <div className="absolute top-[40%] -left-[10%] w-100 h-100 rounded-full bg-amu-gold/10 blur-[100px]" />
       </div>
@@ -33,7 +36,7 @@ const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed"
+            className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed"
           >
             AMU AcadNet is the exclusive academic social network for Aligarh
             Muslim University. Discover researchers, manage verified profiles,
@@ -65,7 +68,7 @@ const Hero = () => {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.5 }}
-            className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 text-left"
+            className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6"
           >
             {[
               {
@@ -86,11 +89,13 @@ const Hero = () => {
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="p-6 bg-white/60 backdrop-blur-sm rounded-2xl border border-gray-100 hover:border-amu-green/30 transition-colors group"
+                className="p-6 bg-white/60 backdrop-blur-sm rounded-2xl border border-gray-100 hover:border-amu-green/30 transition-colors group flex flex-col items-center text-center"
               >
                 <item.icon className="h-8 w-8 text-amu-green mb-3 group-hover:scale-110 transition-transform" />
                 <h3 className="font-bold text-gray-900">{item.title}</h3>
-                <p className="text-sm text-gray-500 mt-1">{item.desc}</p>
+                <p className="text-sm text-gray-500 mt-1 text-justify">
+                  {item.desc}
+                </p>
               </div>
             ))}
           </motion.div>

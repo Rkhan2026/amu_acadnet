@@ -1,24 +1,36 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X, GraduationCap, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
+  const handleScroll = (e, href) => {
+    // Only prevent default and scroll if we are already on the home page
+    if (pathname === "/") {
+      e.preventDefault();
+      const targetId = href.replace(/.*\#/, "");
+      const elem = document.getElementById(targetId);
+      if (elem) {
+        elem.scrollIntoView({ behavior: "smooth" });
+        // Update URL hash without causing a jump
+        window.history.pushState(null, "", `#${targetId}`);
+      }
+    }
+    // Otherwise, let the default Link behavior handle navigation to the home page + hash
+  };
+
   return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100"
-    >
+    <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex-shrink-0 flex items-center gap-2">
+          <div className="shrink-0 flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
               <GraduationCap className="h-8 w-8 text-amu-green" />
               <span className="font-bold text-xl tracking-tight text-gray-900">
@@ -27,28 +39,21 @@ const Navbar = () => {
             </Link>
           </div>
 
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-8 ml-auto">
             <Link
-              href="#features"
+              href="/#features"
+              onClick={(e) => handleScroll(e, "#features")}
               className="text-gray-600 hover:text-amu-green transition-colors font-medium"
             >
               Features
             </Link>
             <Link
-              href="#why-us"
+              href="/#about"
+              onClick={(e) => handleScroll(e, "#about")}
               className="text-gray-600 hover:text-amu-green transition-colors font-medium"
-            >
-              Why Us
-            </Link>
-            <Link
-              href="#"
-              className="hidden text-gray-600 hover:text-amu-green transition-colors font-medium"
             >
               About
             </Link>
-          </div>
-
-          <div className="hidden md:flex items-center space-x-4">
             <Link
               href="/login"
               className="px-5 py-2 text-gray-700 font-medium hover:text-amu-green transition-colors"
@@ -88,18 +93,24 @@ const Navbar = () => {
         >
           <div className="px-4 pt-2 pb-6 space-y-2">
             <Link
-              href="#features"
+              href="/#features"
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-amu-green hover:bg-amu-green/10"
-              onClick={toggleMenu}
+              onClick={(e) => {
+                toggleMenu();
+                handleScroll(e, "#features");
+              }}
             >
               Features
             </Link>
             <Link
-              href="#why-us"
+              href="/#about"
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-amu-green hover:bg-amu-green/10"
-              onClick={toggleMenu}
+              onClick={(e) => {
+                toggleMenu();
+                handleScroll(e, "#about");
+              }}
             >
-              Why Us
+              About
             </Link>
             <Link
               href="/login"
@@ -118,8 +129,7 @@ const Navbar = () => {
           </div>
         </motion.div>
       )}
-    </motion.nav>
+    </nav>
   );
 };
-
 export default Navbar;
