@@ -28,11 +28,20 @@ export default function LoginForm() {
     // Simulate API call
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Login submitted:", formData);
-      // For now, just show success or redirect logic would go here
-      alert("Login logic not implemented yet!");
+
+      // Dummy validation
+      if (
+        formData.email === "test@amu.ac.in" &&
+        formData.password === "password"
+      ) {
+        window.location.href = "/home";
+      } else {
+        setError(
+          "Invalid academic credentials. Use test@amu.ac.in / password for preview.",
+        );
+      }
     } catch {
-      setError("Invalid email or password. Please try again.");
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -48,6 +57,14 @@ export default function LoginForm() {
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
         <p className="text-gray-500 mt-2">Sign in to your academic account</p>
+        <div className="mt-4 p-2 bg-amu-gold/10 border border-amu-gold/20 rounded-lg">
+          <p className="text-[10px] font-black uppercase tracking-widest text-amu-gold">
+            Preview Credentials
+          </p>
+          <p className="text-sm font-bold text-gray-700">
+            test@amu.ac.in / password
+          </p>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

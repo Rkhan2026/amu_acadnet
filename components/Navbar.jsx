@@ -31,10 +31,12 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="shrink-0 flex items-center gap-2">
-            <Link href="/" className="flex items-center gap-2">
-              <GraduationCap className="h-8 w-8 text-amu-green" />
-              <span className="font-bold text-xl tracking-tight text-gray-900">
-                AMU AcadNet
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="p-1.5 bg-amu-green/10 rounded-xl border border-amu-green/20 group-hover:bg-amu-green transition-all">
+                <GraduationCap className="h-7 w-7 text-amu-green group-hover:text-white transition-colors" />
+              </div>
+              <span className="font-extrabold text-2xl tracking-tighter text-gray-900">
+                AMU <span className="text-amu-green">AcadNet</span>
               </span>
             </Link>
           </div>

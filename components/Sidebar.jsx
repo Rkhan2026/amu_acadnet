@@ -1,0 +1,73 @@
+"use client";
+import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  Home,
+  Search,
+  Bell,
+  User,
+  Settings,
+  LogOut,
+  GraduationCap,
+  Users,
+} from "lucide-react";
+
+const Sidebar = () => {
+  const pathname = usePathname();
+
+  const navItems = [
+    { label: "Home", href: "/home", icon: Home },
+    { label: "Explore", href: "/explore", icon: Search },
+    { label: "Notifications", href: "/notifications", icon: Bell },
+    { label: "Network", href: "/network", icon: Users },
+    { label: "Profile", href: "/profile", icon: User },
+    { label: "Settings", href: "/settings", icon: Settings },
+  ];
+
+  return (
+    <aside className="hidden md:flex flex-col w-64 border-r border-gray-100 bg-white h-screen fixed left-0 top-0 z-50">
+      <div className="p-6 border-b border-gray-50 flex items-center gap-2">
+        <GraduationCap className="h-8 w-8 text-amu-green" />
+        <span className="font-bold text-xl tracking-tight text-gray-900">
+          AcadNet
+        </span>
+      </div>
+
+      <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                isActive
+                  ? "bg-amu-green/10 text-amu-green font-semibold"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              }`}
+            >
+              <item.icon
+                className={`h-5 w-5 ${
+                  isActive
+                    ? "text-amu-green"
+                    : "text-gray-400 group-hover:text-gray-600"
+                }`}
+              />
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="p-4 border-t border-gray-50">
+        <button className="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium">
+          <LogOut className="h-5 w-5" />
+          Log Out
+        </button>
+      </div>
+    </aside>
+  );
+};
+
+export default Sidebar;

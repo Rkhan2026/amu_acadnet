@@ -8,95 +8,150 @@ const Hero = () => {
   return (
     <div
       id="about"
-      className="relative pt-24 pb-12 lg:pt-32 lg:pb-16 overflow-hidden bg-white scroll-mt-24"
+      className="relative min-h-[90vh] flex items-center pt-24 pb-12 overflow-hidden bg-white scroll-mt-24"
     >
-      {/* Background decoration */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 bg-linear-to-b from-amu-green/5 to-white">
-        <div className="absolute -top-[20%] -right-[10%] w-150 h-150 rounded-full bg-amu-green/10 blur-[100px]" />
-        <div className="absolute top-[40%] -left-[10%] w-100 h-100 rounded-full bg-amu-gold/10 blur-[100px]" />
+      {/* Background decoration - Enhanced with more layers and motion */}
+      <div className="absolute inset-0 overflow-hidden -z-10 bg-[radial-gradient(circle_at_50%_0%,rgba(0,102,51,0.05),transparent_50%)]">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 90, 0],
+            opacity: [0.1, 0.15, 0.1],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-[10%] -right-[5%] w-150 h-150 rounded-full bg-amu-green/20 blur-[120px]"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.3, 1],
+            rotate: [0, -90, 0],
+            opacity: [0.1, 0.2, 0.1],
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute top-[30%] -left-[10%] w-125 h-125 rounded-full bg-amu-gold/15 blur-[100px]"
+        />
+
+        {/* Abstract shapes for complexity */}
+        <div className="absolute top-1/4 right-1/4 w-px h-64 bg-linear-to-b from-transparent via-amu-green/20 to-transparent rotate-45 transform" />
+        <div className="absolute bottom-1/4 left-1/4 w-px h-64 bg-linear-to-b from-transparent via-amu-gold/20 to-transparent -rotate-45 transform" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center max-w-4xl mx-auto">
-          {/* Badge removed as requested */}
+        <div className="text-center max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amu-green/5 border border-amu-green/10 text-amu-green text-sm font-semibold mb-8"
+          >
+            <Sparkles className="h-4 w-4" />
+            <span>The Official Academic Hub of Aligarh Muslim University</span>
+          </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-6 leading-[1.1]"
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-6xl md:text-8xl font-black tracking-tighter text-gray-900 mb-8 leading-[0.95]"
           >
-            Connect. Collaborate. <br />
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-amu-green to-amu-gold">
+            Connect. <span className="text-amu-green">Collaborate.</span> <br />
+            <motion.span
+              className="text-transparent bg-clip-text bg-linear-to-r from-amu-green via-amu-gold to-amu-green bg-size-[200%_auto]"
+              animate={{ backgroundPosition: ["0% center", "200% center"] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            >
               Innovate Together.
-            </span>
+            </motion.span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed"
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed font-medium"
           >
-            AMU AcadNet is the exclusive academic social network for Aligarh
-            Muslim University. Discover researchers, manage verified profiles,
-            and foster interdisciplinary collaboration under institutional
-            governance.
+            Empowering the AMU community through a centralized, verified, and
+            AI-driven academic ecosystem for research growth and
+            interdisciplinary excellence.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-6"
           >
             <Link
               href="/register"
-              className="w-full sm:w-auto px-8 py-4 bg-amu-green hover:bg-[#004d26] text-white rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-amu-green/30 flex items-center justify-center gap-2"
+              className="group relative w-full sm:w-auto px-10 py-5 bg-amu-green text-white rounded-full font-black text-xl transition-all shadow-2xl hover:shadow-amu-green/40 flex items-center justify-center gap-3 overflow-hidden"
             >
-              Join AcadNet <ArrowRight className="h-5 w-5" />
+              <span className="relative z-10 transition-transform group-hover:-translate-x-1">
+                Join AMU AcadNet
+              </span>
+              <ArrowRight className="h-6 w-6 relative z-10 transition-transform group-hover:translate-x-1" />
+              <motion.div
+                className="absolute inset-0 bg-linear-to-r from-white/0 via-white/20 to-white/0"
+                animate={{ x: ["-100%", "100%"] }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
             </Link>
             <Link
               href="#features"
-              className="w-full sm:w-auto px-8 py-4 bg-white text-gray-700 border border-gray-200 hover:border-amu-green/30 hover:bg-amu-green/5 rounded-full font-bold text-lg transition-all shadow-sm hover:shadow-md"
+              className="w-full sm:w-auto px-10 py-5 bg-white text-gray-900 border-2 border-gray-100 hover:border-amu-green/30 hover:bg-amu-green/5 rounded-full font-black text-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center"
             >
-              Learn More
+              Explore Features
             </Link>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.5 }}
-            className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6"
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8"
           >
             {[
               {
                 icon: ShieldCheck,
-                title: "Verified Profiles",
-                desc: "Authentic academic identities managed by the institution.",
+                title: "Institutional Trust",
+                desc: "Verified student and faculty profiles ensuring a reliable and professional academic environment.",
+                gradient: "from-blue-500/10 to-transparent",
               },
               {
                 icon: Sparkles,
-                title: "AI Recommendations",
-                desc: "Smart matching for interdisciplinary research opportunities.",
+                title: "AI Discovery",
+                desc: "Intelligent recommendations for research partners based on interests, skills, and publication history.",
+                gradient: "from-amu-gold/10 to-transparent",
               },
               {
                 icon: Globe,
-                title: "Institutional Network",
-                desc: "Controlled environment for focused academic growth.",
+                title: "Seamless Network",
+                desc: "Connect across departments to bridge the gap between diverse research domains and expertise.",
+                gradient: "from-amu-green/10 to-transparent",
               },
             ].map((item, idx) => (
-              <div
+              <motion.div
                 key={idx}
-                className="p-6 bg-white/60 backdrop-blur-sm rounded-2xl border border-gray-100 hover:border-amu-green/30 transition-colors group flex flex-col items-center text-center"
+                whileHover={{ y: -5 }}
+                className={`relative overflow-hidden p-8 bg-white rounded-3xl border border-gray-100 hover:border-amu-green/30 transition-all group flex flex-col items-center text-center shadow-sm hover:shadow-xl`}
               >
-                <item.icon className="h-8 w-8 text-amu-green mb-3 group-hover:scale-110 transition-transform" />
-                <h3 className="font-bold text-gray-900">{item.title}</h3>
-                <p className="text-sm text-gray-500 mt-1 text-justify">
+                <div
+                  className={`absolute inset-0 bg-linear-to-br ${item.gradient} opacity-0 group-hover:opacity-100 transition-opacity`}
+                />
+                <div className="mb-4 p-4 rounded-2xl bg-gray-50 group-hover:bg-white group-hover:shadow-md transition-all">
+                  <item.icon className="h-10 w-10 text-amu-green group-hover:scale-110 transition-transform" />
+                </div>
+                <h3 className="font-bold text-2xl text-gray-900 mb-2">
+                  {item.title}
+                </h3>
+                <p className="text-gray-500 leading-relaxed font-medium">
                   {item.desc}
                 </p>
-              </div>
+              </motion.div>
             ))}
           </motion.div>
         </div>

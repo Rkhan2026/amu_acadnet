@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <GraduationCap className="h-8 w-8 text-amu-green" />
-              <span className="font-bold text-xl tracking-tight">
+              <span className="font-bold text-xl tracking-tight text-gray-900">
                 AMU AcadNet
               </span>
             </div>
