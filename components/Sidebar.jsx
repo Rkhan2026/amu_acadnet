@@ -7,13 +7,13 @@ import {
   Search,
   Bell,
   User,
-  Settings,
   LogOut,
   GraduationCap,
   Users,
+  PanelLeftClose,
 } from "lucide-react";
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onToggle }) => {
   const pathname = usePathname();
 
   const navItems = [
@@ -22,16 +22,27 @@ const Sidebar = () => {
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Network", href: "/network", icon: Users },
     { label: "Profile", href: "/profile", icon: User },
-    { label: "Settings", href: "/settings", icon: Settings },
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-64 border-r border-gray-100 bg-white h-screen fixed left-0 top-0 z-50">
-      <div className="p-6 border-b border-gray-50 flex items-center gap-2">
-        <GraduationCap className="h-8 w-8 text-amu-green" />
-        <span className="font-bold text-xl tracking-tight text-gray-900">
-          AcadNet
-        </span>
+    <aside
+      className={`fixed left-0 top-0 z-50 h-screen bg-white border-r border-gray-100 transition-all duration-300 ease-in-out flex flex-col ${
+        isOpen ? "w-64 translate-x-0" : "w-64 -translate-x-full"
+      }`}
+    >
+      <div className="p-6 border-b border-gray-50 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <GraduationCap className="h-8 w-8 text-amu-green" />
+          <span className="font-bold text-xl tracking-tight text-gray-900">
+            AMU AcadNet
+          </span>
+        </div>
+        <button
+          onClick={onToggle}
+          className="p-2 text-gray-400 hover:text-amu-green hover:bg-gray-50 rounded-xl transition-all"
+        >
+          <PanelLeftClose className="h-5 w-5" />
+        </button>
       </div>
 
       <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
