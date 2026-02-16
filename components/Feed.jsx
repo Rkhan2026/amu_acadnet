@@ -1,27 +1,72 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import FeedItem from "./FeedItem";
-import { RESEARCH_PUBLICATIONS } from "@/lib/dummyData";
+import { RESEARCH_PUBLICATIONS, FOLLOWING_FEED } from "@/lib/dummyData";
+import { Sparkles, Users } from "lucide-react";
 
 const Feed = () => {
+  const [activeTab, setActiveTab] = useState("for-you"); // "for-you" or "following"
+
+  const displayFeed =
+    activeTab === "for-you" ? RESEARCH_PUBLICATIONS : FOLLOWING_FEED;
+
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
-      {/* Feed Divider */}
-      <div className="flex items-center gap-4 mb-12">
-        <h2 className="text-2xl font-black text-gray-900 tracking-tight">
-          AI Curated Research
+      {/* Feed Tabs */}
+      <div className="flex items-center gap-8 mb-10 border-b border-gray-100 pb-0">
+        <button
+          onClick={() => setActiveTab("for-you")}
+          className={`pb-4 px-2 flex items-center gap-2 font-bold transition-all relative ${
+            activeTab === "for-you"
+              ? "text-amu-green"
+              : "text-gray-400 hover:text-gray-600"
+          }`}
+        >
+          <Sparkles
+            className={`h-5 w-5 ${activeTab === "for-you" ? "text-amu-green" : "text-gray-400"}`}
+          />
+          For You
+          {activeTab === "for-you" && (
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-amu-green rounded-t-full mt-auto" />
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab("following")}
+          className={`pb-4 px-2 flex items-center gap-2 font-bold transition-all relative ${
+            activeTab === "following"
+              ? "text-amu-green"
+              : "text-gray-400 hover:text-gray-600"
+          }`}
+        >
+          <Users
+            className={`h-5 w-5 ${activeTab === "following" ? "text-amu-green" : "text-gray-400"}`}
+          />
+          Following
+          {activeTab === "following" && (
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-amu-green rounded-t-full mt-auto" />
+          )}
+        </button>
+      </div>
+
+      {/* Feed Header Context */}
+      <div className="flex items-center gap-4 mb-8">
+        <h2 className="text-xl font-black text-gray-900 tracking-tight">
+          {activeTab === "for-you"
+            ? "AI Curated Research"
+            : "Following Updates"}
         </h2>
         <div className="h-px bg-gray-100 flex-1"></div>
-        <select className="bg-transparent text-sm font-black text-amu-green outline-none cursor-pointer uppercase tracking-widest">
-          <option>Best Match</option>
+        <select className="bg-transparent text-[10px] font-black text-amu-green outline-none cursor-pointer uppercase tracking-widest border border-amu-green/20 px-2 py-1 rounded-lg">
           <option>Recent</option>
+          <option>Trending</option>
         </select>
       </div>
 
-      {/* Publications */}
-      <div className="space-y-8">
-        {RESEARCH_PUBLICATIONS.map((pub) => (
-          <FeedItem key={pub.id} post={pub} />
+      {/* Publications / Content */}
+      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+        {displayFeed.map((post) => (
+          <FeedItem key={post.id} post={post} />
         ))}
       </div>
     </div>
