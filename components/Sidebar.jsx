@@ -2,16 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Home,
-  Search,
-  Bell,
-  User,
-  LogOut,
-  GraduationCap,
-  Users,
-  PanelLeftClose,
-} from "lucide-react";
+import { Home, Search, Bell, User, Users, PanelLeftClose } from "lucide-react";
 
 const Sidebar = ({ isOpen, onToggle }) => {
   const pathname = usePathname();
@@ -26,17 +17,11 @@ const Sidebar = ({ isOpen, onToggle }) => {
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-50 h-screen bg-white border-r border-gray-100 transition-all duration-300 ease-in-out flex flex-col ${
+      className={`fixed left-0 top-16 z-50 h-[calc(100vh-64px)] bg-white border-r border-gray-100 transition-all duration-300 ease-in-out flex flex-col ${
         isOpen ? "w-64 translate-x-0" : "w-64 -translate-x-full"
       }`}
     >
-      <div className="p-6 border-b border-gray-50 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <GraduationCap className="h-8 w-8 text-amu-green" />
-          <span className="font-bold text-xl tracking-tight text-gray-900">
-            AMU AcadNet
-          </span>
-        </div>
+      <div className="md:hidden p-4 border-b border-gray-50 flex items-center justify-end">
         <button
           onClick={onToggle}
           className="p-2 text-gray-400 hover:text-amu-green hover:bg-gray-50 rounded-xl transition-all"
@@ -70,13 +55,6 @@ const Sidebar = ({ isOpen, onToggle }) => {
           );
         })}
       </nav>
-
-      <div className="p-4 border-t border-gray-50">
-        <button className="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium">
-          <LogOut className="h-5 w-5" />
-          Log Out
-        </button>
-      </div>
     </aside>
   );
 };
