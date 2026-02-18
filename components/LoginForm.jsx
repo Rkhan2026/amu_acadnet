@@ -9,6 +9,7 @@ export default function LoginForm() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    role: "user",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,15 +31,28 @@ export default function LoginForm() {
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Dummy validation
-      if (
-        formData.email === "test@amu.ac.in" &&
-        formData.password === "password"
-      ) {
-        window.location.href = "/home";
+      if (formData.role === "admin") {
+        if (
+          formData.email === "admin@sample.com" &&
+          formData.password === "admin123"
+        ) {
+          window.location.href = "/admin/dashboard"; // Assuming an admin dashboard exists or will exist
+        } else {
+          setError(
+            "Invalid admin credentials. Use admin@sample.com / admin123 for preview.",
+          );
+        }
       } else {
-        setError(
-          "Invalid academic credentials. Use test@amu.ac.in / password for preview.",
-        );
+        if (
+          formData.email === "test@sample.com" &&
+          formData.password === "password"
+        ) {
+          window.location.href = "/home";
+        } else {
+          setError(
+            "Invalid academic credentials. Use test@sample.com / password for preview.",
+          );
+        }
       }
     } catch {
       setError("An unexpected error occurred. Please try again.");
@@ -62,12 +76,39 @@ export default function LoginForm() {
             Preview Credentials
           </p>
           <p className="text-sm font-bold text-gray-700">
-            test@amu.ac.in / password
+            {formData.role === "admin"
+              ? "admin@sample.com / admin123"
+              : "test@sample.com / password"}
           </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="flex p-1 bg-gray-100 rounded-xl mb-6">
+          <button
+            type="button"
+            onClick={() => setFormData((prev) => ({ ...prev, role: "user" }))}
+            className={`flex-1 py-1.5 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${
+              formData.role === "user"
+                ? "bg-white text-amu-green shadow-sm"
+                : "text-gray-400 hover:text-gray-600"
+            }`}
+          >
+            User
+          </button>
+          <button
+            type="button"
+            onClick={() => setFormData((prev) => ({ ...prev, role: "admin" }))}
+            className={`flex-1 py-1.5 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${
+              formData.role === "admin"
+                ? "bg-white text-amu-gold shadow-sm"
+                : "text-gray-400 hover:text-gray-600"
+            }`}
+          >
+            Admin
+          </button>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Email Address
@@ -146,7 +187,7 @@ export default function LoginForm() {
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg animate-pulse">
+          <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg">
             {error}
           </div>
         )}

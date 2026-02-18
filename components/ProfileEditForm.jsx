@@ -7,12 +7,14 @@ import {
   Briefcase,
   Building2,
   BookText,
+  GraduationCap,
   Sparkles,
 } from "lucide-react";
 
 const ProfileEditForm = ({ user, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     name: user.name,
+    universityId: user.universityId,
     designation: user.designation,
     department: user.department,
     biography: user.biography,
@@ -62,6 +64,22 @@ const ProfileEditForm = ({ user, onSave, onCancel }) => {
               onChange={handleChange}
               className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-amu-green focus:bg-white rounded-2xl outline-none transition-all font-bold text-gray-900 shadow-inner"
               placeholder="e.g. Dr. Sarah Ahmed"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-black text-gray-700 uppercase tracking-widest flex items-center gap-2">
+              <GraduationCap className="h-4 w-4 text-amu-green" />
+              University ID
+            </label>
+            <input
+              type="text"
+              name="universityId"
+              value={formData.universityId}
+              onChange={handleChange}
+              className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-amu-green focus:bg-white rounded-2xl outline-none transition-all font-bold text-gray-900 shadow-inner"
+              placeholder="e.g. FAC2024001"
               required
             />
           </div>
