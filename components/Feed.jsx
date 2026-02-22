@@ -53,14 +53,20 @@ const Feed = () => {
       <div className="flex items-center gap-4 mb-8">
         <h2 className="text-xl font-black text-gray-900 tracking-tight">
           {activeTab === "for-you"
-            ? "AI Curated Research"
+            ? "AI Collaboration Recommendations"
             : "Following Updates"}
         </h2>
         <div className="h-px bg-gray-100 flex-1"></div>
-        <select className="bg-transparent text-[10px] font-black text-amu-green outline-none cursor-pointer uppercase tracking-widest border border-amu-green/20 px-2 py-1 rounded-lg">
-          <option>Recent</option>
-          <option>Trending</option>
-        </select>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+            Sort by:
+          </span>
+          <select className="bg-transparent text-[10px] font-black text-amu-green outline-none cursor-pointer uppercase tracking-widest border border-amu-green/20 px-2 py-1 rounded-lg">
+            <option>Match Score</option>
+            <option>Recent</option>
+            <option>Trending</option>
+          </select>
+        </div>
       </div>
 
       {/* Publications / Content */}

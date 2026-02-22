@@ -20,10 +20,29 @@ import {
   COLLABORATION_REQUESTS_SENT,
 } from "@/lib/dummyData";
 
+const DEPARTMENTS = [
+  "Computer Science",
+  "Physics",
+  "Psychology",
+  "Medicine",
+  "English",
+  "Civil Engineering",
+];
+const DOMAINS = [
+  "AI & ML",
+  "Quantum Physics",
+  "Sustainability",
+  "Mental Health",
+  "English Literature",
+  "Healthcare AI",
+];
+
 export default function NetworkPage() {
   const [activeTab, setActiveTab] = useState("following");
   const [requestType, setRequestType] = useState("received"); // "received" or "sent"
   const [searchQuery, setSearchQuery] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState("");
+  const [domainFilter, setDomainFilter] = useState("");
 
   const tabs = [
     {
@@ -57,13 +76,27 @@ export default function NetworkPage() {
   const renderContent = () => {
     switch (activeTab) {
       case "following":
-        return FOLLOWING.filter((u) =>
-          u.name.toLowerCase().includes(searchQuery.toLowerCase()),
-        ).map((u) => <NetworkCard key={u.id} user={u} type="following" />);
+        return FOLLOWING.filter((u) => {
+          const matchesSearch = u.name
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase());
+          const matchesDept = departmentFilter
+            ? u.department === departmentFilter
+            : true;
+          const matchesDomain = domainFilter ? u.domain === domainFilter : true;
+          return matchesSearch && matchesDept && matchesDomain;
+        }).map((u) => <NetworkCard key={u.id} user={u} type="following" />);
       case "followers":
-        return FOLLOWERS.filter((u) =>
-          u.name.toLowerCase().includes(searchQuery.toLowerCase()),
-        ).map((u) => <NetworkCard key={u.id} user={u} type="followers" />);
+        return FOLLOWERS.filter((u) => {
+          const matchesSearch = u.name
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase());
+          const matchesDept = departmentFilter
+            ? u.department === departmentFilter
+            : true;
+          const matchesDomain = domainFilter ? u.domain === domainFilter : true;
+          return matchesSearch && matchesDept && matchesDomain;
+        }).map((u) => <NetworkCard key={u.id} user={u} type="followers" />);
       case "collaborations":
         return COLLABORATIONS.filter((c) =>
           c.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -89,25 +122,53 @@ export default function NetworkPage() {
   return (
     <div className="py-8 px-4 md:px-8 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header section */}
-      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="mb-10 flex flex-col xl:flex-row xl:items-end justify-between gap-6">
         <div>
           <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-2">
-            My Network
+            Researcher Discovery
           </h1>
           <p className="text-gray-500 font-medium">
-            Manage your academic circle and research partnerships.
+            Discover potential collaborators across departments and domains.
           </p>
         </div>
 
-        <div className="relative group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-amu-green transition-colors" />
-          <input
-            type="text"
-            placeholder="Search network..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 pr-6 py-3 bg-white border border-gray-100 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-amu-green/20 focus:border-amu-green transition-all w-full md:w-80 font-medium"
-          />
+        <div className="flex flex-col md:flex-row gap-4 w-full xl:w-auto">
+          <div className="relative group flex-1 md:flex-none">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-amu-green transition-colors" />
+            <input
+              type="text"
+              placeholder="Search researchers..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-12 pr-6 py-3 bg-white border border-gray-100 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-amu-green/20 focus:border-amu-green transition-all w-full md:w-64 font-medium"
+            />
+          </div>
+
+          <div className="flex gap-4">
+            <select
+              onChange={(e) => setDepartmentFilter(e.target.value)}
+              className="flex-1 md:flex-none px-4 py-3 bg-white border border-gray-100 rounded-2xl shadow-sm focus:outline-none focus:border-amu-green font-bold text-sm text-gray-700 outline-none cursor-pointer"
+            >
+              <option value="">All Departments</option>
+              {DEPARTMENTS.map((dept) => (
+                <option key={dept} value={dept}>
+                  {dept}
+                </option>
+              ))}
+            </select>
+
+            <select
+              onChange={(e) => setDomainFilter(e.target.value)}
+              className="flex-1 md:flex-none px-4 py-3 bg-white border border-gray-100 rounded-2xl shadow-sm focus:outline-none focus:border-amu-green font-bold text-sm text-gray-700 outline-none cursor-pointer"
+            >
+              <option value="">All Domains</option>
+              {DOMAINS.map((domain) => (
+                <option key={domain} value={domain}>
+                  {domain}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 

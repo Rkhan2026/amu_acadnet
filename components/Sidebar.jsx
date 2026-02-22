@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   FileCheck,
   GraduationCap,
+  PlusCircle,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen, onToggle }) => {
@@ -21,6 +22,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
 
   const userItems = [
     { label: "Home", href: "/home", icon: Home },
+    { label: "Create Project", href: "/projects/create", icon: PlusCircle },
     { label: "Explore", href: "/explore", icon: Search },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Network", href: "/network", icon: Users },

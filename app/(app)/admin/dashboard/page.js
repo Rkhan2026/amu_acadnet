@@ -70,16 +70,15 @@ export default function AdminDashboard() {
           icon={ShieldCheck}
           color="bg-amu-gold/10 text-amu-gold"
           href="/admin/verifications"
-          trend="+12%" // Restored TrendingUp icon by adding a trend prop
         />
         <StatsCard
-          title="Total Publications"
+          title="Total Research Projects"
           value={ADMIN_STATS.totalPublications}
           icon={BookOpen}
           color="bg-amu-green/10 text-amu-green"
         />
         <StatsCard
-          title="Pending Research Publication Moderations"
+          title="Pending Research Project Moderations"
           value={ADMIN_STATS.pendingModerations}
           icon={FileCheck}
           color="bg-purple-50 text-purple-500"

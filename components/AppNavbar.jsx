@@ -1,9 +1,13 @@
 "use client";
 import React from "react";
+import { usePathname } from "next/navigation";
 import { GraduationCap, LogOut, User as UserIcon } from "lucide-react";
 import { CURRENT_USER } from "@/lib/dummyData";
 
 const AppNavbar = () => {
+  const pathname = usePathname();
+  const isAdmin = pathname.startsWith("/admin");
+
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 z-[100] flex items-center justify-between px-6 shadow-sm">
       <div className="flex items-center gap-3">
@@ -19,10 +23,10 @@ const AppNavbar = () => {
         <div className="flex items-center gap-4 border-r border-gray-100 pr-6">
           <div className="text-right hidden sm:block">
             <p className="text-sm font-black text-gray-900 leading-none mb-1">
-              {CURRENT_USER.name}
+              {isAdmin ? "Institutional Admin" : CURRENT_USER.name}
             </p>
             <p className="text-[10px] font-bold text-amu-green uppercase tracking-widest">
-              {CURRENT_USER.role}
+              {isAdmin ? "Admin" : CURRENT_USER.role}
             </p>
           </div>
           <div className="h-10 w-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400">
