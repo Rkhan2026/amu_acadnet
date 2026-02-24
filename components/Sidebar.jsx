@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   Search,
-  Bell,
   User,
   Users,
   PanelLeftClose,
@@ -24,7 +23,6 @@ const Sidebar = ({ isOpen, onToggle }) => {
     { label: "Home", href: "/home", icon: Home },
     { label: "Create Project", href: "/projects/create", icon: PlusCircle },
     { label: "Explore", href: "/explore", icon: Search },
-    { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Network", href: "/network", icon: Users },
     { label: "Profile", href: "/profile", icon: User },
   ];
