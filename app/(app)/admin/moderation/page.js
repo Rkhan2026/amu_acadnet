@@ -9,15 +9,14 @@ import {
   Type,
   ExternalLink,
   Building2,
-  X,
-  ArrowLeft
+  ArrowLeft,
 } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { PENDING_PUBLICATIONS } from "@/lib/dummyData";
 
 const ProjectCard = ({ project, onAction, onClick }) => (
-  <div 
+  <div
     onClick={() => onClick(project)}
     className="bg-white p-8 rounded-4xl shadow-xl shadow-gray-200/50 border border-gray-100 animate-in fade-in slide-in-from-right-4 duration-500 hover:border-amu-green/30 transition-all group cursor-pointer"
   >
@@ -52,14 +51,20 @@ const ProjectCard = ({ project, onAction, onClick }) => (
 
       <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
         <button
-          onClick={(e) => { e.stopPropagation(); onAction(project.id, "approve"); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAction(project.id, "approve");
+          }}
           className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-amu-green text-white font-bold rounded-2xl hover:bg-amu-green/90 transition-all shadow-lg shadow-amu-green/20"
         >
           <CheckCircle2 className="h-5 w-5" />
           Approve
         </button>
         <button
-          onClick={(e) => { e.stopPropagation(); onAction(project.id, "reject"); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAction(project.id, "reject");
+          }}
           className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-gray-50 text-gray-400 font-bold rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all"
         >
           <XCircle className="h-5 w-5" />
@@ -90,8 +95,7 @@ const ProjectModal = ({ project, onClose, onAction }) => {
           className="bg-gray-50 w-full max-w-6xl rounded-[3rem] shadow-2xl overflow-hidden my-8"
         >
           <div className="p-8 md:p-14 pb-0 max-h-[85vh] overflow-y-auto custom-scrollbar">
-            
-            <button 
+            <button
               onClick={onClose}
               className="flex items-center gap-2 text-gray-400 hover:text-gray-900 font-bold text-sm uppercase tracking-widest mb-10 transition-colors"
             >
@@ -100,7 +104,6 @@ const ProjectModal = ({ project, onClose, onAction }) => {
             </button>
 
             <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 pb-14">
-              
               {/* Main Content Area */}
               <div className="flex-1 space-y-12">
                 {/* Header Information */}
@@ -124,8 +127,12 @@ const ProjectModal = ({ project, onClose, onAction }) => {
                         <User className="h-6 w-6 text-gray-400" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Lead Researcher</p>
-                        <p className="font-bold text-gray-900">{project.author}</p>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
+                          Lead Researcher
+                        </p>
+                        <p className="font-bold text-gray-900">
+                          {project.author}
+                        </p>
                       </div>
                     </div>
 
@@ -134,8 +141,12 @@ const ProjectModal = ({ project, onClose, onAction }) => {
                         <Building2 className="h-6 w-6 text-gray-400" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Department</p>
-                        <p className="font-bold text-gray-900">{project.department || "Not Specified"}</p>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
+                          Department
+                        </p>
+                        <p className="font-bold text-gray-900">
+                          {project.department || "Not Specified"}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -147,7 +158,9 @@ const ProjectModal = ({ project, onClose, onAction }) => {
                     <div className="w-10 h-10 bg-amu-green/10 rounded-xl flex items-center justify-center">
                       <BookOpen className="h-5 w-5 text-amu-green" />
                     </div>
-                    <h2 className="text-2xl font-black text-gray-900">Description</h2>
+                    <h2 className="text-2xl font-black text-gray-900">
+                      Description
+                    </h2>
                   </div>
                   <p className="text-gray-600 font-medium leading-relaxed prose prose-lg max-w-none">
                     {project.description || "No description provided."}
@@ -163,9 +176,9 @@ const ProjectModal = ({ project, onClose, onAction }) => {
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {project.externalLinks.map((link, i) => (
-                        <a 
+                        <a
                           key={i}
-                          href={link.url || "#"} 
+                          href={link.url || "#"}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="bg-gray-50 p-6 rounded-2xl border border-gray-100 flex items-center justify-center group hover:border-amu-green transition-all"
@@ -183,28 +196,46 @@ const ProjectModal = ({ project, onClose, onAction }) => {
               {/* Sidebar */}
               <div className="w-full lg:w-80 shrink-0 space-y-6">
                 <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm sticky top-8">
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Execution Status</p>
-                  
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">
+                    Execution Status
+                  </p>
+
                   <div className="flex items-center gap-3 mb-8">
                     <div className="p-3 bg-gray-50 rounded-xl">
                       <Calendar className="h-5 w-5 text-gray-400" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-gray-400">Submitted At</p>
-                      <p className="text-sm font-black text-gray-900">{project.submittedAt}</p>
+                      <p className="text-xs font-bold text-gray-400">
+                        Submitted At
+                      </p>
+                      <p className="text-sm font-black text-gray-900">
+                        {project.submittedAt}
+                      </p>
                     </div>
                   </div>
 
                   {project.team && project.team.length > 0 && (
                     <div className="mt-8 pt-8 border-t border-gray-50">
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Project Team</p>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
+                        Project Team
+                      </p>
                       <div className="space-y-6 mb-8">
                         {project.team.map((member, i) => (
                           <div key={i} className="flex items-center gap-3">
-                            <Image src={member.avatar} alt={member.name} width={40} height={40} className="rounded-xl border border-gray-100" />
+                            <Image
+                              src={member.avatar}
+                              alt={member.name}
+                              width={40}
+                              height={40}
+                              className="rounded-xl border border-gray-100"
+                            />
                             <div className="text-left">
-                              <p className="font-bold text-gray-900 text-sm leading-tight">{member.name}</p>
-                              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-0.5">{member.role}</p>
+                              <p className="font-bold text-gray-900 text-sm leading-tight">
+                                {member.name}
+                              </p>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-0.5">
+                                {member.role}
+                              </p>
                             </div>
                           </div>
                         ))}
@@ -214,14 +245,20 @@ const ProjectModal = ({ project, onClose, onAction }) => {
 
                   <div className="space-y-3 pt-8 border-t border-gray-50">
                     <button
-                      onClick={() => { onAction(project.id, "approve"); onClose(); }}
+                      onClick={() => {
+                        onAction(project.id, "approve");
+                        onClose();
+                      }}
                       className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-amu-green text-white font-bold rounded-2xl hover:bg-[#004d26] transition-all shadow-xl shadow-amu-green/20"
                     >
                       <CheckCircle2 className="h-5 w-5" />
                       Approve Project
                     </button>
                     <button
-                      onClick={() => { onAction(project.id, "reject"); onClose(); }}
+                      onClick={() => {
+                        onAction(project.id, "reject");
+                        onClose();
+                      }}
                       className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gray-50 text-gray-400 font-bold rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all border border-gray-100"
                     >
                       <XCircle className="h-5 w-5" />
@@ -230,7 +267,6 @@ const ProjectModal = ({ project, onClose, onAction }) => {
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </motion.div>

@@ -106,14 +106,17 @@ const ProfileView = ({ user, onEdit }) => {
               Research Interests
             </h3>
             <div className="flex flex-wrap gap-2">
-              {user.researchInterests.split(",").slice(0, 1).map((interest, idx) => (
-                <span
-                  key={idx}
-                  className="px-4 py-2 bg-gray-50 text-gray-700 font-bold rounded-xl border border-gray-100 hover:border-amu-green/30 hover:bg-amu-green/5 transition-all cursor-default"
-                >
-                  {interest.trim()}
-                </span>
-              ))}
+              {user.researchInterests
+                .split(",")
+                .slice(0, 1)
+                .map((interest, idx) => (
+                  <span
+                    key={idx}
+                    className="px-4 py-2 bg-gray-50 text-gray-700 font-bold rounded-xl border border-gray-100 hover:border-amu-green/30 hover:bg-amu-green/5 transition-all cursor-default"
+                  >
+                    {interest.trim()}
+                  </span>
+                ))}
             </div>
           </div>
         </div>

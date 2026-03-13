@@ -419,7 +419,9 @@ export default function RegisterForm() {
                   }
                 />
                 {errors.universityID && (
-                  <p className="text-red-500 text-sm mt-1">{errors.universityID}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.universityID}
+                  </p>
                 )}
               </div>
             </motion.div>
@@ -472,7 +474,9 @@ export default function RegisterForm() {
                   placeholder="Tell us about your academic background..."
                 />
                 {errors.biography && (
-                  <p className="text-red-500 text-sm mt-1">{errors.biography}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.biography}
+                  </p>
                 )}
               </div>
             </motion.div>

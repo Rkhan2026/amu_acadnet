@@ -1,13 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import {
-  Save,
-  X,
-  User,
-  Building2,
-  BookText,
-  Sparkles,
-} from "lucide-react";
+import { Save, X, User, Building2, BookText, Sparkles } from "lucide-react";
 
 import { AMU_DEPARTMENTS } from "@/lib/utils";
 
@@ -69,7 +62,6 @@ const ProfileEditForm = ({ user, onSave, onCancel }) => {
             />
           </div>
 
-
           <div className="space-y-2 relative">
             <label className="text-sm font-black text-gray-700 uppercase tracking-widest flex items-center gap-2">
               <Building2 className="h-4 w-4 text-amu-green" />
@@ -90,8 +82,18 @@ const ProfileEditForm = ({ user, onSave, onCancel }) => {
               ))}
             </select>
             <div className="absolute right-6 top-1/2 mt-3 -translate-y-1/2 pointer-events-none text-gray-400">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </div>
           </div>

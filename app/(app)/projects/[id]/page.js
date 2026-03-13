@@ -1,22 +1,26 @@
 "use client";
 import React, { useState } from "react";
-import { 
-  ArrowLeft, 
-  ExternalLink, 
-  User, 
-  Building2, 
+import {
+  ArrowLeft,
+  ExternalLink,
+  User,
+  Building2,
   FlaskConical,
   Calendar,
   FileText,
   Save,
   X,
   Plus,
-  Trash2
+  Trash2,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
-import { RESEARCH_PUBLICATIONS, FOLLOWING_FEED, CURRENT_USER } from "@/lib/dummyData";
+import {
+  RESEARCH_PUBLICATIONS,
+  FOLLOWING_FEED,
+  CURRENT_USER,
+} from "@/lib/dummyData";
 
 const ProjectDetailPage = () => {
   const router = useRouter();
@@ -25,8 +29,8 @@ const ProjectDetailPage = () => {
 
   // Combine projects from both sources to find the right one
   const allProjects = [...RESEARCH_PUBLICATIONS, ...FOLLOWING_FEED];
-  const initialProject = allProjects.find(p => p.id === projectId);
-  
+  const initialProject = allProjects.find((p) => p.id === projectId);
+
   const [project, setProject] = useState(initialProject);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -36,13 +40,15 @@ const ProjectDetailPage = () => {
     description: initialProject?.description || "",
     projectStatus: initialProject?.projectStatus || "Active",
     team: initialProject?.team ? [...initialProject.team] : [],
-    externalLinks: initialProject?.externalLinks ? [...initialProject.externalLinks] : []
+    externalLinks: initialProject?.externalLinks
+      ? [...initialProject.externalLinks]
+      : [],
   });
 
   const isOwner = project?.leadResearcher === CURRENT_USER.name;
 
   const handleSave = () => {
-    setProject(prev => ({ ...prev, ...editForm }));
+    setProject((prev) => ({ ...prev, ...editForm }));
     setIsEditing(false);
   };
 
@@ -54,7 +60,7 @@ const ProjectDetailPage = () => {
       description: project?.description || "",
       projectStatus: project?.projectStatus || "Active",
       team: project?.team ? [...project.team] : [],
-      externalLinks: project?.externalLinks ? [...project.externalLinks] : []
+      externalLinks: project?.externalLinks ? [...project.externalLinks] : [],
     });
     setIsEditing(false);
   };
@@ -65,9 +71,14 @@ const ProjectDetailPage = () => {
         <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center mb-6">
           <FileText className="h-10 w-10 text-red-400" />
         </div>
-        <h1 className="text-3xl font-black text-gray-900 mb-2">Project Not Found</h1>
-        <p className="text-gray-500 mb-8 max-w-sm">The research project you are looking for might have been moved or archived.</p>
-        <button 
+        <h1 className="text-3xl font-black text-gray-900 mb-2">
+          Project Not Found
+        </h1>
+        <p className="text-gray-500 mb-8 max-w-sm">
+          The research project you are looking for might have been moved or
+          archived.
+        </p>
+        <button
           onClick={() => router.back()}
           className="px-8 py-3 bg-gray-100 text-gray-600 font-bold rounded-2xl hover:bg-gray-200 transition-all flex items-center gap-2"
         >
@@ -100,10 +111,12 @@ const ProjectDetailPage = () => {
           >
             <div className="flex flex-wrap items-center gap-4">
               {isEditing ? (
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={editForm.domain}
-                  onChange={(e) => setEditForm({...editForm, domain: e.target.value})}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, domain: e.target.value })
+                  }
                   className="px-6 py-2 bg-white text-amu-green text-sm font-black uppercase tracking-widest rounded-2xl border-2 border-amu-green focus:outline-none focus:ring-4 focus:ring-amu-green/20"
                 />
               ) : (
@@ -112,9 +125,11 @@ const ProjectDetailPage = () => {
                 </span>
               )}
               {isEditing ? (
-                <select 
+                <select
                   value={editForm.projectStatus}
-                  onChange={(e) => setEditForm({...editForm, projectStatus: e.target.value})}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, projectStatus: e.target.value })
+                  }
                   className="px-6 py-2.5 text-sm font-black uppercase tracking-widest rounded-2xl border-2 border-amu-green focus:outline-none focus:ring-4 focus:ring-amu-green/20 bg-white text-amu-green appearance-none cursor-pointer"
                 >
                   <option value="Active">Active</option>
@@ -122,26 +137,34 @@ const ProjectDetailPage = () => {
                   <option value="Finished">Finished</option>
                 </select>
               ) : (
-                <span className={`px-6 py-2.5 text-sm font-black uppercase tracking-widest rounded-2xl flex items-center gap-3 border shadow-sm ${
-                  project.projectStatus === 'Active' || project.projectStatus === 'Ongoing'
-                    ? 'bg-amu-green text-white border-amu-green'
-                    : 'bg-gray-50 text-gray-400 border-gray-100'
-                }`}>
-                  <span className={`w-2 h-2 rounded-full ${
-                    project.projectStatus === 'Active' || project.projectStatus === 'Ongoing'
-                      ? 'bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] animate-pulse'
-                      : 'bg-gray-300'
-                  }`}></span>
+                <span
+                  className={`px-6 py-2.5 text-sm font-black uppercase tracking-widest rounded-2xl flex items-center gap-3 border shadow-sm ${
+                    project.projectStatus === "Active" ||
+                    project.projectStatus === "Ongoing"
+                      ? "bg-amu-green text-white border-amu-green"
+                      : "bg-gray-50 text-gray-400 border-gray-100"
+                  }`}
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      project.projectStatus === "Active" ||
+                      project.projectStatus === "Ongoing"
+                        ? "bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] animate-pulse"
+                        : "bg-gray-300"
+                    }`}
+                  ></span>
                   {project.projectStatus}
                 </span>
               )}
             </div>
 
             {isEditing ? (
-              <input 
+              <input
                 type="text"
                 value={editForm.title}
-                onChange={(e) => setEditForm({...editForm, title: e.target.value})}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, title: e.target.value })
+                }
                 className="w-full text-5xl font-black text-gray-900 leading-[1.1] tracking-tight bg-white border-2 border-gray-200 rounded-2xl p-4 focus:outline-none focus:border-amu-green focus:ring-4 focus:ring-amu-green/20"
               />
             ) : (
@@ -156,8 +179,12 @@ const ProjectDetailPage = () => {
                   <User className="h-6 w-6 text-gray-400" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Lead Researcher</p>
-                  <p className="font-bold text-gray-900">{project.leadResearcher}</p>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
+                    Lead Researcher
+                  </p>
+                  <p className="font-bold text-gray-900">
+                    {project.leadResearcher}
+                  </p>
                 </div>
               </div>
 
@@ -166,8 +193,12 @@ const ProjectDetailPage = () => {
                   <Building2 className="h-6 w-6 text-gray-400" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Department</p>
-                  <p className="font-bold text-gray-900">{project.department}</p>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
+                    Department
+                  </p>
+                  <p className="font-bold text-gray-900">
+                    {project.department}
+                  </p>
                 </div>
               </div>
             </div>
@@ -186,12 +217,14 @@ const ProjectDetailPage = () => {
               </div>
               <h2 className="text-2xl font-black text-gray-900">Description</h2>
             </div>
-            
+
             <div className="prose prose-lg max-w-none text-gray-600 font-medium leading-relaxed">
               {isEditing ? (
-                <textarea 
+                <textarea
                   value={editForm.description}
-                  onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, description: e.target.value })
+                  }
                   rows={6}
                   className="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 focus:outline-none focus:border-amu-green focus:bg-white transition-colors resize-none"
                 />
@@ -214,34 +247,44 @@ const ProjectDetailPage = () => {
                 External Links
               </h3>
               {isEditing && (
-                <button 
-                  onClick={() => setEditForm({...editForm, externalLinks: [...editForm.externalLinks, { url: "", label: "New Link" }]})}
+                <button
+                  onClick={() =>
+                    setEditForm({
+                      ...editForm,
+                      externalLinks: [
+                        ...editForm.externalLinks,
+                        { url: "", label: "New Link" },
+                      ],
+                    })
+                  }
                   className="p-2 bg-white text-amu-green rounded-xl border border-gray-200 hover:border-amu-green transition-all"
                 >
                   <Plus className="h-4 w-4" />
                 </button>
               )}
             </div>
-            
+
             <div className="space-y-4">
               {isEditing ? (
                 editForm.externalLinks.map((link, i) => (
                   <div key={i} className="flex gap-2">
-                    <input 
-                      type="text" 
-                      value={link.url || link} 
+                    <input
+                      type="text"
+                      value={link.url || link}
                       onChange={(e) => {
                         const newLinks = [...editForm.externalLinks];
                         newLinks[i] = { ...link, url: e.target.value };
-                        setEditForm({...editForm, externalLinks: newLinks});
+                        setEditForm({ ...editForm, externalLinks: newLinks });
                       }}
                       placeholder="https://"
                       className="flex-1 px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-amu-green"
                     />
-                    <button 
+                    <button
                       onClick={() => {
-                        const newLinks = editForm.externalLinks.filter((_, idx) => idx !== i);
-                        setEditForm({...editForm, externalLinks: newLinks});
+                        const newLinks = editForm.externalLinks.filter(
+                          (_, idx) => idx !== i,
+                        );
+                        setEditForm({ ...editForm, externalLinks: newLinks });
                       }}
                       className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors"
                     >
@@ -252,15 +295,15 @@ const ProjectDetailPage = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {project.externalLinks?.map((link, i) => (
-                    <a 
+                    <a
                       key={i}
-                      href={link.url || "#"} 
+                      href={link.url || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="bg-white p-6 rounded-2xl border border-gray-200 flex items-center justify-center group hover:border-amu-green transition-all shadow-sm overflow-hidden"
                     >
                       <p className="text-gray-500 group-hover:text-amu-green transition-colors truncate text-sm font-medium">
-                        {typeof link === 'string' ? link : link.url}
+                        {typeof link === "string" ? link : link.url}
                       </p>
                     </a>
                   ))}
@@ -277,58 +320,83 @@ const ProjectDetailPage = () => {
             animate={{ opacity: 1, x: 0 }}
             className="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-gray-100"
           >
-            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-6">Execution Status</h3>
+            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-6">
+              Execution Status
+            </h3>
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 text-gray-500 font-bold">
                   <Calendar className="h-4 w-4" />
                   <span>Created At</span>
                 </div>
-                <span className="font-black text-gray-900">{project.time || '2d ago'}</span>
+                <span className="font-black text-gray-900">
+                  {project.time || "2d ago"}
+                </span>
               </div>
             </div>
 
             {isOwner ? (
               <div className="mt-10 pt-8 border-t border-gray-50 text-center">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Manage Project</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
+                  Manage Project
+                </p>
                 <div className="space-y-6 mb-6">
-                  { (isEditing ? editForm.team : project.team)?.length > 0 ? (
-                    (isEditing ? editForm.team : project.team).map((member, i) => (
-                      <div key={i} className="flex items-center justify-between group">
-                        <div className="flex items-center gap-3">
-                          <Image src={member.avatar} alt={member.name} width={40} height={40} className="rounded-xl border border-gray-100" />
-                          <div className="text-left">
-                            <p className="font-bold text-gray-900 text-sm leading-tight">{member.name}</p>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-0.5">{member.role}</p>
+                  {(isEditing ? editForm.team : project.team)?.length > 0 ? (
+                    (isEditing ? editForm.team : project.team).map(
+                      (member, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Image
+                              src={member.avatar}
+                              alt={member.name}
+                              width={40}
+                              height={40}
+                              className="rounded-xl border border-gray-100"
+                            />
+                            <div className="text-left">
+                              <p className="font-bold text-gray-900 text-sm leading-tight">
+                                {member.name}
+                              </p>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-0.5">
+                                {member.role}
+                              </p>
+                            </div>
                           </div>
+                          {isEditing && (
+                            <button
+                              onClick={() => {
+                                const newTeam = editForm.team.filter(
+                                  (_, idx) => idx !== i,
+                                );
+                                setEditForm({ ...editForm, team: newTeam });
+                              }}
+                              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          )}
                         </div>
-                        {isEditing && (
-                          <button 
-                            onClick={() => {
-                              const newTeam = editForm.team.filter((_, idx) => idx !== i);
-                              setEditForm({...editForm, team: newTeam});
-                            }}
-                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        )}
-                      </div>
-                    ))
+                      ),
+                    )
                   ) : (
-                    <p className="text-sm text-gray-500 italic">No team members added yet.</p>
+                    <p className="text-sm text-gray-500 italic">
+                      No team members added yet.
+                    </p>
                   )}
                 </div>
                 <div className="space-y-3">
                   {isEditing ? (
                     <>
-                      <button 
+                      <button
                         onClick={handleSave}
                         className="w-full py-4 bg-amu-green text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-amu-green/20 hover:shadow-amu-green/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
                       >
                         <Save className="w-4 h-4" /> Save Changes
                       </button>
-                      <button 
+                      <button
                         onClick={handleCancel}
                         className="w-full py-4 bg-white text-gray-900 border border-gray-200 rounded-2xl font-black uppercase tracking-widest text-sm hover:border-gray-900 transition-all flex items-center justify-center gap-2"
                       >
@@ -336,7 +404,7 @@ const ProjectDetailPage = () => {
                       </button>
                     </>
                   ) : (
-                    <button 
+                    <button
                       onClick={() => setIsEditing(true)}
                       className="w-full py-4 bg-gray-900 text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-gray-900/20 hover:shadow-gray-900/40 hover:-translate-y-1 transition-all"
                     >
@@ -347,14 +415,15 @@ const ProjectDetailPage = () => {
               </div>
             ) : (
               <div className="mt-10 pt-8 border-t border-gray-50 text-center">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Interested in Collaborating?</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
+                  Interested in Collaborating?
+                </p>
                 <button className="w-full py-4 bg-amu-green text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-amu-green/20 hover:shadow-amu-green/40 hover:-translate-y-1 transition-all">
                   Send Request
                 </button>
               </div>
             )}
           </motion.div>
-
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useMemo } from "react";
+import Image from "next/image";
 import {
   Search,
   Filter,
@@ -233,9 +234,11 @@ const ExplorePage = () => {
 
                     <div className="mt-8 pt-6 border-t border-gray-50 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <img
+                        <Image
                           src={item.avatar}
                           alt=""
+                          width={32}
+                          height={32}
                           className="h-8 w-8 rounded-full border border-gray-100"
                         />
                         <span className="text-xs font-black text-gray-700">

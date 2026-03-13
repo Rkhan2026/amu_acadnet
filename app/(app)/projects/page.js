@@ -2,12 +2,18 @@
 
 import React from "react";
 import Link from "next/link";
-import { Plus, Briefcase, Clock, CheckCircle2, MoreVertical } from "lucide-react";
+import {
+  Plus,
+  Briefcase,
+  Clock,
+  CheckCircle2,
+  MoreVertical,
+} from "lucide-react";
 import { RESEARCH_PUBLICATIONS, CURRENT_USER } from "@/lib/dummyData";
 
 export default function MyProjectsPage() {
   const myProjects = RESEARCH_PUBLICATIONS.filter(
-    (p) => p.leadResearcher === CURRENT_USER.name
+    (p) => p.leadResearcher === CURRENT_USER.name,
   );
 
   return (
@@ -19,7 +25,8 @@ export default function MyProjectsPage() {
             My Projects
           </h1>
           <p className="text-gray-500 font-medium">
-            Manage your research projects, track progress, and create new initiatives.
+            Manage your research projects, track progress, and create new
+            initiatives.
           </p>
         </div>
         <Link
@@ -42,9 +49,12 @@ export default function MyProjectsPage() {
             <div className="p-4 bg-gray-100 rounded-2xl mb-4">
               <Briefcase className="h-10 w-10 text-gray-400" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">No projects yet</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              No projects yet
+            </h3>
             <p className="text-gray-500 max-w-xs mb-8">
-              You haven&apos;t registered any research projects. Start by creating your first project!
+              You haven&apos;t registered any research projects. Start by
+              creating your first project!
             </p>
             <Link
               href="/projects/create"
@@ -69,20 +79,34 @@ function MyProjectCard({ project }) {
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-amu-green/10 text-amu-green`}>
+              <span
+                className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-amu-green/10 text-amu-green`}
+              >
                 {project.domain}
               </span>
-              <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                project.projectStatus === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-amu-gold/10 text-amu-gold'
-              }`}>
+              <span
+                className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                  project.projectStatus === "Active"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-amu-gold/10 text-amu-gold"
+                }`}
+              >
                 {project.projectStatus}
               </span>
               {project.approvalStatus && (
-                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 ${
-                  project.approvalStatus === 'Approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-                }`}>
-                  {project.approvalStatus === 'Pending' && <Clock className="w-3 h-3" />}
-                  {project.approvalStatus === 'Approved' && <CheckCircle2 className="w-3 h-3" />}
+                <span
+                  className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 ${
+                    project.approvalStatus === "Approved"
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-amber-100 text-amber-700"
+                  }`}
+                >
+                  {project.approvalStatus === "Pending" && (
+                    <Clock className="w-3 h-3" />
+                  )}
+                  {project.approvalStatus === "Approved" && (
+                    <CheckCircle2 className="w-3 h-3" />
+                  )}
                   {project.approvalStatus}
                 </span>
               )}
@@ -100,7 +124,6 @@ function MyProjectCard({ project }) {
       <p className="text-gray-600 font-medium mb-8 line-clamp-2">
         {project.description}
       </p>
-
 
       <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-gray-50">
         <div className="flex items-center gap-2 text-gray-400 font-medium text-sm">

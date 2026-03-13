@@ -50,12 +50,11 @@ const FeedItem = ({ post }) => {
             {post.description}
           </p>
         </div>
-
       </div>
 
       {/* Footer - Restored Actions */}
       <div className="flex items-center justify-between mt-10 pt-8 border-t border-gray-50 gap-4">
-        <Link 
+        <Link
           href={`/projects/${post.id}`}
           className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-amu-green text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:shadow-amu-green/40 hover:-translate-y-1 transition-all"
         >

@@ -77,11 +77,11 @@ export default function NetworkPage() {
       case "collaborations":
         if (subTab === "ongoing") {
           return COLLABORATIONS.filter(
-            (c) => c.status === "Active" || c.status === "Ongoing"
+            (c) => c.status === "Active" || c.status === "Ongoing",
           ).map((c) => <CollaborationCard key={c.id} collab={c} />);
         } else if (subTab === "finished") {
           return COLLABORATIONS.filter((c) => c.status === "Finished").map(
-            (c) => <CollaborationCard key={c.id} collab={c} />
+            (c) => <CollaborationCard key={c.id} collab={c} />,
           );
         } else {
           const requests =
@@ -161,7 +161,7 @@ export default function NetworkPage() {
               label="Ongoing"
               count={
                 COLLABORATIONS.filter(
-                  (c) => c.status === "Active" || c.status === "Ongoing"
+                  (c) => c.status === "Active" || c.status === "Ongoing",
                 ).length
               }
             />
@@ -169,7 +169,9 @@ export default function NetworkPage() {
               active={subTab === "finished"}
               onClick={() => setSubTab("finished")}
               label="Finished"
-              count={COLLABORATIONS.filter((c) => c.status === "Finished").length}
+              count={
+                COLLABORATIONS.filter((c) => c.status === "Finished").length
+              }
             />
           </>
         ) : activeTab === "following" ? (
