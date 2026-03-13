@@ -2,6 +2,7 @@
 import React from "react";
 import { MoreHorizontal, BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const FeedItem = ({ post }) => {
   return (
@@ -21,15 +22,15 @@ const FeedItem = ({ post }) => {
       <div className="space-y-6">
         <div>
           <div className="flex items-center justify-between mb-4">
-            <span className="px-3 py-1 bg-amu-green/10 text-amu-green text-[10px] font-black uppercase tracking-widest rounded-lg border border-amu-green/20">
+            <span className="px-5 py-2 bg-amu-green/10 text-amu-green text-[12px] font-black uppercase tracking-widest rounded-xl border border-amu-green/20 shadow-sm">
               {post.domain}
             </span>
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+            <span className="text-[12px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2.5">
               <span
-                className={`w-2 h-2 rounded-full ${
+                className={`w-3 h-3 rounded-full ${
                   post.projectStatus === "Active" ||
                   post.projectStatus === "Ongoing"
-                    ? "bg-amu-green"
+                    ? "bg-amu-green shadow-[0_0_8px_rgba(4,103,66,0.4)] animate-pulse"
                     : "bg-amu-gold"
                 }`}
               ></span>
@@ -50,25 +51,17 @@ const FeedItem = ({ post }) => {
           </p>
         </div>
 
-        {/* Keywords */}
-        <div className="flex flex-wrap gap-2">
-          {post.keywords?.map((keyword, index) => (
-            <span
-              key={index}
-              className="text-[11px] font-bold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-100"
-            >
-              #{keyword}
-            </span>
-          ))}
-        </div>
       </div>
 
       {/* Footer - Restored Actions */}
       <div className="flex items-center justify-between mt-10 pt-8 border-t border-gray-50 gap-4">
-        <button className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-amu-green text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:shadow-amu-green/40 hover:-translate-y-1 transition-all">
+        <Link 
+          href={`/projects/${post.id}`}
+          className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-amu-green text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:shadow-amu-green/40 hover:-translate-y-1 transition-all"
+        >
           <BookOpen className="h-4 w-4" />
           Full Project
-        </button>
+        </Link>
         <button className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-white text-amu-green border-2 border-amu-green rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-amu-green/5 hover:-translate-y-1 transition-all">
           Accept Collab Request
         </button>

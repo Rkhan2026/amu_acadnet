@@ -4,25 +4,26 @@ import {
   Save,
   X,
   User,
-  Briefcase,
   Building2,
   BookText,
-  GraduationCap,
   Sparkles,
 } from "lucide-react";
+
+import { AMU_DEPARTMENTS } from "@/lib/utils";
 
 const ProfileEditForm = ({ user, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     name: user.name,
-    universityId: user.universityId,
-    designation: user.designation,
     department: user.department,
     biography: user.biography,
     researchInterests: user.researchInterests,
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    if (name === "researchInterests") {
+      value = value.replace(/,/g, "");
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -68,52 +69,31 @@ const ProfileEditForm = ({ user, onSave, onCancel }) => {
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-black text-gray-700 uppercase tracking-widest flex items-center gap-2">
-              <GraduationCap className="h-4 w-4 text-amu-green" />
-              University ID
-            </label>
-            <input
-              type="text"
-              name="universityId"
-              value={formData.universityId}
-              onChange={handleChange}
-              className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-amu-green focus:bg-white rounded-2xl outline-none transition-all font-bold text-gray-900 shadow-inner"
-              placeholder="e.g. FAC2024001"
-              required
-            />
-          </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-black text-gray-700 uppercase tracking-widest flex items-center gap-2">
-              <Briefcase className="h-4 w-4 text-amu-green" />
-              Designation
-            </label>
-            <input
-              type="text"
-              name="designation"
-              value={formData.designation}
-              onChange={handleChange}
-              className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-amu-green focus:bg-white rounded-2xl outline-none transition-all font-bold text-gray-900 shadow-inner"
-              placeholder="e.g. Assistant Professor"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
+          <div className="space-y-2 relative">
             <label className="text-sm font-black text-gray-700 uppercase tracking-widest flex items-center gap-2">
               <Building2 className="h-4 w-4 text-amu-green" />
               Department
             </label>
-            <input
-              type="text"
+            <select
               name="department"
               value={formData.department}
               onChange={handleChange}
-              className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-amu-green focus:bg-white rounded-2xl outline-none transition-all font-bold text-gray-900 shadow-inner"
-              placeholder="Department of Computer Science"
+              className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-amu-green focus:bg-white rounded-2xl outline-none transition-all font-bold text-gray-900 shadow-inner appearance-none cursor-pointer"
               required
-            />
+            >
+              <option value="">Select Department</option>
+              {AMU_DEPARTMENTS.map((dept) => (
+                <option key={dept} value={dept}>
+                  {dept}
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-6 top-1/2 mt-3 -translate-y-1/2 pointer-events-none text-gray-400">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -127,11 +107,11 @@ const ProfileEditForm = ({ user, onSave, onCancel }) => {
               value={formData.researchInterests}
               onChange={handleChange}
               className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-amu-green focus:bg-white rounded-2xl outline-none transition-all font-bold text-gray-900 shadow-inner"
-              placeholder="AI, Machine Learning, Data Science"
+              placeholder="e.g. Artificial Intelligence"
               required
             />
             <p className="text-xs text-gray-400 font-medium">
-              Separate with commas
+              Enter your primary research domain
             </p>
           </div>
         </div>

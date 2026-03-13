@@ -21,7 +21,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
 
   const userItems = [
     { label: "Home", href: "/home", icon: Home },
-    { label: "Create Project", href: "/projects/create", icon: PlusCircle },
+    { label: "My Projects", href: "/projects", icon: PlusCircle },
     { label: "Explore", href: "/explore", icon: Search },
     { label: "Network", href: "/network", icon: Users },
     { label: "Profile", href: "/profile", icon: User },

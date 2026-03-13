@@ -6,7 +6,6 @@ import {
   FileCheck,
   BookOpen,
   TrendingUp,
-  BarChart3,
   PieChart,
 } from "lucide-react";
 import Link from "next/link";
@@ -128,45 +127,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8">
-        {/* Research Activity Summary */}
-        <div className="bg-white p-8 rounded-4xl shadow-xl shadow-gray-200/50 border border-gray-100">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-black text-gray-900 flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-xl">
-                <BarChart3 className="h-5 w-5 text-purple-600" />
-              </div>
-              Research Activity Trends
-            </h3>
-          </div>
-          <div className="flex items-end gap-2 h-48 mb-6 px-2">
-            {ANALYTICS_DATA.researchActivities.map((data, idx) => (
-              <div
-                key={idx}
-                className="flex-1 flex flex-col items-center gap-2 group"
-              >
-                <div className="w-full relative flex items-end justify-center h-full">
-                  <motion.div
-                    initial={{ height: 0 }}
-                    animate={{ height: `${(data.publications / 100) * 100}%` }}
-                    className="w-full max-w-6 bg-amu-green rounded-t-lg group-hover:bg-amu-green-light transition-colors relative"
-                  >
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-black text-amu-green">
-                      {data.publications}
-                    </div>
-                  </motion.div>
-                </div>
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                  {data.month}
-                </span>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs text-gray-400 font-medium text-center">
-            Monthly institutional research output across all departments.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

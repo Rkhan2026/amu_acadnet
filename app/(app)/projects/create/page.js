@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   ArrowRight,
   Loader2,
-  Tags,
   Plus,
   Trash2,
 } from "lucide-react";
@@ -23,7 +22,6 @@ const CreateProjectPage = () => {
     researchDomain: "",
     projectStatus: "Proposed",
     description: "",
-    keywords: "",
     externalLinks: [""],
   });
 
@@ -222,23 +220,6 @@ const CreateProjectPage = () => {
                 placeholder="Briefly describe the research goals and methodology..."
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amu-green/20 focus:border-amu-green transition-all font-medium text-gray-600 placeholder:text-gray-300 resize-none"
               />
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">
-                Keywords
-              </label>
-              <div className="relative">
-                <Tags className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-300" />
-                <input
-                  type="text"
-                  name="keywords"
-                  value={formData.keywords}
-                  onChange={handleChange}
-                  placeholder="e.g. AI, Quantum, Sustainability"
-                  className="w-full pl-14 pr-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amu-green/20 focus:border-amu-green transition-all font-bold text-gray-900 placeholder:text-gray-300"
-                />
-              </div>
             </div>
 
             <div className="space-y-4">

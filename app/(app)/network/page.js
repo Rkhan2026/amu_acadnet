@@ -75,10 +75,14 @@ export default function NetworkPage() {
           return [];
         }
       case "collaborations":
-        if (subTab === "accepted") {
-          return COLLABORATIONS.map((c) => (
-            <CollaborationCard key={c.id} collab={c} />
-          ));
+        if (subTab === "ongoing") {
+          return COLLABORATIONS.filter(
+            (c) => c.status === "Active" || c.status === "Ongoing"
+          ).map((c) => <CollaborationCard key={c.id} collab={c} />);
+        } else if (subTab === "finished") {
+          return COLLABORATIONS.filter((c) => c.status === "Finished").map(
+            (c) => <CollaborationCard key={c.id} collab={c} />
+          );
         } else {
           const requests =
             subTab === "received"
@@ -115,7 +119,7 @@ export default function NetworkPage() {
             key={tab.id}
             onClick={() => {
               setActiveTab(tab.id);
-              setSubTab("accepted");
+              setSubTab(tab.id === "collaborations" ? "ongoing" : "accepted");
             }}
             className={`pb-4 px-2 flex items-center gap-2 font-bold transition-all relative whitespace-nowrap ${
               activeTab === tab.id
@@ -152,10 +156,20 @@ export default function NetworkPage() {
               count={COLLABORATION_REQUESTS_SENT.length}
             />
             <SubTabButton
-              active={subTab === "accepted"}
-              onClick={() => setSubTab("accepted")}
-              label="Accepted"
-              count={COLLABORATIONS.length}
+              active={subTab === "ongoing"}
+              onClick={() => setSubTab("ongoing")}
+              label="Ongoing"
+              count={
+                COLLABORATIONS.filter(
+                  (c) => c.status === "Active" || c.status === "Ongoing"
+                ).length
+              }
+            />
+            <SubTabButton
+              active={subTab === "finished"}
+              onClick={() => setSubTab("finished")}
+              label="Finished"
+              count={COLLABORATIONS.filter((c) => c.status === "Finished").length}
             />
           </>
         ) : activeTab === "following" ? (

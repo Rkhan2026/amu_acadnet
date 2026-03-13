@@ -24,7 +24,9 @@ export default function RegisterForm() {
     password: "",
     confirmPassword: "",
     department: "",
-    idNumber: "", // Enrollment for Student, Faculty ID for others
+    universityID: "", // Enrollment for Student, Faculty ID for others
+    biography: "",
+    domain: "",
   });
   const [errors, setErrors] = useState({});
 
@@ -99,11 +101,26 @@ export default function RegisterForm() {
         newErrors.department = "Please select your department.";
         isValid = false;
       }
-      if (!formData.idNumber.trim()) {
-        newErrors.idNumber =
+      if (!formData.universityID.trim()) {
+        newErrors.universityID =
           formData.role === "faculty"
             ? "Faculty ID is required."
             : "Enrollment Number is required.";
+        isValid = false;
+      }
+    } else if (currentStep === 3) {
+      if (!formData.biography.trim()) {
+        newErrors.biography = "Biography is required.";
+        isValid = false;
+      } else if (formData.biography.trim().length < 20) {
+        newErrors.biography = "Biography should be at least 20 characters.";
+        isValid = false;
+      }
+      if (!formData.domain.trim()) {
+        newErrors.domain = "Domain is required.";
+        isValid = false;
+      } else if (formData.domain.includes(",")) {
+        newErrors.domain = "Please enter only one primary domain.";
         isValid = false;
       }
     }
@@ -168,7 +185,7 @@ export default function RegisterForm() {
 
         {/* Progress Bar */}
         <div className="mt-6 flex justify-center gap-2">
-          {[0, 1, 2].map((i) => (
+          {[0, 1, 2, 3].map((i) => (
             <div
               key={i}
               className={cn(
@@ -386,23 +403,76 @@ export default function RegisterForm() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {formData.role === "faculty"
                     ? "Faculty ID"
-                    : "Enrollment Number"}
+                    : "University ID (Enrollment Number)"}
                 </label>
                 <input
                   type="text"
-                  name="idNumber"
-                  value={formData.idNumber}
+                  name="universityID"
+                  value={formData.universityID}
                   onChange={handleInputChange}
                   className={cn(
                     "w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amu-green focus:border-amu-green outline-none transition-all",
-                    errors.idNumber ? "border-red-500" : "border-gray-300",
+                    errors.universityID ? "border-red-500" : "border-gray-300",
                   )}
                   placeholder={
-                    formData.role === "faculty" ? "e.g. FAC-001" : "e.g. GK1234"
+                    formData.role === "faculty" ? "e.g. FAC-001" : "e.g. GI1234"
                   }
                 />
-                {errors.idNumber && (
-                  <p className="text-red-500 text-sm mt-1">{errors.idNumber}</p>
+                {errors.universityID && (
+                  <p className="text-red-500 text-sm mt-1">{errors.universityID}</p>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {step === 3 && (
+            <motion.div
+              key="step3"
+              custom={step}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Domain
+                </label>
+                <input
+                  type="text"
+                  name="domain"
+                  value={formData.domain}
+                  onChange={handleInputChange}
+                  className={cn(
+                    "w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amu-green focus:border-amu-green outline-none transition-all",
+                    errors.domain ? "border-red-500" : "border-gray-300",
+                  )}
+                  placeholder="e.g. Artificial Intelligence"
+                />
+                {errors.domain && (
+                  <p className="text-red-500 text-sm mt-1">{errors.domain}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Biography
+                </label>
+                <textarea
+                  name="biography"
+                  value={formData.biography}
+                  onChange={handleInputChange}
+                  rows={4}
+                  className={cn(
+                    "w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amu-green focus:border-amu-green outline-none transition-all resize-none",
+                    errors.biography ? "border-red-500" : "border-gray-300",
+                  )}
+                  placeholder="Tell us about your academic background..."
+                />
+                {errors.biography && (
+                  <p className="text-red-500 text-sm mt-1">{errors.biography}</p>
                 )}
               </div>
             </motion.div>
@@ -422,7 +492,7 @@ export default function RegisterForm() {
             <div></div> // Spacer
           )}
 
-          {step < 2 ? (
+          {step < 3 ? (
             <button
               type="button"
               onClick={handleNext}

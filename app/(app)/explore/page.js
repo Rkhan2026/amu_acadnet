@@ -68,7 +68,7 @@ const ExplorePage = () => {
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-gray-400" />
             <input
               type="text"
-              placeholder="Search by keywords, researcher name, or project title..."
+              placeholder="Search by researcher name, or project title..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-16 pr-8 py-5 bg-white rounded-3xl text-gray-900 font-bold text-lg focus:outline-none focus:ring-8 focus:ring-white/10 transition-all placeholder:text-gray-400 shadow-2xl shadow-black/10"
