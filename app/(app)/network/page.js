@@ -10,88 +10,172 @@ import {
   Briefcase,
   UserCheck,
 } from "lucide-react";
-import {
-  FOLLOWING,
-  FOLLOWERS,
-  COLLABORATIONS,
-  COLLABORATION_REQUESTS_RECEIVED,
-  COLLABORATION_REQUESTS_SENT,
-  FOLLOW_REQUESTS_RECEIVED,
-  FOLLOW_REQUESTS_SENT,
-} from "@/lib/dummyData";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function NetworkPage() {
   const [activeTab, setActiveTab] = useState("following");
   const [subTab, setSubTab] = useState("accepted");
+  const [networkData, setNetworkData] = useState({
+    following: [],
+    followers: [],
+    sentCollaborations: [],
+    receivedCollaborations: [],
+  });
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    fetch("/api/network")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.error) setNetworkData(d);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Format data
+  const followingAccepted = networkData.following
+    .filter((f) => f.requestStatus === "ACCEPTED")
+    .map((f) => ({
+      id: f.followingID,
+      name: f.following.name,
+      department: f.following.department,
+      avatar: "/default-avatar.png",
+      role: "USER",
+      followers: 0,
+    }));
+  const followingSent = networkData.following
+    .filter((f) => f.requestStatus === "PENDING")
+    .map((f) => ({
+      id: f.followingID,
+      name: f.following.name,
+      department: f.following.department,
+      avatar: "/default-avatar.png",
+      role: "USER",
+      status: "PENDING",
+    }));
+
+  const followersAccepted = networkData.followers
+    .filter((f) => f.requestStatus === "ACCEPTED")
+    .map((f) => ({
+      id: f.followerID,
+      name: f.follower.name,
+      department: f.follower.department,
+      avatar: "/default-avatar.png",
+      role: "USER",
+      followers: 0,
+    }));
+  const followersReceived = networkData.followers
+    .filter((f) => f.requestStatus === "PENDING")
+    .map((f) => ({
+      id: f.followerID,
+      name: f.follower.name,
+      department: f.follower.department,
+      avatar: "/default-avatar.png",
+      role: "USER",
+      status: "PENDING",
+    }));
+
+  const collabOngoing = [
+    ...networkData.sentCollaborations,
+    ...networkData.receivedCollaborations,
+  ]
+    .filter((c) => c.requestStatus === "ACCEPTED")
+    .map((c) => ({
+      id: c.requestID,
+      name: c.project?.title || "Project",
+      partners: [c.receiver?.name || c.sender?.name],
+      avatar: "/default-avatar.png",
+      progress: 50,
+      status: "Active",
+    }));
+  const collabFinished = [];
+  const collabReceived = networkData.receivedCollaborations
+    .filter((c) => c.requestStatus === "PENDING")
+    .map((c) => ({
+      id: c.requestID,
+      name: c.project?.title || "Project",
+      from: c.sender?.name,
+      avatar: "/default-avatar.png",
+      status: "PENDING",
+    }));
+  const collabSent = networkData.sentCollaborations
+    .filter((c) => c.requestStatus === "PENDING")
+    .map((c) => ({
+      id: c.requestID,
+      name: c.project?.title || "Project",
+      to: c.receiver?.name,
+      avatar: "/default-avatar.png",
+      status: "PENDING",
+    }));
 
   const tabs = [
     {
       id: "following",
       label: "Following",
-      count: FOLLOWING.length + FOLLOW_REQUESTS_SENT.length,
+      count: followingAccepted.length + followingSent.length,
       icon: UserCheck,
     },
     {
       id: "followers",
       label: "Followers",
-      count: FOLLOWERS.length + FOLLOW_REQUESTS_RECEIVED.length,
+      count: followersAccepted.length + followersReceived.length,
       icon: Users,
     },
     {
       id: "collaborations",
       label: "Collaborations",
       count:
-        COLLABORATIONS.length +
-        COLLABORATION_REQUESTS_RECEIVED.length +
-        COLLABORATION_REQUESTS_SENT.length,
+        collabOngoing.length +
+        collabFinished.length +
+        collabReceived.length +
+        collabSent.length,
       icon: Briefcase,
     },
   ];
 
   const renderContent = () => {
+    if (loading)
+      return (
+        <div className="col-span-full py-20">
+          <LoadingSpinner message="Loading network activity..." />
+        </div>
+      );
+
     switch (activeTab) {
       case "following":
-        if (subTab === "accepted") {
-          return FOLLOWING.map((u) => (
-            <NetworkCard key={u.id} user={u} type="following" />
-          ));
-        } else if (subTab === "sent") {
-          return FOLLOW_REQUESTS_SENT.map((u) => (
-            <FollowRequestCard key={u.id} request={u} type="sent" />
-          ));
-        } else {
-          return [];
-        }
+        return subTab === "accepted"
+          ? followingAccepted.map((u) => (
+              <NetworkCard key={u.id} user={u} type="following" />
+            ))
+          : followingSent.map((u) => (
+              <FollowRequestCard key={u.id} request={u} type="sent" />
+            ));
       case "followers":
-        if (subTab === "accepted") {
-          return FOLLOWERS.map((u) => (
-            <NetworkCard key={u.id} user={u} type="followers" />
-          ));
-        } else if (subTab === "received") {
-          return FOLLOW_REQUESTS_RECEIVED.map((u) => (
-            <FollowRequestCard key={u.id} request={u} type="received" />
-          ));
-        } else {
-          return [];
-        }
+        return subTab === "accepted"
+          ? followersAccepted.map((u) => (
+              <NetworkCard key={u.id} user={u} type="followers" />
+            ))
+          : followersReceived.map((u) => (
+              <FollowRequestCard key={u.id} request={u} type="received" />
+            ));
       case "collaborations":
-        if (subTab === "ongoing") {
-          return COLLABORATIONS.filter(
-            (c) => c.status === "Active" || c.status === "Ongoing",
-          ).map((c) => <CollaborationCard key={c.id} collab={c} />);
-        } else if (subTab === "finished") {
-          return COLLABORATIONS.filter((c) => c.status === "Finished").map(
-            (c) => <CollaborationCard key={c.id} collab={c} />,
-          );
-        } else {
-          const requests =
-            subTab === "received"
-              ? COLLABORATION_REQUESTS_RECEIVED
-              : COLLABORATION_REQUESTS_SENT;
-          return requests.map((r) => (
-            <CollabRequestCard key={r.id} request={r} type={subTab} />
+        if (subTab === "ongoing")
+          return collabOngoing.map((c) => (
+            <CollaborationCard key={c.id} collab={c} />
           ));
-        }
+        if (subTab === "finished")
+          return collabFinished.map((c) => (
+            <CollaborationCard key={c.id} collab={c} />
+          ));
+        if (subTab === "received")
+          return collabReceived.map((r) => (
+            <CollabRequestCard key={r.id} request={r} type="received" />
+          ));
+        if (subTab === "sent")
+          return collabSent.map((r) => (
+            <CollabRequestCard key={r.id} request={r} type="sent" />
+          ));
+        return null;
       default:
         return null;
     }
@@ -99,7 +183,6 @@ export default function NetworkPage() {
 
   return (
     <div className="py-8 px-4 md:px-8 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Header section */}
       <div className="mb-10 flex flex-col xl:flex-row xl:items-end justify-between gap-6">
         <div>
           <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-2">
@@ -112,7 +195,6 @@ export default function NetworkPage() {
         </div>
       </div>
 
-      {/* Main Tabs */}
       <div className="flex gap-4 mb-8 border-b border-gray-100 pb-0 overflow-x-auto scroller-hide">
         {tabs.map((tab) => (
           <button
@@ -139,7 +221,6 @@ export default function NetworkPage() {
         ))}
       </div>
 
-      {/* Sub-tabs Rendering */}
       <div className="flex gap-3 mb-8">
         {activeTab === "collaborations" ? (
           <>
@@ -147,31 +228,25 @@ export default function NetworkPage() {
               active={subTab === "received"}
               onClick={() => setSubTab("received")}
               label="Received"
-              count={COLLABORATION_REQUESTS_RECEIVED.length}
+              count={collabReceived.length}
             />
             <SubTabButton
               active={subTab === "sent"}
               onClick={() => setSubTab("sent")}
               label="Sent"
-              count={COLLABORATION_REQUESTS_SENT.length}
+              count={collabSent.length}
             />
             <SubTabButton
               active={subTab === "ongoing"}
               onClick={() => setSubTab("ongoing")}
               label="Ongoing"
-              count={
-                COLLABORATIONS.filter(
-                  (c) => c.status === "Active" || c.status === "Ongoing",
-                ).length
-              }
+              count={collabOngoing.length}
             />
             <SubTabButton
               active={subTab === "finished"}
               onClick={() => setSubTab("finished")}
               label="Finished"
-              count={
-                COLLABORATIONS.filter((c) => c.status === "Finished").length
-              }
+              count={collabFinished.length}
             />
           </>
         ) : activeTab === "following" ? (
@@ -180,13 +255,13 @@ export default function NetworkPage() {
               active={subTab === "sent"}
               onClick={() => setSubTab("sent")}
               label="Sent"
-              count={FOLLOW_REQUESTS_SENT.length}
+              count={followingSent.length}
             />
             <SubTabButton
               active={subTab === "accepted"}
               onClick={() => setSubTab("accepted")}
               label="Accepted"
-              count={FOLLOWING.length}
+              count={followingAccepted.length}
             />
           </>
         ) : (
@@ -195,19 +270,18 @@ export default function NetworkPage() {
               active={subTab === "received"}
               onClick={() => setSubTab("received")}
               label="Received"
-              count={FOLLOW_REQUESTS_RECEIVED.length}
+              count={followersReceived.length}
             />
             <SubTabButton
               active={subTab === "accepted"}
               onClick={() => setSubTab("accepted")}
               label="Accepted"
-              count={FOLLOWERS.length}
+              count={followersAccepted.length}
             />
           </>
         )}
       </div>
 
-      {/* Content Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {renderContent()}
       </div>

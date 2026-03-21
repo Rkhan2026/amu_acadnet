@@ -12,38 +12,66 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AMU_DEPARTMENTS } from "@/lib/utils";
-import { EXPLORE_RESEARCHERS, EXPLORE_PROJECTS } from "@/lib/dummyData";
-
+import LoadingSpinner from "@/components/LoadingSpinner";
 const ExplorePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("projects"); // "projects" or "researchers"
+  const [activeTab, setActiveTab] = useState("projects");
   const [selectedDept, setSelectedDept] = useState("");
   const [selectedDomain, setSelectedDomain] = useState("");
 
+  const [projectsData, setProjectsData] = useState([]);
+  const [researchersData, setResearchersData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    Promise.all([
+      fetch("/api/projects").then((r) => r.json()),
+      fetch("/api/users").then((r) => r.json()),
+    ])
+      .then(([pData, rData]) => {
+        if (Array.isArray(pData))
+          setProjectsData(
+            pData.filter((p) => p.moderationStatus === "APPROVED"),
+          );
+        if (Array.isArray(rData))
+          setResearchersData(
+            rData.map((u) => ({
+              id: u.universityID,
+              name: u.name,
+              role: u.role,
+              department: u.department,
+              interests: [], // To be fetched or fallback
+              domain: u.department,
+              avatar: "/default-avatar.png",
+            })),
+          );
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
   const filteredProjects = useMemo(() => {
-    return EXPLORE_PROJECTS.filter((p) => {
+    return projectsData.filter((p) => {
       const matchesSearch =
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.leadResearcher.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesDept = !selectedDept || p.department === selectedDept;
-      const matchesDomain = !selectedDomain || p.domain === selectedDomain;
+        p.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesDept =
+        !selectedDept || p.creator?.department === selectedDept;
+      const matchesDomain =
+        !selectedDomain || p.researchDomain === selectedDomain;
       return matchesSearch && matchesDept && matchesDomain;
     });
-  }, [searchQuery, selectedDept, selectedDomain]);
+  }, [searchQuery, selectedDept, selectedDomain, projectsData]);
 
   const filteredResearchers = useMemo(() => {
-    return EXPLORE_RESEARCHERS.filter((r) => {
-      const matchesSearch =
-        r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.interests.some((i) =>
-          i.toLowerCase().includes(searchQuery.toLowerCase()),
-        );
+    return researchersData.filter((r) => {
+      const matchesSearch = r.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
       const matchesDept = !selectedDept || r.department === selectedDept;
       const matchesDomain = !selectedDomain || r.domain === selectedDomain;
       return matchesSearch && matchesDept && matchesDomain;
     });
-  }, [searchQuery, selectedDept, selectedDomain]);
+  }, [searchQuery, selectedDept, selectedDomain, researchersData]);
 
   const results =
     activeTab === "projects" ? filteredProjects : filteredResearchers;
@@ -145,129 +173,137 @@ const ExplorePage = () => {
 
         {/* Results Area (Right) */}
         <main className="lg:col-span-3 space-y-8">
-          {/* Tabs */}
-          <div className="flex items-center gap-2 p-1.5 bg-gray-100/50 rounded-2xl w-fit">
-            <button
-              onClick={() => setActiveTab("projects")}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black text-sm transition-all ${
-                activeTab === "projects"
-                  ? "bg-white text-amu-green shadow-md"
-                  : "text-gray-400 hover:text-gray-600"
-              }`}
-            >
-              <BookOpen className="h-4 w-4" />
-              Projects
-              <span className="ml-2 px-2 py-0.5 bg-gray-100 text-[10px] rounded-md">
-                {filteredProjects.length}
-              </span>
-            </button>
-            <button
-              onClick={() => setActiveTab("researchers")}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black text-sm transition-all ${
-                activeTab === "researchers"
-                  ? "bg-white text-amu-green shadow-md"
-                  : "text-gray-400 hover:text-gray-600"
-              }`}
-            >
-              <Users className="h-4 w-4" />
-              Researchers
-              <span className="ml-2 px-2 py-0.5 bg-gray-100 text-[10px] rounded-md">
-                {filteredResearchers.length}
-              </span>
-            </button>
-          </div>
+          {loading ? (
+            <LoadingSpinner fullPage message="Searching discovery results..." />
+          ) : (
+            <>
+              {/* Tabs */}
+              <div className="flex items-center gap-2 p-1.5 bg-gray-100/50 rounded-2xl w-fit">
+                <button
+                  onClick={() => setActiveTab("projects")}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black text-sm transition-all ${
+                    activeTab === "projects"
+                      ? "bg-white text-amu-green shadow-md"
+                      : "text-gray-400 hover:text-gray-600"
+                  }`}
+                >
+                  <BookOpen className="h-4 w-4" />
+                  Projects
+                  <span className="ml-2 px-2 py-0.5 bg-gray-100 text-[10px] rounded-md">
+                    {filteredProjects.length}
+                  </span>
+                </button>
+                <button
+                  onClick={() => setActiveTab("researchers")}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black text-sm transition-all ${
+                    activeTab === "researchers"
+                      ? "bg-white text-amu-green shadow-md"
+                      : "text-gray-400 hover:text-gray-600"
+                  }`}
+                >
+                  <Users className="h-4 w-4" />
+                  Researchers
+                  <span className="ml-2 px-2 py-0.5 bg-gray-100 text-[10px] rounded-md">
+                    {filteredResearchers.length}
+                  </span>
+                </button>
+              </div>
 
-          {/* Results Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-100">
-            <AnimatePresence mode="wait">
-              {results.length > 0 ? (
-                results.map((item, idx) => (
-                  <motion.div
-                    key={activeTab === "projects" ? item.id : item.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className="group bg-white p-6 rounded-3xl border border-gray-100 hover:border-amu-green/30 transition-all hover:shadow-2xl hover:shadow-gray-200/50 flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="flex items-start justify-between mb-4">
-                        <div
-                          className={`p-3 rounded-2xl ${activeTab === "projects" ? "bg-amu-gold/10 text-amu-gold" : "bg-blue-50 text-blue-500"}`}
-                        >
-                          {activeTab === "projects" ? (
-                            <BookOpen className="h-6 w-6" />
-                          ) : (
-                            <Users className="h-6 w-6" />
-                          )}
-                        </div>
-                        {activeTab === "projects" && (
-                          <span className="px-3 py-1 bg-amu-green/5 text-amu-green text-[10px] font-black uppercase tracking-widest rounded-full">
-                            {item.projectStatus}
-                          </span>
-                        )}
-                      </div>
-
-                      <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-amu-green transition-colors">
-                        {activeTab === "projects" ? item.title : item.name}
-                      </h3>
-
-                      <p className="text-gray-500 text-sm font-medium leading-relaxed line-clamp-2 mb-6 text-balance">
-                        {activeTab === "projects"
-                          ? item.description
-                          : `Expertise in ${item.interests.join(", ")}`}
-                      </p>
-
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-tighter">
-                          <Building2 className="h-4 w-4 shrink-0" />
-                          <span className="truncate">{item.department}</span>
-                        </div>
-                        {activeTab === "researchers" && (
-                          <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-tighter">
-                            <Sparkles className="h-4 w-4 shrink-0" />
-                            <span>{item.role}</span>
+              {/* Results Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-100">
+                <AnimatePresence mode="wait">
+                  {results.length > 0 ? (
+                    results.map((item, idx) => (
+                      <motion.div
+                        key={activeTab === "projects" ? item.id : item.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ delay: idx * 0.05 }}
+                        className="group bg-white p-6 rounded-3xl border border-gray-100 hover:border-amu-green/30 transition-all hover:shadow-2xl hover:shadow-gray-200/50 flex flex-col justify-between"
+                      >
+                        <div>
+                          <div className="flex items-start justify-between mb-4">
+                            <div
+                              className={`p-3 rounded-2xl ${activeTab === "projects" ? "bg-amu-gold/10 text-amu-gold" : "bg-blue-50 text-blue-500"}`}
+                            >
+                              {activeTab === "projects" ? (
+                                <BookOpen className="h-6 w-6" />
+                              ) : (
+                                <Users className="h-6 w-6" />
+                              )}
+                            </div>
+                            {activeTab === "projects" && (
+                              <span className="px-3 py-1 bg-amu-green/5 text-amu-green text-[10px] font-black uppercase tracking-widest rounded-full">
+                                {item.projectStatus}
+                              </span>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    </div>
 
-                    <div className="mt-8 pt-6 border-t border-gray-50 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Image
-                          src={item.avatar}
-                          alt=""
-                          width={32}
-                          height={32}
-                          className="h-8 w-8 rounded-full border border-gray-100"
-                        />
-                        <span className="text-xs font-black text-gray-700">
-                          {activeTab === "projects"
-                            ? item.leadResearcher
-                            : item.domain}
-                        </span>
+                          <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-amu-green transition-colors">
+                            {activeTab === "projects" ? item.title : item.name}
+                          </h3>
+
+                          <p className="text-gray-500 text-sm font-medium leading-relaxed line-clamp-2 mb-6 text-balance">
+                            {activeTab === "projects"
+                              ? item.description
+                              : `Expertise in ${item.interests.join(", ")}`}
+                          </p>
+
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-tighter">
+                              <Building2 className="h-4 w-4 shrink-0" />
+                              <span className="truncate">
+                                {item.department}
+                              </span>
+                            </div>
+                            {activeTab === "researchers" && (
+                              <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-tighter">
+                                <Sparkles className="h-4 w-4 shrink-0" />
+                                <span>{item.role}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="mt-8 pt-6 border-t border-gray-50 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Image
+                              src={item.avatar}
+                              alt=""
+                              width={32}
+                              height={32}
+                              className="h-8 w-8 rounded-full border border-gray-100"
+                            />
+                            <span className="text-xs font-black text-gray-700">
+                              {activeTab === "projects"
+                                ? item.leadResearcher
+                                : item.domain}
+                            </span>
+                          </div>
+                          <button className="p-2 bg-gray-50 text-gray-400 group-hover:bg-amu-green group-hover:text-white rounded-xl transition-all">
+                            <ArrowRight className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
+                      <div className="p-6 bg-gray-100 rounded-full mb-6">
+                        <Search className="h-12 w-12 text-gray-300" />
                       </div>
-                      <button className="p-2 bg-gray-50 text-gray-400 group-hover:bg-amu-green group-hover:text-white rounded-xl transition-all">
-                        <ArrowRight className="h-5 w-5" />
-                      </button>
+                      <h3 className="text-2xl font-black text-gray-300 uppercase tracking-widest">
+                        No results found
+                      </h3>
+                      <p className="text-gray-400 font-medium mt-2">
+                        Adjust your filters or try a different search term.
+                      </p>
                     </div>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
-                  <div className="p-6 bg-gray-100 rounded-full mb-6">
-                    <Search className="h-12 w-12 text-gray-300" />
-                  </div>
-                  <h3 className="text-2xl font-black text-gray-300 uppercase tracking-widest">
-                    No results found
-                  </h3>
-                  <p className="text-gray-400 font-medium mt-2">
-                    Adjust your filters or try a different search term.
-                  </p>
-                </div>
-              )}
-            </AnimatePresence>
-          </div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </>
+          )}
         </main>
       </div>
     </div>

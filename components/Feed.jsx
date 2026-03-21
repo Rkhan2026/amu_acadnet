@@ -1,14 +1,39 @@
 "use client";
 import React, { useState } from "react";
 import FeedItem from "./FeedItem";
-import { RESEARCH_PUBLICATIONS, FOLLOWING_FEED } from "@/lib/dummyData";
 import { Sparkles, Users } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const Feed = () => {
   const [activeTab, setActiveTab] = useState("for-you"); // "for-you" or "following"
+  const [feedData, setFeedData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const displayFeed =
-    activeTab === "for-you" ? RESEARCH_PUBLICATIONS : FOLLOWING_FEED;
+  React.useEffect(() => {
+    setLoading(true);
+    fetch("/api/projects")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          // In a real app, "for-you" would be AI filtered.
+          // For now, we show all APPROVED projects.
+          const filtered = data
+            .filter((p) => p.moderationStatus === "APPROVED")
+            .map((p) => ({
+              id: p.projectID,
+              title: p.title,
+              domain: p.researchDomain,
+              description: p.description,
+              leadResearcher: p.creator?.name || "Member",
+              projectStatus: p.projectStatus === "ACTIVE" ? "Active" : "Closed",
+              matchScore: 95,
+            }));
+          setFeedData(filtered);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [activeTab]);
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
@@ -71,9 +96,15 @@ const Feed = () => {
 
       {/* Publications / Content */}
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-        {displayFeed.map((post) => (
-          <FeedItem key={post.id} post={post} />
-        ))}
+        {loading ? (
+          <LoadingSpinner message="Loading research discovery feed..." />
+        ) : feedData.length > 0 ? (
+          feedData.map((post) => <FeedItem key={post.id} post={post} />)
+        ) : (
+          <div className="text-center py-20 text-gray-400 font-medium">
+            No research updates found.
+          </div>
+        )}
       </div>
     </div>
   );

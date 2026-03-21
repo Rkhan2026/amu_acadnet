@@ -9,12 +9,43 @@ import {
   CheckCircle2,
   MoreVertical,
 } from "lucide-react";
-import { RESEARCH_PUBLICATIONS, CURRENT_USER } from "@/lib/dummyData";
-
+import LoadingSpinner from "@/components/LoadingSpinner";
 export default function MyProjectsPage() {
-  const myProjects = RESEARCH_PUBLICATIONS.filter(
-    (p) => p.leadResearcher === CURRENT_USER.name,
-  );
+  const [myProjects, setMyProjects] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    Promise.all([
+      fetch("/api/auth/me").then((r) => r.json()),
+      fetch("/api/projects").then((r) => r.json()),
+    ])
+      .then(([authRes, projRes]) => {
+        if (!authRes.error && !projRes.error) {
+          const mine = projRes.filter(
+            (p) => p.creatorID === authRes.user?.universityID,
+          );
+          setMyProjects(
+            mine.map((p) => ({
+              id: p.projectID,
+              title: p.title,
+              domain: p.researchDomain,
+              projectStatus:
+                p.projectStatus === "ACTIVE" ? "Active" : p.projectStatus,
+              approvalStatus:
+                p.moderationStatus === "APPROVED"
+                  ? "Approved"
+                  : p.moderationStatus === "PENDING"
+                    ? "Pending"
+                    : "Rejected",
+              description: p.description || "No description provided.",
+              time: new Date(p.createdAt).toLocaleDateString(),
+            })),
+          );
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="py-8 px-4 md:px-8 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -40,7 +71,11 @@ export default function MyProjectsPage() {
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {myProjects.length > 0 ? (
+        {loading ? (
+          <div className="col-span-full">
+            <LoadingSpinner fullPage message="Loading your projects..." />
+          </div>
+        ) : myProjects.length > 0 ? (
           myProjects.map((project) => (
             <MyProjectCard key={project.id} project={project} />
           ))

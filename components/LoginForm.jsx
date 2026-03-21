@@ -26,35 +26,29 @@ export default function LoginForm() {
     setIsLoading(true);
     setError("");
 
-    // Simulate API call
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
-      // Dummy validation
-      if (formData.role === "admin") {
-        if (
-          formData.email === "admin@sample.com" &&
-          formData.password === "admin123"
-        ) {
-          window.location.href = "/admin/dashboard"; // Assuming an admin dashboard exists or will exist
+      const data = await response.json();
+
+      if (response.ok && data.user) {
+        if (data.user.role === "ADMIN") {
+          window.location.href = "/admin/dashboard";
         } else {
-          setError(
-            "Invalid admin credentials. Use admin@sample.com / admin123 for preview.",
-          );
+          window.location.href = "/home";
         }
       } else {
-        if (
-          formData.email === "test@sample.com" &&
-          formData.password === "password"
-        ) {
-          window.location.href = "/home";
-        } else {
-          setError(
-            "Invalid academic credentials. Use test@sample.com / password for preview.",
-          );
-        }
+        setError(data.error || "Invalid credentials. Please try again.");
       }
-    } catch {
+    } catch (error) {
+      console.error("Login error:", error);
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
@@ -77,8 +71,8 @@ export default function LoginForm() {
           </p>
           <p className="text-sm font-bold text-gray-700">
             {formData.role === "admin"
-              ? "admin@sample.com / admin123"
-              : "test@sample.com / password"}
+              ? "browser_admin@test.com / admin123"
+              : "browser_test@test.com / password123"}
           </p>
         </div>
       </div>

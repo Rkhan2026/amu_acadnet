@@ -16,54 +16,82 @@ import {
 import { motion } from "framer-motion";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
-import {
-  RESEARCH_PUBLICATIONS,
-  FOLLOWING_FEED,
-  CURRENT_USER,
-} from "@/lib/dummyData";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const ProjectDetailPage = () => {
   const router = useRouter();
   const params = useParams();
   const projectId = parseInt(params.id);
 
-  // Combine projects from both sources to find the right one
-  const allProjects = [...RESEARCH_PUBLICATIONS, ...FOLLOWING_FEED];
-  const initialProject = allProjects.find((p) => p.id === projectId);
-
-  const [project, setProject] = useState(initialProject);
+  const [project, setProject] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({
-    title: initialProject?.title || "",
-    domain: initialProject?.domain || "",
-    department: initialProject?.department || "",
-    description: initialProject?.description || "",
-    projectStatus: initialProject?.projectStatus || "Active",
-    team: initialProject?.team ? [...initialProject.team] : [],
-    externalLinks: initialProject?.externalLinks
-      ? [...initialProject.externalLinks]
-      : [],
-  });
+  const [editForm, setEditForm] = useState(null);
 
-  const isOwner = project?.leadResearcher === CURRENT_USER.name;
+  React.useEffect(() => {
+    Promise.all([
+      fetch("/api/auth/me").then((r) => r.json()),
+      fetch(`/api/projects/${projectId}`).then((r) => r.json()),
+    ])
+      .then(([authRes, projRes]) => {
+        if (!authRes.error) setCurrentUser(authRes.user);
+        if (!projRes.error) {
+          const mapped = {
+            id: projRes.projectID,
+            title: projRes.title,
+            domain: projRes.researchDomain,
+            department: projRes.creator?.department || "University",
+            description: projRes.description,
+            projectStatus:
+              projRes.projectStatus === "ACTIVE"
+                ? "Active"
+                : projRes.projectStatus === "ON_HOLD"
+                  ? "Ongoing"
+                  : "Finished",
+            leadResearcher: projRes.creator?.name || "Unknown",
+            creatorID: projRes.creatorID,
+            time: new Date(projRes.createdAt).toLocaleDateString(),
+            team: [],
+            externalLinks: projRes.externalLinks?.map((url) => ({ url })) || [],
+          };
+          setProject(mapped);
+          setEditForm(mapped);
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [projectId]);
 
-  const handleSave = () => {
-    setProject((prev) => ({ ...prev, ...editForm }));
-    setIsEditing(false);
+  const isOwner =
+    currentUser &&
+    (project?.creatorID === currentUser.universityID ||
+      currentUser.role === "ADMIN");
+
+  const handleSave = async () => {
+    try {
+      const res = await fetch(`/api/projects/${projectId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm),
+      });
+      if (res.ok) {
+        setProject((prev) => ({ ...prev, ...editForm }));
+        setIsEditing(false);
+      } else {
+        console.error("Failed to save project.");
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleCancel = () => {
-    setEditForm({
-      title: project?.title || "",
-      domain: project?.domain || "",
-      department: project?.department || "",
-      description: project?.description || "",
-      projectStatus: project?.projectStatus || "Active",
-      team: project?.team ? [...project.team] : [],
-      externalLinks: project?.externalLinks ? [...project.externalLinks] : [],
-    });
+    setEditForm({ ...project });
     setIsEditing(false);
   };
+
+  if (loading)
+    return <LoadingSpinner fullPage message="Loading project data..." />;
 
   if (!project) {
     return (

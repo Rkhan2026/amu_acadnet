@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { Suspense } from "react";
 import {
   ShieldCheck,
   CheckCircle2,
@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { PENDING_VERIFICATIONS } from "@/lib/dummyData";
+import { useSearchParams } from "next/navigation";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const VerificationCard = ({ request, onAction, onClick }) => (
   <div
@@ -50,28 +51,30 @@ const VerificationCard = ({ request, onAction, onClick }) => (
         </div>
       </div>
 
-      <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onAction(request.id, "approve");
-          }}
-          className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-amu-green text-white font-bold rounded-2xl hover:bg-amu-green/90 transition-all shadow-lg shadow-amu-green/20"
-        >
-          <CheckCircle2 className="h-5 w-5" />
-          Verify
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onAction(request.id, "reject");
-          }}
-          className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-gray-50 text-gray-400 font-bold rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all"
-        >
-          <XCircle className="h-5 w-5" />
-          Reject
-        </button>
-      </div>
+      {request.accountStatus !== "APPROVED" && (
+        <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onAction(request.id, "approve");
+            }}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-amu-green text-white font-bold rounded-2xl hover:bg-amu-green/90 transition-all shadow-lg shadow-amu-green/20"
+          >
+            <CheckCircle2 className="h-5 w-5" />
+            Verify
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onAction(request.id, "reject");
+            }}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-gray-50 text-gray-400 font-bold rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all"
+          >
+            <XCircle className="h-5 w-5" />
+            Reject
+          </button>
+        </div>
+      )}
     </div>
   </div>
 );
@@ -104,28 +107,30 @@ const UserModal = ({ user, onClose, onAction }) => {
                 <ArrowLeft className="h-4 w-4" />
                 Go Back
               </button>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => {
-                    onAction(user.id, "approve");
-                    onClose();
-                  }}
-                  className="flex items-center gap-2 px-6 py-3 bg-amu-green text-white font-bold rounded-2xl hover:bg-[#004d26] transition-all shadow-lg shadow-amu-green/20"
-                >
-                  <CheckCircle2 className="h-5 w-5" />
-                  Verify Profile
-                </button>
-                <button
-                  onClick={() => {
-                    onAction(user.id, "reject");
-                    onClose();
-                  }}
-                  className="flex items-center gap-2 px-6 py-3 bg-white text-gray-400 font-bold rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all border border-gray-100"
-                >
-                  <XCircle className="h-5 w-5" />
-                  Reject
-                </button>
-              </div>
+              {user.accountStatus !== "APPROVED" && (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      onAction(user.id, "approve");
+                      onClose();
+                    }}
+                    className="flex items-center gap-2 px-6 py-3 bg-amu-green text-white font-bold rounded-2xl hover:bg-[#004d26] transition-all shadow-lg shadow-amu-green/20"
+                  >
+                    <CheckCircle2 className="h-5 w-5" />
+                    Verify Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      onAction(user.id, "reject");
+                      onClose();
+                    }}
+                    className="flex items-center gap-2 px-6 py-3 bg-white text-gray-400 font-bold rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all border border-gray-100"
+                  >
+                    <XCircle className="h-5 w-5" />
+                    Reject
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="space-y-8 pb-14">
@@ -261,39 +266,151 @@ const UserModal = ({ user, onClose, onAction }) => {
   );
 };
 
-export default function VerificationsPage() {
-  const [requests, setRequests] = useState(PENDING_VERIFICATIONS);
-  const [selectedUser, setSelectedUser] = useState(null);
+const StatusBadge = ({ status }) => {
+  const styles = {
+    APPROVED: "bg-emerald-100 text-emerald-700 border-emerald-200",
+    REJECTED: "bg-red-100 text-red-700 border-red-200",
+    PENDING: "bg-amber-100 text-amber-700 border-amber-200",
+  };
+  return (
+    <span
+      className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${styles[status]}`}
+    >
+      {status}
+    </span>
+  );
+};
 
-  const handleAction = (id, _action) => {
-    // In a real app, API call would happen here
-    setRequests((prev) => prev.filter((req) => req.id !== id));
-    if (selectedUser?.id === id) {
-      setSelectedUser(null);
+function VerificationsContent() {
+  const searchParams = useSearchParams();
+  const [requests, setRequests] = React.useState([]);
+  const [selectedUser, setSelectedUser] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [mode, setMode] = React.useState(searchParams.get("mode") || "PENDING");
+
+  React.useEffect(() => {
+    const m = searchParams.get("mode");
+    if (m) setMode(m);
+  }, [searchParams]);
+
+  React.useEffect(() => {
+    setLoading(true);
+    const url =
+      mode === "PENDING"
+        ? "/api/admin/users/pending"
+        : "/api/admin/users?accountStatus=APPROVED";
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.error) {
+          setRequests(
+            data.map((u) => ({
+              id: u.universityID,
+              universityId: u.universityID,
+              name: u.name,
+              email: u.email,
+              role: u.role,
+              accountStatus: u.accountStatus,
+              department: u.department,
+              appliedAt: new Date(
+                u.createdAt || Date.now(),
+              ).toLocaleDateString(),
+              avatar: "/default-avatar.png",
+              biography:
+                u.academicProfile?.biography || "No biography provided.",
+              researchInterests: u.academicProfile?.researchInterests
+                ? u.academicProfile.researchInterests
+                    .split(",")
+                    .map((s) => s.trim())
+                : ["Unspecified"],
+            })),
+          );
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [mode]);
+
+  const handleAction = async (id, action) => {
+    try {
+      const accountStatus = action === "approve" ? "APPROVED" : "REJECTED";
+      const res = await fetch(`/api/admin/users/${id}/verify`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accountStatus }),
+      });
+      if (res.ok) {
+        if (mode === "PENDING") {
+          setRequests((prev) => prev.filter((req) => req.id !== id));
+        } else {
+          setRequests((prev) =>
+            prev.map((req) =>
+              req.id === id ? { ...req, accountStatus } : req,
+            ),
+          );
+        }
+        if (selectedUser?.id === id) {
+          setSelectedUser(null);
+        }
+      } else {
+        console.error("Action failed");
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div>
-        <h1 className="text-4xl font-black text-gray-900 tracking-tight flex items-center gap-4">
-          Academic Verifications
-        </h1>
-        <p className="text-gray-500 mt-2 font-medium">
-          Verify institutional records and academic affiliations for members of
-          AMU.
-        </p>
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-black text-gray-900 tracking-tight flex items-center gap-4">
+            Academic Verifications
+          </h1>
+          <p className="text-gray-500 mt-2 font-medium">
+            Manage institutional records and academic affiliations for members
+            of AMU.
+          </p>
+        </div>
+
+        {/* Tab Switcher */}
+        <div className="flex bg-white p-1.5 rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/40 w-fit">
+          {[
+            { label: "Pending", value: "PENDING" },
+            { label: "Verified", value: "APPROVED" },
+          ].map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setMode(tab.value)}
+              className={`px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${
+                mode === tab.value
+                  ? "bg-amu-green text-white shadow-lg shadow-amu-green/20"
+                  : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-6">
-        {requests.length > 0 ? (
+        {loading ? (
+          <LoadingSpinner message="Loading records..." />
+        ) : requests.length > 0 ? (
           requests.map((req) => (
-            <VerificationCard
-              key={req.id}
-              request={req}
-              onClick={setSelectedUser}
-              onAction={handleAction}
-            />
+            <div key={req.id} className="relative">
+              <VerificationCard
+                request={req}
+                onClick={setSelectedUser}
+                onAction={handleAction}
+              />
+              {mode === "APPROVED" && (
+                <div className="absolute top-8 right-1/2 md:right-80">
+                  <StatusBadge status={req.accountStatus} />
+                </div>
+              )}
+            </div>
           ))
         ) : (
           <div className="bg-white p-20 rounded-4xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center text-center">
@@ -301,10 +418,12 @@ export default function VerificationsPage() {
               <CheckCircle2 size={48} className="text-amu-green" />
             </div>
             <h3 className="text-2xl font-black text-gray-900 mb-2">
-              Queue is Clear!
+              {mode === "PENDING" ? "Queue is Clear!" : "No Verified Users"}
             </h3>
             <p className="text-gray-500 font-medium">
-              All academic profiles have been successfully verified.
+              {mode === "PENDING"
+                ? "All academic profiles have been successfully verified."
+                : "The institutional registry currently has no verified members."}
             </p>
           </div>
         )}
@@ -318,5 +437,13 @@ export default function VerificationsPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function VerificationsPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner message="Accessing records..." />}>
+      <VerificationsContent />
+    </Suspense>
   );
 }
