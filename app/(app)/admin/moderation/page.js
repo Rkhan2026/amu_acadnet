@@ -115,9 +115,7 @@ const ProjectModal = ({ project, onClose, onAction }) => {
                     <span className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-amu-green/10 text-amu-green">
                       {project.domain}
                     </span>
-                    <span className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-100 text-amber-700">
-                      Pending Approval
-                    </span>
+                    <StatusBadge status={project.moderationStatus} />
                   </div>
 
                   <h1 className="text-4xl md:text-5xl font-black text-gray-900 leading-[1.1] tracking-tight mb-8">
