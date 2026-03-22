@@ -42,7 +42,8 @@ export async function PUT(request, { params }) {
     });
     if (
       !existing ||
-      (existing.universityID !== session.universityID && session.role !== "ADMIN")
+      (existing.universityID !== session.universityID &&
+        session.role !== "ADMIN")
     ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
