@@ -34,7 +34,15 @@ const ExplorePage = () => {
       .then(([pData, rData, nData]) => {
         if (Array.isArray(pData))
           setProjectsData(
-            pData.filter((p) => p.moderationStatus === "APPROVED"),
+            pData
+              .filter((p) => p.moderationStatus === "APPROVED")
+              .map((p) => ({
+                ...p,
+                id: p.projectID,
+                department: p.creator?.department || "General",
+                leadResearcher: p.creator?.name || "Unknown",
+                avatar: "/default-avatar.svg",
+              })),
           );
         if (Array.isArray(rData))
           setResearchersData(
@@ -83,8 +91,7 @@ const ExplorePage = () => {
       const matchesSearch =
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesDept =
-        !selectedDept || p.creator?.department === selectedDept;
+      const matchesDept = !selectedDept || p.department === selectedDept;
       const matchesDomain =
         !selectedDomain || p.researchDomain === selectedDomain;
       return matchesSearch && matchesDept && matchesDomain;

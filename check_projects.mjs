@@ -13,8 +13,9 @@ async function main() {
     select: {
       projectID: true,
       title: true,
+      moderationStatus: true,
       universityID: true,
-      creator: { select: { name: true } },
+      creator: { select: { name: true, department: true } },
     },
   });
   console.log(JSON.stringify(projects, null, 2));
