@@ -4,7 +4,8 @@ import { MoreHorizontal, BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
-const FeedItem = ({ post }) => {
+const FeedItem = ({ post, currentUser }) => {
+  const isOwner = currentUser?.universityID === post.ownerID;
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -61,9 +62,11 @@ const FeedItem = ({ post }) => {
           <BookOpen className="h-4 w-4" />
           Full Project
         </Link>
-        <button className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-white text-amu-green border-2 border-amu-green rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-amu-green/5 hover:-translate-y-1 transition-all">
-          Accept Collab Request
-        </button>
+        {!isOwner && (
+          <button className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-white text-amu-green border-2 border-amu-green rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-amu-green/5 hover:-translate-y-1 transition-all">
+            Accept Collab Request
+          </button>
+        )}
       </div>
     </motion.div>
   );

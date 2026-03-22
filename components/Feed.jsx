@@ -7,9 +7,18 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 const Feed = () => {
   const [activeTab, setActiveTab] = useState("for-you"); // "for-you" or "following"
   const [feedData, setFeedData] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   React.useEffect(() => {
+    // Fetch current user
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user) setCurrentUser(data.user);
+      })
+      .catch(console.error);
+
     setLoading(true);
     fetch("/api/projects")
       .then((res) => res.json())
@@ -25,6 +34,7 @@ const Feed = () => {
               domain: p.researchDomain,
               description: p.description,
               leadResearcher: p.creator?.name || "Member",
+              ownerID: p.universityID,
               projectStatus: p.projectStatus === "ACTIVE" ? "Active" : "Closed",
               matchScore: 95,
             }));
@@ -99,7 +109,9 @@ const Feed = () => {
         {loading ? (
           <LoadingSpinner message="Loading research discovery feed..." />
         ) : feedData.length > 0 ? (
-          feedData.map((post) => <FeedItem key={post.id} post={post} />)
+          feedData.map((post) => (
+            <FeedItem key={post.id} post={post} currentUser={currentUser} />
+          ))
         ) : (
           <div className="text-center py-20 text-gray-400 font-medium">
             No research updates found.
