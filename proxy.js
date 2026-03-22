@@ -6,10 +6,12 @@ export function proxy(request) {
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://va.vercel-scripts.com${isDev ? " 'unsafe-eval'" : ""};
-    style-src 'self' 'nonce-${nonce}' 'unsafe-inline';
+    style-src 'self' 'nonce-${nonce}';
+    style-src-attr 'unsafe-inline';
     img-src 'self' blob: data: https://api.dicebear.com;
     font-src 'self';
     connect-src 'self' https://vitals.vercel-insights.com;
+    frame-src 'self' https://vercel.live;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
