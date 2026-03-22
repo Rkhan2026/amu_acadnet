@@ -11,6 +11,12 @@ export async function GET(request, { params }) {
       where: { projectID: projectID },
       include: {
         creator: { select: { name: true, department: true } },
+        collaborations: {
+          where: { requestStatus: "ACCEPTED" },
+          include: {
+            sender: { select: { name: true, role: true, department: true } },
+          },
+        },
       },
     });
 
@@ -19,6 +25,41 @@ export async function GET(request, { params }) {
     return NextResponse.json(project);
   } catch (error) {
     console.error("Project GET Error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(request, { params }) {
+  try {
+    const session = await getSession();
+    if (!session)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const resolvedParams = await params;
+    const { projectID } = resolvedParams;
+
+    // Verify ownership
+    const existing = await prisma.researchProject.findUnique({
+      where: { projectID },
+    });
+    if (
+      !existing ||
+      (existing.universityID !== session.universityID &&
+        session.role !== "ADMIN")
+    ) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    await prisma.researchProject.delete({
+      where: { projectID },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Project DELETE Error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

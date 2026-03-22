@@ -61,7 +61,12 @@ const ProjectDetailPage = () => {
             leadResearcher: projRes.creator?.name || "Unknown",
             creatorID: projRes.universityID,
             time: new Date(projRes.createdAt).toLocaleDateString(),
-            team: [],
+            team:
+              projRes.collaborations?.map((c) => ({
+                name: c.sender?.name || "Member",
+                role: c.sender?.role || "Researcher",
+                avatar: "/default-avatar.svg",
+              })) || [],
             externalLinks: projRes.externalLinks?.map((url) => ({ url })) || [],
           };
           setProject(mapped);
@@ -94,6 +99,23 @@ const ProjectDetailPage = () => {
         setIsEditing(false);
       } else {
         console.error("Failed to save project.");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this research project?"))
+      return;
+    try {
+      const res = await fetch(`/api/projects/${projectId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        router.push("/projects");
+      } else {
+        alert("Failed to delete project");
       }
     } catch (err) {
       console.error(err);
@@ -341,10 +363,10 @@ const ProjectDetailPage = () => {
                   <div key={i} className="flex gap-2">
                     <input
                       type="text"
-                      value={link.url || link}
+                      value={link.url || (typeof link === "string" ? link : "")}
                       onChange={(e) => {
                         const newLinks = [...editForm.externalLinks];
-                        newLinks[i] = { ...link, url: e.target.value };
+                        newLinks[i] = { url: e.target.value };
                         setEditForm({ ...editForm, externalLinks: newLinks });
                       }}
                       placeholder="https://"
@@ -368,7 +390,7 @@ const ProjectDetailPage = () => {
                   {project.externalLinks?.map((link, i) => (
                     <a
                       key={i}
-                      href={link.url || "#"}
+                      href={typeof link === "string" ? link : link.url || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="bg-white p-6 rounded-2xl border border-gray-200 flex items-center justify-center group hover:border-amu-green transition-all shadow-sm overflow-hidden"
@@ -407,54 +429,39 @@ const ProjectDetailPage = () => {
             </div>
 
             {isOwner ? (
-              <div className="mt-10 pt-8 border-t border-gray-50 text-center">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
-                  Manage Project
+              <div className="mt-10 pt-8 border-t border-gray-50">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 text-center">
+                  Project Team
                 </p>
-                <div className="space-y-6 mb-6">
-                  {(isEditing ? editForm.team : project.team)?.length > 0 ? (
-                    (isEditing ? editForm.team : project.team).map(
-                      (member, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center justify-between group"
-                        >
-                          <div className="flex items-center gap-3">
-                            <Image
-                              src={member.avatar}
-                              alt={member.name}
-                              width={40}
-                              height={40}
-                              className="rounded-xl border border-gray-100"
-                            />
-                            <div className="text-left">
-                              <p className="font-bold text-gray-900 text-sm leading-tight">
-                                {member.name}
-                              </p>
-                              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-0.5">
-                                {member.role}
-                              </p>
-                            </div>
+                <div className="space-y-6 mb-10">
+                  {project.team?.length > 0 ? (
+                    project.team.map((member, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Image
+                            src={member.avatar}
+                            alt={member.name}
+                            width={40}
+                            height={40}
+                            className="rounded-xl border border-gray-100"
+                          />
+                          <div className="text-left">
+                            <p className="font-bold text-gray-900 text-sm leading-tight">
+                              {member.name}
+                            </p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-0.5">
+                              {member.role}
+                            </p>
                           </div>
-                          {isEditing && (
-                            <button
-                              onClick={() => {
-                                const newTeam = editForm.team.filter(
-                                  (_, idx) => idx !== i,
-                                );
-                                setEditForm({ ...editForm, team: newTeam });
-                              }}
-                              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          )}
                         </div>
-                      ),
-                    )
+                      </div>
+                    ))
                   ) : (
-                    <p className="text-sm text-gray-500 italic">
-                      No team members added yet.
+                    <p className="text-sm text-gray-500 italic text-center">
+                      No collaborators as of yet.
                     </p>
                   )}
                 </div>
@@ -475,12 +482,20 @@ const ProjectDetailPage = () => {
                       </button>
                     </>
                   ) : (
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="w-full py-4 bg-gray-900 text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-gray-900/20 hover:shadow-gray-900/40 hover:-translate-y-1 transition-all"
-                    >
-                      Edit Details
-                    </button>
+                    <>
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="w-full py-4 bg-gray-900 text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-gray-900/20 hover:shadow-gray-900/40 hover:-translate-y-1 transition-all"
+                      >
+                        Edit Details
+                      </button>
+                      <button
+                        onClick={handleDelete}
+                        className="w-full py-4 text-red-500 hover:text-red-700 font-bold text-xs uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Trash2 className="h-4 w-4" /> Delete Project
+                      </button>
+                    </>
                   )}
                 </div>
               </div>

@@ -26,9 +26,11 @@ export default function ProfilePage() {
             ...profileData,
             avatar: "/default-avatar.svg", // Placeholder
             stats: {
-              projects: profileData.academicProfile?.totalProjects || 0,
+              projects: profileData.createdProjects?.length || 0,
               citations: 0,
-              collaborators: 0,
+              collaborators:
+                (profileData.sentCollaborations?.length || 0) +
+                (profileData.receivedCollaborations?.length || 0),
             },
           });
         }

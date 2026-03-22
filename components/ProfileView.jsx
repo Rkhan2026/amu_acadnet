@@ -86,6 +86,34 @@ const ProfileView = ({ user, onEdit }) => {
             </div>
           </div>
         </div>
+
+        {/* User Stats Bar */}
+        <div className="mt-10 pt-8 border-t border-gray-100 grid grid-cols-3 gap-4">
+          <div className="text-center group-hover:bg-gray-50 p-4 rounded-3xl transition-all">
+            <p className="text-2xl lg:text-3xl font-black text-amu-green">
+              {user.stats?.projects || 0}
+            </p>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+              Projects
+            </p>
+          </div>
+          <div className="text-center group-hover:bg-gray-50 p-4 rounded-3xl transition-all border-x border-gray-100">
+            <p className="text-2xl lg:text-3xl font-black text-amu-gold">
+              {user.stats?.citations || 0}
+            </p>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+              Citations
+            </p>
+          </div>
+          <div className="text-center group-hover:bg-gray-50 p-4 rounded-3xl transition-all">
+            <p className="text-2xl lg:text-3xl font-black text-blue-500">
+              {user.stats?.collaborators || 0}
+            </p>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+              Collaborators
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Main Content Grid */}

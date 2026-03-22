@@ -133,16 +133,17 @@ export default function NetworkPage() {
         : "Are you sure you want to unfollow this researcher?",
       confirmText: isFollower ? "Remove" : "Unfollow",
       variant: "danger",
-      onConfirm: () => executeUnfollow(targetID),
+      onConfirm: () =>
+        executeUnfollow(targetID, isFollower ? "follower" : "following"),
     });
   };
 
-  const executeUnfollow = async (targetID) => {
+  const executeUnfollow = async (targetID, direction = "following") => {
     try {
       const res = await fetch("/api/network/follow", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ targetID }),
+        body: JSON.stringify({ targetID, direction }),
       });
       if (res.ok) {
         fetchNetworkData();
@@ -207,7 +208,11 @@ export default function NetworkPage() {
 
   const collabOngoing = [
     ...networkData.sentCollaborations
-      .filter((c) => c.requestStatus === "ACCEPTED")
+      .filter(
+        (c) =>
+          c.requestStatus === "ACCEPTED" &&
+          c.project?.projectStatus !== "COMPLETED",
+      )
       .map((c) => ({
         id: c.requestID,
         name: c.project?.title || "Project",
@@ -217,7 +222,11 @@ export default function NetworkPage() {
         status: "Active",
       })),
     ...networkData.receivedCollaborations
-      .filter((c) => c.requestStatus === "ACCEPTED")
+      .filter(
+        (c) =>
+          c.requestStatus === "ACCEPTED" &&
+          c.project?.projectStatus !== "COMPLETED",
+      )
       .map((c) => ({
         id: c.requestID,
         name: c.project?.title || "Project",
@@ -227,7 +236,38 @@ export default function NetworkPage() {
         status: "Active",
       })),
   ];
-  const collabFinished = [];
+
+  const collabFinished = [
+    ...networkData.sentCollaborations
+      .filter(
+        (c) =>
+          c.requestStatus === "ACCEPTED" &&
+          c.project?.projectStatus === "COMPLETED",
+      )
+      .map((c) => ({
+        id: c.requestID,
+        name: c.project?.title || "Project",
+        partners: [c.receiver?.name || "Member"],
+        avatar: "/default-avatar.svg",
+        progress: 100,
+        status: "Completed",
+      })),
+    ...networkData.receivedCollaborations
+      .filter(
+        (c) =>
+          c.requestStatus === "ACCEPTED" &&
+          c.project?.projectStatus === "COMPLETED",
+      )
+      .map((c) => ({
+        id: c.requestID,
+        name: c.project?.title || "Project",
+        partners: [c.sender?.name || "Member"],
+        avatar: "/default-avatar.svg",
+        progress: 100,
+        status: "Completed",
+      })),
+  ];
+
   const collabReceived = networkData.receivedCollaborations
     .filter((c) => c.requestStatus === "PENDING")
     .map((c) => ({
@@ -237,6 +277,7 @@ export default function NetworkPage() {
       avatar: "/default-avatar.svg",
       status: "PENDING",
     }));
+
   const collabSent = networkData.sentCollaborations
     .filter((c) => c.requestStatus === "PENDING")
     .map((c) => ({

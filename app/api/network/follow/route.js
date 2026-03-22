@@ -51,15 +51,26 @@ export async function DELETE(request) {
     if (!session || !session.universityID)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { targetID } = await request.json();
+    const { targetID, direction } = await request.json();
     if (!targetID)
       return NextResponse.json(
         { error: "Missing target user ID" },
         { status: 400 },
       );
 
+    const where = {};
+    if (direction === "follower") {
+      // Removing a follower
+      where.followerID = targetID;
+      where.followingID = session.universityID;
+    } else {
+      // Unfollowing someone (default)
+      where.followerID = session.universityID;
+      where.followingID = targetID;
+    }
+
     await prisma.follows.deleteMany({
-      where: { followerID: session.universityID, followingID: targetID },
+      where,
     });
 
     return NextResponse.json({ success: true });

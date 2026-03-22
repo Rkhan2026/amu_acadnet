@@ -326,7 +326,7 @@ const ExplorePage = () => {
                               href={
                                 activeTab === "projects"
                                   ? `/projects/${item.projectID}`
-                                  : "#"
+                                  : `/profile/${item.id}`
                               }
                               className="p-2 bg-gray-50 text-gray-400 group-hover:bg-amu-green group-hover:text-white rounded-xl transition-all"
                             >

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Feed from "@/components/Feed";
 import { UserPlus, Sparkles } from "lucide-react";
+import Link from "next/link";
 import Image from "next/image";
 
 export default function HomePage() {
@@ -111,9 +112,12 @@ export default function HomePage() {
               </p>
             )}
           </div>
-          <button className="w-full mt-8 py-4 bg-gray-50 hover:bg-amu-green/5 text-sm text-amu-green font-black rounded-2xl transition-all uppercase tracking-widest border border-transparent hover:border-amu-green/20">
+          <Link
+            href="/explore"
+            className="block w-full mt-8 py-4 bg-gray-50 hover:bg-amu-green/5 text-sm font-black rounded-2xl transition-all uppercase tracking-widest border border-transparent hover:border-amu-green/20 text-center text-amu-green"
+          >
             View All Researchers
-          </button>
+          </Link>
         </div>
       </div>
     </div>
