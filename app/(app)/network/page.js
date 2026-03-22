@@ -12,6 +12,7 @@ import {
   UserMinus,
 } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 export default function NetworkPage() {
   const [activeTab, setActiveTab] = useState("following");
@@ -23,6 +24,10 @@ export default function NetworkPage() {
     receivedCollaborations: [],
   });
   const [loading, setLoading] = useState(true);
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    targetID: null,
+  });
 
   const fetchNetworkData = () => {
     setLoading(true);
@@ -82,8 +87,13 @@ export default function NetworkPage() {
     }
   };
 
-  const handleUnfollow = async (targetID) => {
-    if (!confirm("Are you sure you want to unfollow?")) return;
+  const handleUnfollowRequest = (targetID) => {
+    setModalConfig({ isOpen: true, targetID });
+  };
+
+  const executeUnfollow = async () => {
+    const { targetID } = modalConfig;
+    if (!targetID) return;
     try {
       const res = await fetch("/api/network/follow", {
         method: "DELETE",
@@ -234,7 +244,7 @@ export default function NetworkPage() {
                 key={u.id}
                 user={u}
                 type="following"
-                onAction={handleUnfollow}
+                onAction={handleUnfollowRequest}
               />
             ))
           : followingSent.map((u) => (
@@ -395,6 +405,16 @@ export default function NetworkPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {renderContent()}
       </div>
+
+      <ConfirmationModal
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ isOpen: false, targetID: null })}
+        onConfirm={executeUnfollow}
+        title="Unfollow Researcher?"
+        message="Are you sure you want to unfollow this researcher? You will stop seeing their updates in your research feed."
+        confirmText="Unfollow"
+        variant="danger"
+      />
     </div>
   );
 }
