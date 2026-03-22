@@ -94,3 +94,56 @@ export async function PATCH(request) {
     );
   }
 }
+
+export async function DELETE(request) {
+  try {
+    const session = await getSession();
+    if (!session || !session.universityID)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { requestID } = await request.json();
+
+    if (!requestID) {
+      return NextResponse.json(
+        { error: "Missing request ID" },
+        { status: 400 },
+      );
+    }
+
+    const collabReq = await prisma.collaboration.findUnique({
+      where: { requestID },
+    });
+
+    if (!collabReq) {
+      return NextResponse.json({ error: "Request not found" }, { status: 404 });
+    }
+
+    // Only allow the sender to cancel their own request
+    if (collabReq.senderID !== session.universityID) {
+      return NextResponse.json(
+        { error: "Only the sender can cancel this request" },
+        { status: 403 },
+      );
+    }
+
+    // Optional: Only allow cancelling if it's still PENDING
+    if (collabReq.requestStatus !== "PENDING") {
+      return NextResponse.json(
+        { error: "Only pending requests can be cancelled" },
+        { status: 400 },
+      );
+    }
+
+    await prisma.collaboration.delete({
+      where: { requestID },
+    });
+
+    return NextResponse.json({ success: true, message: "Request cancelled" });
+  } catch (error) {
+    console.error("Collaboration DELETE error", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}
