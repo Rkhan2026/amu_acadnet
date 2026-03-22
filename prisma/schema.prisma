@@ -4,7 +4,77 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  
+}
+
+model Admin {
+  adminID  String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String
+}
+
+model User {
+  universityID           String            @id
+  name                   String
+  email                  String            @unique
+  password               String
+  role                   String
+  department             String
+  accountStatus          AccountStatus     @default(PENDING)
+  academicProfile        AcademicProfile?
+  receivedCollaborations Collaboration[]   @relation("CollaborationInvitee")
+  sentCollaborations     Collaboration[]   @relation("CollaborationInitiator")
+  following              Follows[]         @relation("FollowerRelation")
+  followers              Follows[]         @relation("FollowingRelation")
+  createdProjects        ResearchProject[] @relation("UserCreatesProject")
+  workingProjects        ResearchProject[] @relation("UserWorksOnProject")
+}
+
+model AcademicProfile {
+  profileID         String   @id @default(uuid())
+  universityID      String   @unique
+  researchInterests String
+  biography         String
+  lastUpdated       DateTime @updatedAt
+  user              User     @relation(fields: [universityID], references: [universityID], onDelete: Cascade)
+}
+
+model ResearchProject {
+  projectID        String           @id @default(uuid())
+  title            String
+  description      String
+  researchDomain   String
+  moderationStatus ModerationStatus @default(PENDING)
+  projectStatus    ProjectStatus    @default(PROPOSED)
+  createdAt        DateTime         @default(now())
+  externalLinks    String[]
+  universityID     String
+  collaborations   Collaboration[]
+  creator          User             @relation("UserCreatesProject", fields: [universityID], references: [universityID])
+  teamMembers      User[]           @relation("UserWorksOnProject")
+}
+
+model Collaboration {
+  requestID     String          @id @default(uuid())
+  projectID     String
+  senderID      String
+  receiverID    String
+  requestStatus RequestStatus   @default(PENDING)
+  createdAt     DateTime        @default(now())
+  project       ResearchProject @relation(fields: [projectID], references: [projectID], onDelete: Cascade)
+  receiver      User            @relation("CollaborationInvitee", fields: [receiverID], references: [universityID], onDelete: Cascade)
+  sender        User            @relation("CollaborationInitiator", fields: [senderID], references: [universityID], onDelete: Cascade)
+}
+
+model Follows {
+  followID      String        @id @default(uuid())
+  followerID    String
+  followingID   String
+  requestStatus RequestStatus @default(PENDING)
+  follower      User          @relation("FollowerRelation", fields: [followerID], references: [universityID], onDelete: Cascade)
+  following     User          @relation("FollowingRelation", fields: [followingID], references: [universityID], onDelete: Cascade)
+
+  @@unique([followerID, followingID])
 }
 
 enum AccountStatus {
@@ -31,84 +101,4 @@ enum RequestStatus {
   PENDING
   ACCEPTED
   REJECTED
-}
-
-model Admin {
-  adminID          String            @id @default(uuid())
-  name             String
-  email            String            @unique
-  password         String
-}
-
-model User {
-  universityID     String         @id
-  name             String
-  email            String         @unique
-  password         String
-  role             String
-  department       String
-  accountStatus    AccountStatus  @default(PENDING)
-
-  academicProfile  AcademicProfile?
-
-  createdProjects  ResearchProject[] @relation("UserCreatesProject")
-  workingProjects  ResearchProject[] @relation("UserWorksOnProject")
-
-  sentCollaborations     Collaboration[] @relation("CollaborationInitiator")
-  receivedCollaborations Collaboration[] @relation("CollaborationInvitee")
-
-  followers        Follows[]      @relation("FollowingRelation")
-  following        Follows[]      @relation("FollowerRelation")
-}
-
-model AcademicProfile {
-  profileID         String   @id @default(uuid())
-  universityID      String   @unique
-  researchInterests String
-  biography         String
-  lastUpdated       DateTime @updatedAt
-
-  user              User     @relation(fields: [universityID], references: [universityID], onDelete: Cascade)
-}
-
-model ResearchProject {
-  projectID         String           @id @default(uuid())
-  title             String
-  description       String
-  researchDomain    String
-  moderationStatus  ModerationStatus @default(PENDING)
-  projectStatus     ProjectStatus    @default(PROPOSED)
-  createdAt         DateTime         @default(now())
-  externalLinks     String[]
-
-  universityID      String
-  creator           User             @relation("UserCreatesProject", fields: [universityID], references: [universityID])
-
-  teamMembers       User[]           @relation("UserWorksOnProject")
-  collaborations    Collaboration[]
-}
-
-model Collaboration {
-  requestID         String         @id @default(uuid())
-  projectID         String
-  senderID          String
-  receiverID        String
-  requestStatus     RequestStatus  @default(PENDING)
-  createdAt         DateTime       @default(now())
-
-  project           ResearchProject @relation(fields: [projectID], references: [projectID], onDelete: Cascade)
-  sender            User            @relation("CollaborationInitiator", fields: [senderID], references: [universityID], onDelete: Cascade)
-  receiver          User            @relation("CollaborationInvitee", fields: [receiverID], references: [universityID], onDelete: Cascade)
-}
-
-model Follows {
-  followID          String         @id @default(uuid())
-  followerID        String
-  followingID       String
-  requestStatus     RequestStatus  @default(PENDING)
-
-  follower          User           @relation("FollowerRelation", fields: [followerID], references: [universityID], onDelete: Cascade)
-  following         User           @relation("FollowingRelation", fields: [followingID], references: [universityID], onDelete: Cascade)
-
-  @@unique([followerID, followingID])
 }

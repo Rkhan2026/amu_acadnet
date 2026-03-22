@@ -76,18 +76,27 @@ export default function NetworkPage() {
     }));
 
   const collabOngoing = [
-    ...networkData.sentCollaborations,
-    ...networkData.receivedCollaborations,
-  ]
-    .filter((c) => c.requestStatus === "ACCEPTED")
-    .map((c) => ({
-      id: c.requestID,
-      name: c.project?.title || "Project",
-      partners: [c.receiver?.name || c.sender?.name],
-      avatar: "/default-avatar.svg",
-      progress: 50,
-      status: "Active",
-    }));
+    ...networkData.sentCollaborations
+      .filter((c) => c.requestStatus === "ACCEPTED")
+      .map((c) => ({
+        id: c.requestID,
+        name: c.project?.title || "Project",
+        partners: [c.receiver?.name || "Member"],
+        avatar: "/default-avatar.svg",
+        progress: 50,
+        status: "Active",
+      })),
+    ...networkData.receivedCollaborations
+      .filter((c) => c.requestStatus === "ACCEPTED")
+      .map((c) => ({
+        id: c.requestID,
+        name: c.project?.title || "Project",
+        partners: [c.sender?.name || "Member"],
+        avatar: "/default-avatar.svg",
+        progress: 50,
+        status: "Active",
+      })),
+  ];
   const collabFinished = [];
   const collabReceived = networkData.receivedCollaborations
     .filter((c) => c.requestStatus === "PENDING")

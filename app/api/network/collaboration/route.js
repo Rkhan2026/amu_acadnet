@@ -21,7 +21,14 @@ export async function POST(request) {
       where: { projectID, senderID: session.universityID, receiverID },
     });
 
+    console.log("Creating collaboration request:", {
+      projectID,
+      senderID: session.universityID,
+      receiverID,
+    });
+
     if (existing) {
+      console.log("Collaboration request already exists:", existing.requestID);
       return NextResponse.json(
         { error: "Collaboration request already sent" },
         { status: 409 },
@@ -37,6 +44,10 @@ export async function POST(request) {
       },
     });
 
+    console.log(
+      "Collaboration request created successfully:",
+      collab.requestID,
+    );
     return NextResponse.json(collab, { status: 201 });
   } catch (error) {
     console.error("Collaboration POST error", error);
