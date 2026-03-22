@@ -3,8 +3,26 @@ import React from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Globe, ShieldCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { getCurrentUser } from "@/lib/utils/auth";
 
 const Hero = () => {
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    // Initial check from localStorage for speed
+    const localUser = getCurrentUser();
+    if (localUser) setUser(localUser);
+
+    // Verify with API to ensure session is still valid
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.user) setUser(d.user);
+        else setUser(null);
+      })
+      .catch(() => setUser(null));
+  }, []);
+
   return (
     <div
       id="about"
@@ -82,11 +100,17 @@ const Hero = () => {
             className="flex flex-col sm:flex-row items-center justify-center gap-6"
           >
             <Link
-              href="/register"
+              href={
+                user
+                  ? user.role === "ADMIN"
+                    ? "/admin/dashboard"
+                    : "/home"
+                  : "/register"
+              }
               className="group relative w-full sm:w-auto px-10 py-5 bg-amu-green text-white rounded-full font-black text-xl transition-all shadow-2xl hover:shadow-amu-green/40 flex items-center justify-center gap-3 overflow-hidden"
             >
               <span className="relative z-10 transition-transform group-hover:-translate-x-1">
-                Join AMU AcadNet
+                {user ? "Go to Dashboard" : "Join AMU AcadNet"}
               </span>
               <ArrowRight className="h-6 w-6 relative z-10 transition-transform group-hover:translate-x-1" />
               <motion.div

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { GraduationCap, LogOut, User as UserIcon } from "lucide-react";
+import { clearCurrentUser } from "@/lib/utils/auth";
 
 const AppNavbar = () => {
   const pathname = usePathname();
@@ -50,6 +51,7 @@ const AppNavbar = () => {
         <button
           onClick={async () => {
             await fetch("/api/auth/logout", { method: "POST" });
+            clearCurrentUser();
             window.location.href = "/login";
           }}
           className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-xl transition-all font-bold text-sm"

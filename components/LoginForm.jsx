@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Eye, EyeOff, Lock, Mail, Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { setCurrentUser } from "@/lib/utils/auth";
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -39,6 +40,7 @@ export default function LoginForm() {
       const data = await response.json();
 
       if (response.ok && data.user) {
+        setCurrentUser(data.user);
         if (data.user.role === "ADMIN") {
           window.location.href = "/admin/dashboard";
         } else {
