@@ -106,9 +106,9 @@ const ExplorePage = () => {
     activeTab === "projects" ? filteredProjects : filteredResearchers;
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-6 space-y-12">
+    <div className="max-w-7xl mx-auto py-4 px-6 space-y-8">
       {/* Search Header */}
-      <section className="relative h-72 rounded-4xl overflow-hidden flex flex-col items-center justify-center text-center p-8 bg-amu-green text-white shadow-2xl shadow-amu-green/20">
+      <section className="relative h-64 rounded-4xl overflow-hidden flex flex-col items-center justify-center text-center p-8 bg-amu-green text-white shadow-2xl shadow-amu-green/20">
         <div className="absolute inset-0 bg-linear-to-tr from-amu-green via-amu-green to-amu-green-light opacity-50" />
         <motion.div
           initial={{ y: 20, opacity: 0 }}
@@ -135,10 +135,10 @@ const ExplorePage = () => {
         </motion.div>
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Sidebar Filters (Left) */}
-        <aside className="lg:col-span-1 space-y-8">
-          <section className="bg-white p-8 rounded-4xl border border-gray-100 shadow-xl shadow-gray-200/50 space-y-8">
+        <aside className="lg:col-span-1 space-y-6">
+          <section className="bg-white p-6 rounded-4xl border border-gray-100 shadow-xl shadow-gray-200/50 space-y-6">
             <div className="flex items-center gap-3 pb-4 border-b border-gray-50">
               <div className="p-2 bg-amu-green/10 rounded-xl">
                 <Filter className="h-5 w-5 text-amu-green" />
@@ -201,7 +201,7 @@ const ExplorePage = () => {
         </aside>
 
         {/* Results Area (Right) */}
-        <main className="lg:col-span-3 space-y-8">
+        <main className="lg:col-span-3 space-y-6">
           {loading ? (
             <LoadingSpinner fullPage message="Searching discovery results..." />
           ) : (
@@ -242,7 +242,7 @@ const ExplorePage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <AnimatePresence mode="wait">
                   {results.length > 0 ? (
-                    results.map((item, idx) => (
+                    results.filter(item => item && item.id).map((item, idx) => (
                       <motion.div
                         key={activeTab === "projects" ? item.id : item.id}
                         initial={{ opacity: 0, y: 20 }}
