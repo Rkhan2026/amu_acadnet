@@ -242,112 +242,116 @@ const ExplorePage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <AnimatePresence mode="wait">
                   {results.length > 0 ? (
-                    results.filter(item => item && item.id).map((item, idx) => (
-                      <motion.div
-                        key={activeTab === "projects" ? item.id : item.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ delay: idx * 0.05 }}
-                        className="group bg-white p-6 rounded-3xl border border-gray-100 hover:border-amu-green/30 transition-all hover:shadow-2xl hover:shadow-gray-200/50 flex flex-col justify-between"
-                      >
-                        <div>
-                          <div className="flex items-start justify-between mb-4">
-                            <div
-                              className={`p-3 rounded-2xl ${activeTab === "projects" ? "bg-amu-gold/10 text-amu-gold" : "bg-blue-50 text-blue-500"}`}
-                            >
-                              {activeTab === "projects" ? (
-                                <BookOpen className="h-6 w-6" />
-                              ) : (
-                                <Users className="h-6 w-6" />
-                              )}
-                            </div>
-                            {activeTab === "projects" && (
-                              <span className="px-3 py-1 bg-amu-green/5 text-amu-green text-[10px] font-black uppercase tracking-widest rounded-full">
-                                {item.projectStatus}
-                              </span>
-                            )}
-                          </div>
-
-                          <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-amu-green transition-colors">
-                            {activeTab === "projects" ? item.title : item.name}
-                          </h3>
-
-                          <p className="text-gray-500 text-sm font-medium leading-relaxed line-clamp-2 mb-6 text-balance">
-                            {activeTab === "projects"
-                              ? item.description
-                              : `Expertise in ${item.interests.join(", ")}`}
-                          </p>
-
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-tighter">
-                              <Building2 className="h-4 w-4 shrink-0" />
-                              <span className="truncate">
-                                {item.department}
-                              </span>
-                            </div>
-                            {activeTab === "researchers" && (
-                              <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-tighter">
-                                <Sparkles className="h-4 w-4 shrink-0" />
-                                <span>{item.role}</span>
+                    results
+                      .filter((item) => item && item.id)
+                      .map((item, idx) => (
+                        <motion.div
+                          key={activeTab === "projects" ? item.id : item.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ delay: idx * 0.05 }}
+                          className="group bg-white p-6 rounded-3xl border border-gray-100 hover:border-amu-green/30 transition-all hover:shadow-2xl hover:shadow-gray-200/50 flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-start justify-between mb-4">
+                              <div
+                                className={`p-3 rounded-2xl ${activeTab === "projects" ? "bg-amu-gold/10 text-amu-gold" : "bg-blue-50 text-blue-500"}`}
+                              >
+                                {activeTab === "projects" ? (
+                                  <BookOpen className="h-6 w-6" />
+                                ) : (
+                                  <Users className="h-6 w-6" />
+                                )}
                               </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="mt-8 pt-6 border-t border-gray-50 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Image
-                              src={item.avatar}
-                              alt=""
-                              width={32}
-                              height={32}
-                              className="h-8 w-8 rounded-full border border-gray-100"
-                            />
-                            <span className="text-xs font-black text-gray-700">
-                              {activeTab === "projects"
-                                ? item.leadResearcher
-                                : item.domain}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {activeTab === "researchers" &&
-                              !followingStatuses[item.id] && (
-                                <button
-                                  onClick={() => handleFollow(item.id)}
-                                  className="px-4 py-2 bg-amu-green/10 text-amu-green text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-amu-green hover:text-white transition-all shadow-sm"
-                                >
-                                  Follow
-                                </button>
-                              )}
-                            {activeTab === "researchers" &&
-                              followingStatuses[item.id] && (
-                                <span
-                                  className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border ${
-                                    followingStatuses[item.id] === "ACCEPTED"
-                                      ? "bg-amu-green/10 text-amu-green border-amu-green/20"
-                                      : "bg-gray-100 text-gray-400 border-gray-200"
-                                  }`}
-                                >
-                                  {followingStatuses[item.id] === "ACCEPTED"
-                                    ? "Following"
-                                    : "Requested"}
+                              {activeTab === "projects" && (
+                                <span className="px-3 py-1 bg-amu-green/5 text-amu-green text-[10px] font-black uppercase tracking-widest rounded-full">
+                                  {item.projectStatus}
                                 </span>
                               )}
-                            <Link
-                              href={
-                                activeTab === "projects"
-                                  ? `/projects/${item.projectID}`
-                                  : `/profile/${item.id}`
-                              }
-                              className="p-2 bg-gray-50 text-gray-400 group-hover:bg-amu-green group-hover:text-white rounded-xl transition-all"
-                            >
-                              <ArrowRight className="h-5 w-5" />
-                            </Link>
+                            </div>
+
+                            <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-amu-green transition-colors">
+                              {activeTab === "projects"
+                                ? item.title
+                                : item.name}
+                            </h3>
+
+                            <p className="text-gray-500 text-sm font-medium leading-relaxed line-clamp-2 mb-6 text-balance">
+                              {activeTab === "projects"
+                                ? item.description
+                                : `Expertise in ${item.interests.join(", ")}`}
+                            </p>
+
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-tighter">
+                                <Building2 className="h-4 w-4 shrink-0" />
+                                <span className="truncate">
+                                  {item.department}
+                                </span>
+                              </div>
+                              {activeTab === "researchers" && (
+                                <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-tighter">
+                                  <Sparkles className="h-4 w-4 shrink-0" />
+                                  <span>{item.role}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </motion.div>
-                    ))
+
+                          <div className="mt-8 pt-6 border-t border-gray-50 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Image
+                                src={item.avatar}
+                                alt=""
+                                width={32}
+                                height={32}
+                                className="h-8 w-8 rounded-full border border-gray-100"
+                              />
+                              <span className="text-xs font-black text-gray-700">
+                                {activeTab === "projects"
+                                  ? item.leadResearcher
+                                  : item.domain}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {activeTab === "researchers" &&
+                                !followingStatuses[item.id] && (
+                                  <button
+                                    onClick={() => handleFollow(item.id)}
+                                    className="px-4 py-2 bg-amu-green/10 text-amu-green text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-amu-green hover:text-white transition-all shadow-sm"
+                                  >
+                                    Follow
+                                  </button>
+                                )}
+                              {activeTab === "researchers" &&
+                                followingStatuses[item.id] && (
+                                  <span
+                                    className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border ${
+                                      followingStatuses[item.id] === "ACCEPTED"
+                                        ? "bg-amu-green/10 text-amu-green border-amu-green/20"
+                                        : "bg-gray-100 text-gray-400 border-gray-200"
+                                    }`}
+                                  >
+                                    {followingStatuses[item.id] === "ACCEPTED"
+                                      ? "Following"
+                                      : "Requested"}
+                                  </span>
+                                )}
+                              <Link
+                                href={
+                                  activeTab === "projects"
+                                    ? `/projects/${item.projectID}`
+                                    : `/profile/${item.id}`
+                                }
+                                className="p-2 bg-gray-50 text-gray-400 group-hover:bg-amu-green group-hover:text-white rounded-xl transition-all"
+                              >
+                                <ArrowRight className="h-5 w-5" />
+                              </Link>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))
                   ) : (
                     <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
                       <div className="p-6 bg-gray-100 rounded-full mb-6">
