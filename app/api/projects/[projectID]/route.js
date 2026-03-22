@@ -57,11 +57,13 @@ export async function PUT(request, { params }) {
         projectStatus:
           body.projectStatus === "Active"
             ? "ACTIVE"
-            : body.projectStatus === "Ongoing"
+            : body.projectStatus === "On Hold"
               ? "ON_HOLD"
-              : body.projectStatus === "Archived"
-                ? "ARCHIVED"
-                : "COMPLETED",
+              : body.projectStatus === "Proposed"
+                ? "PROPOSED"
+                : body.projectStatus === "Archived"
+                  ? "ARCHIVED"
+                  : "COMPLETED",
         externalLinks: body.externalLinks.map((l) => l.url || l),
       },
     });

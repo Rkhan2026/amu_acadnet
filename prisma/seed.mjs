@@ -157,7 +157,7 @@ async function main() {
         "Designing an IoT-based framework to monitor, analyse, and optimise energy consumption across AMU campus buildings.",
       researchDomain: "Internet of Things & Sustainability",
       moderationStatus: "APPROVED",
-      projectStatus: "PROPOSED",
+      projectStatus: "ON_HOLD",
       externalLinks: ["https://doi.org/example-iot"],
       universityID: bob.universityID,
 
@@ -177,7 +177,7 @@ async function main() {
         "Investigating gene-editing strategies using CRISPR-Cas9 frameworks to target inherited genetic disorders.",
       researchDomain: "Biotechnology & Genomics",
       moderationStatus: "PENDING",
-      projectStatus: "PROPOSED",
+      projectStatus: "COMPLETED",
       externalLinks: [],
       universityID: carol.universityID,
     },

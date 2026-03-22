@@ -47,10 +47,12 @@ const ProjectDetailPage = () => {
               projRes.projectStatus === "ACTIVE"
                 ? "Active"
                 : projRes.projectStatus === "ON_HOLD"
-                  ? "Ongoing"
-                  : projRes.projectStatus === "ARCHIVED"
-                    ? "Archived"
-                    : "Finished",
+                  ? "On Hold"
+                  : projRes.projectStatus === "PROPOSED"
+                    ? "Proposed"
+                    : projRes.projectStatus === "ARCHIVED"
+                      ? "Archived"
+                      : "Completed",
             leadResearcher: projRes.creator?.name || "Unknown",
             creatorID: projRes.universityID,
             time: new Date(projRes.createdAt).toLocaleDateString(),
@@ -162,16 +164,18 @@ const ProjectDetailPage = () => {
                   }
                   className="px-6 py-2.5 text-sm font-black uppercase tracking-widest rounded-2xl border-2 border-amu-green focus:outline-none focus:ring-4 focus:ring-amu-green/20 bg-white text-amu-green appearance-none cursor-pointer"
                 >
+                  <option value="Proposed">Proposed</option>
                   <option value="Active">Active</option>
-                  <option value="Ongoing">Ongoing</option>
+                  <option value="On Hold">On Hold</option>
+                  <option value="Completed">Completed</option>
                   <option value="Archived">Archived</option>
-                  <option value="Finished">Finished</option>
                 </select>
               ) : (
                 <span
                   className={`px-6 py-2.5 text-sm font-black uppercase tracking-widest rounded-2xl flex items-center gap-3 border shadow-sm ${
                     project.projectStatus === "Active" ||
-                    project.projectStatus === "Ongoing"
+                    project.projectStatus === "On Hold" ||
+                    project.projectStatus === "Proposed"
                       ? "bg-amu-green text-white border-amu-green"
                       : "bg-gray-50 text-gray-400 border-gray-100"
                   }`}
@@ -179,7 +183,8 @@ const ProjectDetailPage = () => {
                   <span
                     className={`w-2 h-2 rounded-full ${
                       project.projectStatus === "Active" ||
-                      project.projectStatus === "Ongoing"
+                      project.projectStatus === "On Hold" ||
+                      project.projectStatus === "Proposed"
                         ? "bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] animate-pulse"
                         : "bg-gray-300"
                     }`}

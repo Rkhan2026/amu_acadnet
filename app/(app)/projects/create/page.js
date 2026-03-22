@@ -36,7 +36,7 @@ const CreateProjectPage = () => {
     "Biotechnology",
   ];
 
-  const statuses = ["Proposed", "Active", "Completed", "Archived"];
+  const statuses = ["Proposed", "Active", "On Hold", "Completed", "Archived"];
 
   const handleSubmit = async (e) => {
     e.preventDefault();

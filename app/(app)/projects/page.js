@@ -30,7 +30,15 @@ export default function MyProjectsPage() {
               title: p.title,
               domain: p.researchDomain,
               projectStatus:
-                p.projectStatus === "ACTIVE" ? "Active" : p.projectStatus,
+                p.projectStatus === "ACTIVE"
+                  ? "Active"
+                  : p.projectStatus === "ON_HOLD"
+                    ? "On Hold"
+                    : p.projectStatus === "PROPOSED"
+                      ? "Proposed"
+                      : p.projectStatus === "ARCHIVED"
+                        ? "Archived"
+                        : "Completed",
               approvalStatus:
                 p.moderationStatus === "APPROVED"
                   ? "Approved"
@@ -121,7 +129,9 @@ function MyProjectCard({ project }) {
               </span>
               <span
                 className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                  project.projectStatus === "Active"
+                  project.projectStatus === "Active" ||
+                  project.projectStatus === "On Hold" ||
+                  project.projectStatus === "Proposed"
                     ? "bg-emerald-100 text-emerald-700"
                     : "bg-amu-gold/10 text-amu-gold"
                 }`}

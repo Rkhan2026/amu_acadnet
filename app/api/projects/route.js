@@ -64,7 +64,12 @@ export async function POST(request) {
         externalLinks: Array.isArray(externalLinks) ? externalLinks : [],
         universityID: session.universityID,
         moderationStatus: "PENDING",
-        projectStatus: projectStatus ? projectStatus.toUpperCase() : "PROPOSED",
+        projectStatus:
+          projectStatus === "On Hold"
+            ? "ON_HOLD"
+            : projectStatus
+              ? projectStatus.toUpperCase()
+              : "PROPOSED",
       },
     });
 
