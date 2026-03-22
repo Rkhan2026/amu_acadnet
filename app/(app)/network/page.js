@@ -39,7 +39,7 @@ export default function NetworkPage() {
       id: f.followingID,
       name: f.following.name,
       department: f.following.department,
-      avatar: "/default-avatar.png",
+      avatar: "/default-avatar.svg",
       role: "USER",
       followers: 0,
     }));
@@ -49,7 +49,7 @@ export default function NetworkPage() {
       id: f.followingID,
       name: f.following.name,
       department: f.following.department,
-      avatar: "/default-avatar.png",
+      avatar: "/default-avatar.svg",
       role: "USER",
       status: "PENDING",
     }));
@@ -60,7 +60,7 @@ export default function NetworkPage() {
       id: f.followerID,
       name: f.follower.name,
       department: f.follower.department,
-      avatar: "/default-avatar.png",
+      avatar: "/default-avatar.svg",
       role: "USER",
       followers: 0,
     }));
@@ -70,7 +70,7 @@ export default function NetworkPage() {
       id: f.followerID,
       name: f.follower.name,
       department: f.follower.department,
-      avatar: "/default-avatar.png",
+      avatar: "/default-avatar.svg",
       role: "USER",
       status: "PENDING",
     }));
@@ -84,7 +84,7 @@ export default function NetworkPage() {
       id: c.requestID,
       name: c.project?.title || "Project",
       partners: [c.receiver?.name || c.sender?.name],
-      avatar: "/default-avatar.png",
+      avatar: "/default-avatar.svg",
       progress: 50,
       status: "Active",
     }));
@@ -95,7 +95,7 @@ export default function NetworkPage() {
       id: c.requestID,
       name: c.project?.title || "Project",
       from: c.sender?.name,
-      avatar: "/default-avatar.png",
+      avatar: "/default-avatar.svg",
       status: "PENDING",
     }));
   const collabSent = networkData.sentCollaborations
@@ -104,7 +104,7 @@ export default function NetworkPage() {
       id: c.requestID,
       name: c.project?.title || "Project",
       to: c.receiver?.name,
-      avatar: "/default-avatar.png",
+      avatar: "/default-avatar.svg",
       status: "PENDING",
     }));
 

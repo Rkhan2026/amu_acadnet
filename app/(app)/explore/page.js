@@ -42,7 +42,7 @@ const ExplorePage = () => {
               department: u.department,
               interests: [], // To be fetched or fallback
               domain: u.department,
-              avatar: "/default-avatar.png",
+              avatar: "/default-avatar.svg",
             })),
           );
       })

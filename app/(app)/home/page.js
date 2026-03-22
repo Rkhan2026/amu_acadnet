@@ -17,7 +17,7 @@ export default function HomePage() {
             data.map((u) => ({
               name: u.name,
               role: u.role,
-              avatar: "/default-avatar.png", // Fallback
+              avatar: "/default-avatar.svg", // Fallback
               universityID: u.universityID,
             })),
           );

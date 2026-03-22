@@ -315,7 +315,7 @@ function VerificationsContent() {
               appliedAt: new Date(
                 u.createdAt || Date.now(),
               ).toLocaleDateString(),
-              avatar: "/default-avatar.png",
+              avatar: "/default-avatar.svg",
               biography:
                 u.academicProfile?.biography || "No biography provided.",
               researchInterests: u.academicProfile?.researchInterests

@@ -24,7 +24,7 @@ export default function ProfilePage() {
         if (!profileData.error) {
           setUserData({
             ...profileData,
-            avatar: "/default-avatar.png", // Placeholder
+            avatar: "/default-avatar.svg", // Placeholder
             stats: {
               projects: profileData.academicProfile?.totalProjects || 0,
               citations: 0,
