@@ -8,7 +8,7 @@ export async function GET(request, { params }) {
     const { projectID } = resolvedParams;
 
     const project = await prisma.researchProject.findUnique({
-      where: { projectID: parseInt(projectID) },
+      where: { projectID: projectID },
       include: {
         creator: { select: { name: true, department: true } },
       },
@@ -38,17 +38,17 @@ export async function PUT(request, { params }) {
 
     // Verify ownership
     const existing = await prisma.researchProject.findUnique({
-      where: { projectID: parseInt(projectID) },
+      where: { projectID: projectID },
     });
     if (
       !existing ||
-      (existing.creatorID !== session.universityID && session.role !== "ADMIN")
+      (existing.universityID !== session.universityID && session.role !== "ADMIN")
     ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     const updated = await prisma.researchProject.update({
-      where: { projectID: parseInt(projectID) },
+      where: { projectID: projectID },
       data: {
         title: body.title,
         description: body.description,
@@ -58,7 +58,9 @@ export async function PUT(request, { params }) {
             ? "ACTIVE"
             : body.projectStatus === "Ongoing"
               ? "ON_HOLD"
-              : "COMPLETED",
+              : body.projectStatus === "Archived"
+                ? "ARCHIVED"
+                : "COMPLETED",
         externalLinks: body.externalLinks.map((l) => l.url || l),
       },
     });

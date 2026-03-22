@@ -21,7 +21,7 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 const ProjectDetailPage = () => {
   const router = useRouter();
   const params = useParams();
-  const projectId = parseInt(params.id);
+  const projectId = params.id;
 
   const [project, setProject] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
@@ -48,9 +48,11 @@ const ProjectDetailPage = () => {
                 ? "Active"
                 : projRes.projectStatus === "ON_HOLD"
                   ? "Ongoing"
-                  : "Finished",
+                  : projRes.projectStatus === "ARCHIVED"
+                    ? "Archived"
+                    : "Finished",
             leadResearcher: projRes.creator?.name || "Unknown",
-            creatorID: projRes.creatorID,
+            creatorID: projRes.universityID,
             time: new Date(projRes.createdAt).toLocaleDateString(),
             team: [],
             externalLinks: projRes.externalLinks?.map((url) => ({ url })) || [],
@@ -162,6 +164,7 @@ const ProjectDetailPage = () => {
                 >
                   <option value="Active">Active</option>
                   <option value="Ongoing">Ongoing</option>
+                  <option value="Archived">Archived</option>
                   <option value="Finished">Finished</option>
                 </select>
               ) : (
