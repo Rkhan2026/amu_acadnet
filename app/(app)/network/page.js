@@ -26,8 +26,15 @@ export default function NetworkPage() {
   const [loading, setLoading] = useState(true);
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
-    targetID: null,
+    title: "",
+    message: "",
+    confirmText: "Confirm",
+    onConfirm: () => {},
+    variant: "danger",
   });
+
+  const closeModal = () =>
+    setModalConfig((prev) => ({ ...prev, isOpen: false }));
 
   const fetchNetworkData = () => {
     setLoading(true);
@@ -44,6 +51,21 @@ export default function NetworkPage() {
   }, []);
 
   const handleCollabRequest = async (requestID, action) => {
+    if (action === "reject") {
+      setModalConfig({
+        isOpen: true,
+        title: "Reject Collaboration?",
+        message: "Are you sure you want to reject this collaboration request?",
+        confirmText: "Reject",
+        variant: "danger",
+        onConfirm: () => executeCollabAction(requestID, "reject"),
+      });
+      return;
+    }
+    executeCollabAction(requestID, action);
+  };
+
+  const executeCollabAction = async (requestID, action) => {
     try {
       const res = await fetch("/api/network/collaboration", {
         method: action === "cancel" ? "DELETE" : "PATCH",
@@ -65,6 +87,21 @@ export default function NetworkPage() {
   };
 
   const handleFollowRequest = async (id, action, type) => {
+    if (action === "reject") {
+      setModalConfig({
+        isOpen: true,
+        title: "Reject Follow Request?",
+        message: "Are you sure you want to reject this follow request?",
+        confirmText: "Reject",
+        variant: "danger",
+        onConfirm: () => executeFollowAction(id, "reject", type),
+      });
+      return;
+    }
+    executeFollowAction(id, action, type);
+  };
+
+  const executeFollowAction = async (id, action, type) => {
     try {
       const isCancel = action === "cancel";
       const res = await fetch("/api/network/follow", {
@@ -87,13 +124,20 @@ export default function NetworkPage() {
     }
   };
 
-  const handleUnfollowRequest = (targetID) => {
-    setModalConfig({ isOpen: true, targetID });
+  const handleUnfollowRequest = (targetID, isFollower = false) => {
+    setModalConfig({
+      isOpen: true,
+      title: isFollower ? "Remove Follower?" : "Unfollow Researcher?",
+      message: isFollower
+        ? "Are you sure you want to remove this researcher from your followers?"
+        : "Are you sure you want to unfollow this researcher?",
+      confirmText: isFollower ? "Remove" : "Unfollow",
+      variant: "danger",
+      onConfirm: () => executeUnfollow(targetID),
+    });
   };
 
-  const executeUnfollow = async () => {
-    const { targetID } = modalConfig;
-    if (!targetID) return;
+  const executeUnfollow = async (targetID) => {
     try {
       const res = await fetch("/api/network/follow", {
         method: "DELETE",
@@ -104,7 +148,7 @@ export default function NetworkPage() {
         fetchNetworkData();
       } else {
         const err = await res.json();
-        alert(err.error || "Unfollow failed");
+        alert(err.error || "Action failed");
       }
     } catch (_e) {
       alert("Something went wrong");
@@ -258,7 +302,12 @@ export default function NetworkPage() {
       case "followers":
         return subTab === "accepted"
           ? followersAccepted.map((u) => (
-              <NetworkCard key={u.id} user={u} type="followers" />
+              <NetworkCard
+                key={u.id}
+                user={u}
+                type="follower"
+                onAction={(id) => handleUnfollowRequest(id, true)}
+              />
             ))
           : followersReceived.map((u) => (
               <FollowRequestCard
@@ -408,12 +457,12 @@ export default function NetworkPage() {
 
       <ConfirmationModal
         isOpen={modalConfig.isOpen}
-        onClose={() => setModalConfig({ isOpen: false, targetID: null })}
-        onConfirm={executeUnfollow}
-        title="Unfollow Researcher?"
-        message="Are you sure you want to unfollow this researcher? You will stop seeing their updates in your research feed."
-        confirmText="Unfollow"
-        variant="danger"
+        onClose={closeModal}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        confirmText={modalConfig.confirmText}
+        variant={modalConfig.variant}
       />
     </div>
   );
@@ -462,6 +511,15 @@ function NetworkCard({ user, type, onAction }) {
             onClick={() => onAction(user.id)}
             className="px-4 py-3 bg-gray-50 text-gray-400 font-bold rounded-xl hover:bg-red-50 hover:text-red-500 transition-all"
             title="Unfollow"
+          >
+            <UserMinus className="h-5 w-5" />
+          </button>
+        )}
+        {type === "follower" && (
+          <button
+            onClick={() => onAction(user.id)}
+            className="px-4 py-3 bg-gray-50 text-gray-400 font-bold rounded-xl hover:bg-red-50 hover:text-red-500 transition-all"
+            title="Remove Follower"
           >
             <UserMinus className="h-5 w-5" />
           </button>
