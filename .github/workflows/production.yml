@@ -21,12 +21,16 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
 
       - name: Run Lint
         run: npm run lint
 
       - name: Build Project
         run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
 
       # Deployment steps would go here
       # For example, to deploy to Vercel or AWS
