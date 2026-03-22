@@ -11,6 +11,7 @@ import {
   UserCheck,
   UserMinus,
 } from "lucide-react";
+import Link from "next/link";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ConfirmationModal from "@/components/ConfirmationModal";
 
@@ -215,6 +216,7 @@ export default function NetworkPage() {
       )
       .map((c) => ({
         id: c.requestID,
+        projectId: c.projectID,
         name: c.project?.title || "Project",
         partners: [c.receiver?.name || "Member"],
         avatar: "/default-avatar.svg",
@@ -229,6 +231,7 @@ export default function NetworkPage() {
       )
       .map((c) => ({
         id: c.requestID,
+        projectId: c.projectID,
         name: c.project?.title || "Project",
         partners: [c.sender?.name || "Member"],
         avatar: "/default-avatar.svg",
@@ -246,6 +249,7 @@ export default function NetworkPage() {
       )
       .map((c) => ({
         id: c.requestID,
+        projectId: c.projectID,
         name: c.project?.title || "Project",
         partners: [c.receiver?.name || "Member"],
         avatar: "/default-avatar.svg",
@@ -260,6 +264,7 @@ export default function NetworkPage() {
       )
       .map((c) => ({
         id: c.requestID,
+        projectId: c.projectID,
         name: c.project?.title || "Project",
         partners: [c.sender?.name || "Member"],
         avatar: "/default-avatar.svg",
@@ -572,7 +577,10 @@ function NetworkCard({ user, type, onAction }) {
 
 function CollaborationCard({ collab }) {
   return (
-    <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-amu-green/30 transition-all group relative overflow-hidden">
+    <Link
+      href={`/projects/${collab.projectId}`}
+      className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-amu-green/30 transition-all group relative overflow-hidden block"
+    >
       <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
         <Briefcase className="h-16 w-16 text-amu-green" />
       </div>
@@ -581,13 +589,13 @@ function CollaborationCard({ collab }) {
         <div className="relative h-12 w-12 rounded-xl overflow-hidden shadow-md border-2 border-white">
           <Image
             src={collab.avatar}
-            alt={collab.partner}
+            alt={collab.partners.join(", ")}
             fill
             className="object-cover"
           />
         </div>
         <div>
-          <h4 className="font-bold text-gray-900 leading-tight line-clamp-1">
+          <h4 className="font-bold text-gray-900 leading-tight line-clamp-1 group-hover:text-amu-green transition-colors">
             {collab.name}
           </h4>
           <p className="text-sm text-gray-500">
@@ -610,7 +618,7 @@ function CollaborationCard({ collab }) {
           />
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 

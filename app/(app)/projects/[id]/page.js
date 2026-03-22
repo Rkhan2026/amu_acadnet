@@ -73,10 +73,18 @@ const ProjectDetailPage = () => {
           setEditForm(mapped);
         }
         if (!netRes.error) {
-          const hasReq = netRes.sentCollaborations?.some(
+          const sent = netRes.sentCollaborations?.find(
             (c) => c.projectID === projectId,
           );
-          setRequested(hasReq);
+          const received = netRes.receivedCollaborations?.find(
+            (c) => c.projectID === projectId,
+          );
+          const collab = sent || received;
+          if (collab) {
+            setRequested(collab.requestStatus);
+          } else {
+            setRequested(null);
+          }
         }
       })
       .finally(() => setLoading(false));
@@ -508,8 +516,12 @@ const ProjectDetailPage = () => {
                   onClick={handleSendRequest}
                   disabled={requested || requestLoading}
                   className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl transition-all flex items-center justify-center gap-2 ${
-                    requested
-                      ? "bg-emerald-100 text-emerald-700 shadow-emerald-green/10 cursor-not-allowed"
+                    requested === "PENDING" ||
+                    requested === "ACCEPTED" ||
+                    requestLoading
+                      ? requested === "ACCEPTED"
+                        ? "bg-amu-green/10 text-amu-green shadow-none cursor-default border border-amu-green/20"
+                        : "bg-emerald-100 text-emerald-700 shadow-emerald-green/10 cursor-not-allowed"
                       : "bg-amu-green text-white shadow-amu-green/20 hover:shadow-amu-green/40 hover:-translate-y-1"
                   }`}
                 >
@@ -517,7 +529,11 @@ const ProjectDetailPage = () => {
                     <>
                       <Clock className="w-4 h-4 animate-spin" /> Sending...
                     </>
-                  ) : requested ? (
+                  ) : requested === "ACCEPTED" ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" /> Collaborating
+                    </>
+                  ) : requested === "PENDING" ? (
                     <>
                       <CheckCircle2 className="w-4 h-4" /> Requested
                     </>
