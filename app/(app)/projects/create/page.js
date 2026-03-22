@@ -42,16 +42,37 @@ const CreateProjectPage = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        researchDomain: formData.researchDomain,
+        projectStatus: formData.projectStatus,
+        externalLinks: formData.externalLinks.filter((l) => l.trim() !== ""),
+      };
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    // Redirect after success animation
-    setTimeout(() => {
-      router.push("/home");
-    }, 2500);
+      if (res.ok) {
+        setIsSubmitted(true);
+        setTimeout(() => {
+          router.push("/projects");
+        }, 2500);
+      } else {
+        const errData = await res.json();
+        console.error("Failed to create project:", errData.error);
+        alert(errData.error || "Failed to create project");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e) => {

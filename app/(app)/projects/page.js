@@ -22,7 +22,7 @@ export default function MyProjectsPage() {
       .then(([authRes, projRes]) => {
         if (!authRes.error && !projRes.error) {
           const mine = projRes.filter(
-            (p) => p.creatorID === authRes.user?.universityID,
+            (p) => p.universityID === authRes.user?.universityID,
           );
           setMyProjects(
             mine.map((p) => ({

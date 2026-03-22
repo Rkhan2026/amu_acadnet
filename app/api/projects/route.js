@@ -46,7 +46,8 @@ export async function POST(request) {
     }
 
     const data = await request.json();
-    const { title, description, researchDomain, externalLinks } = data;
+    const { title, description, researchDomain, externalLinks, projectStatus } =
+      data;
 
     if (!title || !description || !researchDomain) {
       return NextResponse.json(
@@ -63,7 +64,7 @@ export async function POST(request) {
         externalLinks: Array.isArray(externalLinks) ? externalLinks : [],
         universityID: session.universityID,
         moderationStatus: "PENDING",
-        projectStatus: "PROPOSED",
+        projectStatus: projectStatus ? projectStatus.toUpperCase() : "PROPOSED",
       },
     });
 
