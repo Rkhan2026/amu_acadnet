@@ -12,6 +12,8 @@ import {
   X,
   Plus,
   Trash2,
+  Clock,
+  CheckCircle2,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter, useParams } from "next/navigation";
@@ -28,13 +30,16 @@ const ProjectDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState(null);
+  const [requested, setRequested] = useState(false);
+  const [requestLoading, setRequestLoading] = useState(false);
 
   React.useEffect(() => {
     Promise.all([
       fetch("/api/auth/me").then((r) => r.json()),
       fetch(`/api/projects/${projectId}`).then((r) => r.json()),
+      fetch("/api/network").then((r) => r.json()),
     ])
-      .then(([authRes, projRes]) => {
+      .then(([authRes, projRes, netRes]) => {
         if (!authRes.error) setCurrentUser(authRes.user);
         if (!projRes.error) {
           const mapped = {
@@ -61,6 +66,12 @@ const ProjectDetailPage = () => {
           };
           setProject(mapped);
           setEditForm(mapped);
+        }
+        if (!netRes.error) {
+          const hasReq = netRes.sentCollaborations?.some(
+            (c) => c.projectID === projectId,
+          );
+          setRequested(hasReq);
         }
       })
       .finally(() => setLoading(false));
@@ -92,6 +103,30 @@ const ProjectDetailPage = () => {
   const handleCancel = () => {
     setEditForm({ ...project });
     setIsEditing(false);
+  };
+
+  const handleSendRequest = async () => {
+    setRequestLoading(true);
+    try {
+      const res = await fetch("/api/network/collaboration", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectID: projectId,
+          receiverID: project.creatorID,
+        }),
+      });
+      if (res.ok) {
+        setRequested(true);
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to send request");
+      }
+    } catch (_e) {
+      alert("Something went wrong");
+    } finally {
+      setRequestLoading(false);
+    }
   };
 
   if (loading)
@@ -454,8 +489,26 @@ const ProjectDetailPage = () => {
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
                   Interested in Collaborating?
                 </p>
-                <button className="w-full py-4 bg-amu-green text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-amu-green/20 hover:shadow-amu-green/40 hover:-translate-y-1 transition-all">
-                  Send Request
+                <button
+                  onClick={handleSendRequest}
+                  disabled={requested || requestLoading}
+                  className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl transition-all flex items-center justify-center gap-2 ${
+                    requested
+                      ? "bg-emerald-100 text-emerald-700 shadow-emerald-green/10 cursor-not-allowed"
+                      : "bg-amu-green text-white shadow-amu-green/20 hover:shadow-amu-green/40 hover:-translate-y-1"
+                  }`}
+                >
+                  {requestLoading ? (
+                    <>
+                      <Clock className="w-4 h-4 animate-spin" /> Sending...
+                    </>
+                  ) : requested ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" /> Requested
+                    </>
+                  ) : (
+                    "Send Request"
+                  )}
                 </button>
               </div>
             )}

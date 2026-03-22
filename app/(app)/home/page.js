@@ -8,6 +8,21 @@ export default function HomePage() {
   const [suggested, setSuggested] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const handleFollow = async (tid) => {
+    try {
+      const res = await fetch("/api/network/follow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetID: tid }),
+      });
+      if (res.ok) {
+        setSuggested((prev) => prev.filter((u) => u.universityID !== tid));
+      }
+    } catch (_e) {
+      console.error("Follow error:", _e);
+    }
+  };
+
   useEffect(() => {
     fetch("/api/users")
       .then((res) => res.json())
@@ -23,7 +38,7 @@ export default function HomePage() {
           );
         }
       })
-      .catch(console.error)
+      .catch((_e) => console.error(_e))
       .finally(() => setLoading(false));
   }, []);
 
@@ -82,7 +97,10 @@ export default function HomePage() {
                       </p>
                     </div>
                   </div>
-                  <button className="bg-gray-50 hover:bg-amu-green hover:text-white p-2.5 rounded-2xl transition-all shadow-inner text-gray-400">
+                  <button
+                    onClick={() => handleFollow(user.universityID)}
+                    className="bg-gray-50 hover:bg-amu-green hover:text-white p-2.5 rounded-2xl transition-all shadow-inner text-gray-400"
+                  >
                     <UserPlus className="h-5 w-5" />
                   </button>
                 </div>

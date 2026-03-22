@@ -9,6 +9,7 @@ import {
   MoreVertical,
   Briefcase,
   UserCheck,
+  UserMinus,
 } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
@@ -23,14 +24,82 @@ export default function NetworkPage() {
   });
   const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
+  const fetchNetworkData = () => {
+    setLoading(true);
     fetch("/api/network")
       .then((r) => r.json())
       .then((d) => {
         if (!d.error) setNetworkData(d);
       })
       .finally(() => setLoading(false));
+  };
+
+  React.useEffect(() => {
+    fetchNetworkData();
   }, []);
+
+  const handleCollabRequest = async (requestID, action) => {
+    try {
+      const res = await fetch("/api/network/collaboration", {
+        method: action === "cancel" ? "DELETE" : "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          requestID,
+          requestStatus: action === "accept" ? "ACCEPTED" : "REJECTED",
+        }),
+      });
+      if (res.ok) {
+        fetchNetworkData();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Action failed");
+      }
+    } catch (_e) {
+      alert("Something went wrong");
+    }
+  };
+
+  const handleFollowRequest = async (id, action, type) => {
+    try {
+      const isCancel = action === "cancel";
+      const res = await fetch("/api/network/follow", {
+        method: isCancel ? "DELETE" : "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          targetID: type === "sent" ? id : undefined,
+          followID: type === "received" ? id : undefined,
+          requestStatus: action === "accept" ? "ACCEPTED" : "REJECTED",
+        }),
+      });
+      if (res.ok) {
+        fetchNetworkData();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Action failed");
+      }
+    } catch (_e) {
+      alert("Something went wrong");
+    }
+  };
+
+  const handleUnfollow = async (targetID) => {
+    if (!confirm("Are you sure you want to unfollow?")) return;
+    try {
+      const res = await fetch("/api/network/follow", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetID }),
+      });
+      if (res.ok) {
+        fetchNetworkData();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Unfollow failed");
+      }
+    } catch (_e) {
+      alert("Something went wrong");
+    }
+  };
 
   // Format data
   const followingAccepted = networkData.following
@@ -41,7 +110,8 @@ export default function NetworkPage() {
       department: f.following.department,
       avatar: "/default-avatar.svg",
       role: "USER",
-      followers: 0,
+      followers: f.following.followers?.length || 0,
+      mutualConnections: 0,
     }));
   const followingSent = networkData.following
     .filter((f) => f.requestStatus === "PENDING")
@@ -52,6 +122,8 @@ export default function NetworkPage() {
       avatar: "/default-avatar.svg",
       role: "USER",
       status: "PENDING",
+      followers: f.following.followers?.length || 0,
+      mutualConnections: 0,
     }));
 
   const followersAccepted = networkData.followers
@@ -62,17 +134,21 @@ export default function NetworkPage() {
       department: f.follower.department,
       avatar: "/default-avatar.svg",
       role: "USER",
-      followers: 0,
+      followers: f.follower.followers?.length || 0,
+      mutualConnections: 0,
     }));
   const followersReceived = networkData.followers
     .filter((f) => f.requestStatus === "PENDING")
     .map((f) => ({
-      id: f.followerID,
+      id: f.followID,
       name: f.follower.name,
       department: f.follower.department,
       avatar: "/default-avatar.svg",
       role: "USER",
       status: "PENDING",
+      appliedAt: new Date(f.createdAt).toLocaleDateString(),
+      followers: f.follower.followers?.length || 0,
+      mutualConnections: 0,
     }));
 
   const collabOngoing = [
@@ -154,10 +230,20 @@ export default function NetworkPage() {
       case "following":
         return subTab === "accepted"
           ? followingAccepted.map((u) => (
-              <NetworkCard key={u.id} user={u} type="following" />
+              <NetworkCard
+                key={u.id}
+                user={u}
+                type="following"
+                onAction={handleUnfollow}
+              />
             ))
           : followingSent.map((u) => (
-              <FollowRequestCard key={u.id} request={u} type="sent" />
+              <FollowRequestCard
+                key={u.id}
+                request={u}
+                type="sent"
+                onAction={handleFollowRequest}
+              />
             ));
       case "followers":
         return subTab === "accepted"
@@ -165,7 +251,12 @@ export default function NetworkPage() {
               <NetworkCard key={u.id} user={u} type="followers" />
             ))
           : followersReceived.map((u) => (
-              <FollowRequestCard key={u.id} request={u} type="received" />
+              <FollowRequestCard
+                key={u.id}
+                request={u}
+                type="received"
+                onAction={handleFollowRequest}
+              />
             ));
       case "collaborations":
         if (subTab === "ongoing")
@@ -178,11 +269,21 @@ export default function NetworkPage() {
           ));
         if (subTab === "received")
           return collabReceived.map((r) => (
-            <CollabRequestCard key={r.id} request={r} type="received" />
+            <CollabRequestCard
+              key={r.id}
+              request={r}
+              type="received"
+              onAction={handleCollabRequest}
+            />
           ));
         if (subTab === "sent")
           return collabSent.map((r) => (
-            <CollabRequestCard key={r.id} request={r} type="sent" />
+            <CollabRequestCard
+              key={r.id}
+              request={r}
+              type="sent"
+              onAction={handleCollabRequest}
+            />
           ));
         return null;
       default:
@@ -298,7 +399,7 @@ export default function NetworkPage() {
   );
 }
 
-function NetworkCard({ user, type }) {
+function NetworkCard({ user, type, onAction }) {
   return (
     <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-amu-green/30 transition-all group">
       <div className="flex justify-between items-start mb-4">
@@ -332,9 +433,20 @@ function NetworkCard({ user, type }) {
         </p>
       </div>
 
-      <button className="w-full flex items-center justify-center gap-2 py-3 bg-amu-green/5 text-amu-green font-bold rounded-xl hover:bg-amu-green hover:text-white transition-all">
-        View Profile
-      </button>
+      <div className="flex gap-2">
+        <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-amu-green/5 text-amu-green font-bold rounded-xl hover:bg-amu-green hover:text-white transition-all">
+          View Profile
+        </button>
+        {type === "following" && (
+          <button
+            onClick={() => onAction(user.id)}
+            className="px-4 py-3 bg-gray-50 text-gray-400 font-bold rounded-xl hover:bg-red-50 hover:text-red-500 transition-all"
+            title="Unfollow"
+          >
+            <UserMinus className="h-5 w-5" />
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -383,7 +495,7 @@ function CollaborationCard({ collab }) {
   );
 }
 
-function CollabRequestCard({ request, type }) {
+function CollabRequestCard({ request, type, onAction }) {
   return (
     <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-amu-green/30 transition-all group">
       <div className="flex items-center gap-4 mb-4">
@@ -421,16 +533,25 @@ function CollabRequestCard({ request, type }) {
       <div className="flex gap-2">
         {type === "received" ? (
           <>
-            <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-amu-green text-white font-bold rounded-xl hover:bg-amu-green/90 transition-all shadow-lg shadow-amu-green/10">
+            <button
+              onClick={() => onAction(request.id, "accept")}
+              className="flex-1 flex items-center justify-center gap-2 py-3 bg-amu-green text-white font-bold rounded-xl hover:bg-amu-green/90 transition-all shadow-lg shadow-amu-green/10"
+            >
               <Check className="h-4 w-4" />
               Accept
             </button>
-            <button className="flex items-center justify-center p-3 bg-gray-50 text-gray-400 font-bold rounded-xl hover:bg-red-50 hover:text-red-500 transition-all">
+            <button
+              onClick={() => onAction(request.id, "reject")}
+              className="flex items-center justify-center p-3 bg-gray-50 text-gray-400 font-bold rounded-xl hover:bg-red-50 hover:text-red-500 transition-all"
+            >
               <X className="h-5 w-5" />
             </button>
           </>
         ) : (
-          <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-500 font-bold rounded-xl hover:bg-gray-100 transition-all">
+          <button
+            onClick={() => onAction(request.id, "cancel")}
+            className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-500 font-bold rounded-xl hover:bg-gray-100 transition-all"
+          >
             Cancel Request
           </button>
         )}
@@ -439,7 +560,7 @@ function CollabRequestCard({ request, type }) {
   );
 }
 
-function FollowRequestCard({ request, type }) {
+function FollowRequestCard({ request, type, onAction }) {
   return (
     <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-amu-green/30 transition-all group">
       <div className="flex items-center gap-4 mb-6">
@@ -481,16 +602,25 @@ function FollowRequestCard({ request, type }) {
       <div className="flex gap-2">
         {type === "received" ? (
           <>
-            <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-amu-green text-white font-bold rounded-xl hover:bg-amu-green/90 transition-all shadow-lg shadow-amu-green/10">
+            <button
+              onClick={() => onAction(request.id, "accept", "received")}
+              className="flex-1 flex items-center justify-center gap-2 py-3 bg-amu-green text-white font-bold rounded-xl hover:bg-amu-green/90 transition-all shadow-lg shadow-amu-green/10"
+            >
               <Check className="h-4 w-4" />
               Accept
             </button>
-            <button className="flex items-center justify-center p-3 bg-gray-50 text-gray-400 font-bold rounded-xl hover:bg-red-50 hover:text-red-500 transition-all">
+            <button
+              onClick={() => onAction(request.id, "reject", "received")}
+              className="flex items-center justify-center p-3 bg-gray-50 text-gray-400 font-bold rounded-xl hover:bg-red-50 hover:text-red-500 transition-all"
+            >
               <X className="h-5 w-5" />
             </button>
           </>
         ) : (
-          <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-500 font-bold rounded-xl hover:bg-gray-100 transition-all">
+          <button
+            onClick={() => onAction(request.id, "cancel", "sent")}
+            className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-500 font-bold rounded-xl hover:bg-gray-100 transition-all"
+          >
             Cancel Request
           </button>
         )}

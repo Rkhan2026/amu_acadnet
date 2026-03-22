@@ -31,12 +31,34 @@ export async function GET(_request) {
 
     const following = await prisma.follows.findMany({
       where: { followerID: universityID },
-      include: { following: { select: { name: true, department: true } } },
+      include: {
+        following: {
+          select: {
+            name: true,
+            department: true,
+            followers: {
+              where: { requestStatus: "ACCEPTED" },
+              select: { followerID: true },
+            },
+          },
+        },
+      },
     });
 
     const followers = await prisma.follows.findMany({
       where: { followingID: universityID },
-      include: { follower: { select: { name: true, department: true } } },
+      include: {
+        follower: {
+          select: {
+            name: true,
+            department: true,
+            followers: {
+              where: { requestStatus: "ACCEPTED" },
+              select: { followerID: true },
+            },
+          },
+        },
+      },
     });
 
     return NextResponse.json({

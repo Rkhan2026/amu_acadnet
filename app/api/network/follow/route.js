@@ -31,7 +31,7 @@ export async function POST(request) {
       data: {
         followerID: session.universityID,
         followingID: targetID,
-        requestStatus: "ACCEPTED",
+        requestStatus: "PENDING",
       },
     });
 
@@ -65,6 +65,43 @@ export async function DELETE(request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Follow DELETE Error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}
+export async function PATCH(request) {
+  try {
+    const session = await getSession();
+    if (!session || !session.universityID)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { followID, requestStatus } = await request.json();
+
+    if (!followID || !["ACCEPTED", "REJECTED"].includes(requestStatus)) {
+      return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    }
+
+    const followReq = await prisma.follows.findUnique({
+      where: { followID },
+    });
+
+    if (!followReq || followReq.followingID !== session.universityID) {
+      return NextResponse.json(
+        { error: "Not authorized or request not found" },
+        { status: 403 },
+      );
+    }
+
+    const updatedFollow = await prisma.follows.update({
+      where: { followID },
+      data: { requestStatus },
+    });
+
+    return NextResponse.json(updatedFollow);
+  } catch (error) {
+    console.error("Follow PATCH error", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

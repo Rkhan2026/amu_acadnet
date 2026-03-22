@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Search,
   Filter,
@@ -22,13 +23,15 @@ const ExplorePage = () => {
   const [projectsData, setProjectsData] = useState([]);
   const [researchersData, setResearchersData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [followingIds, setFollowingIds] = useState([]);
 
   React.useEffect(() => {
     Promise.all([
       fetch("/api/projects").then((r) => r.json()),
       fetch("/api/users").then((r) => r.json()),
+      fetch("/api/network").then((r) => r.json()),
     ])
-      .then(([pData, rData]) => {
+      .then(([pData, rData, nData]) => {
         if (Array.isArray(pData))
           setProjectsData(
             pData.filter((p) => p.moderationStatus === "APPROVED"),
@@ -45,9 +48,31 @@ const ExplorePage = () => {
               avatar: "/default-avatar.svg",
             })),
           );
+        if (!nData.error && nData.following) {
+          setFollowingIds(nData.following.map((f) => f.followingID));
+        }
       })
+      .catch((_e) => console.error(_e))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleFollow = async (tid) => {
+    try {
+      const res = await fetch("/api/network/follow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetID: tid }),
+      });
+      if (res.ok) {
+        setFollowingIds((prev) => [...prev, tid]);
+      } else {
+        const err = await res.json();
+        alert(err.error || "Follow failed");
+      }
+    } catch (_e) {
+      alert("Something went wrong");
+    }
+  };
 
   const filteredProjects = useMemo(() => {
     return projectsData.filter((p) => {
@@ -281,9 +306,33 @@ const ExplorePage = () => {
                                 : item.domain}
                             </span>
                           </div>
-                          <button className="p-2 bg-gray-50 text-gray-400 group-hover:bg-amu-green group-hover:text-white rounded-xl transition-all">
-                            <ArrowRight className="h-5 w-5" />
-                          </button>
+                          <div className="flex items-center gap-2">
+                            {activeTab === "researchers" &&
+                              !followingIds.includes(item.id) && (
+                                <button
+                                  onClick={() => handleFollow(item.id)}
+                                  className="px-4 py-2 bg-amu-green/10 text-amu-green text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-amu-green hover:text-white transition-all shadow-sm"
+                                >
+                                  Follow
+                                </button>
+                              )}
+                            {activeTab === "researchers" &&
+                              followingIds.includes(item.id) && (
+                                <span className="px-4 py-2 bg-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest rounded-xl border border-gray-200">
+                                  Following
+                                </span>
+                              )}
+                            <Link
+                              href={
+                                activeTab === "projects"
+                                  ? `/projects/${item.projectID}`
+                                  : "#"
+                              }
+                              className="p-2 bg-gray-50 text-gray-400 group-hover:bg-amu-green group-hover:text-white rounded-xl transition-all"
+                            >
+                              <ArrowRight className="h-5 w-5" />
+                            </Link>
+                          </div>
                         </div>
                       </motion.div>
                     ))
