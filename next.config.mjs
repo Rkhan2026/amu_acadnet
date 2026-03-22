@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  /* config options here */
   reactCompiler: true,
   images: {
     dangerouslyAllowSVG: true,
@@ -12,31 +13,6 @@ const nextConfig = {
         pathname: "/**",
       },
     ],
-  },
-  async headers() {
-    return [
-      {
-        source: "/(.*)",
-        headers: [
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' blob: data: https://api.dicebear.com",
-              "font-src 'self'",
-              "connect-src 'self' https://vitals.vercel-insights.com",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              "frame-ancestors 'none'",
-              "upgrade-insecure-requests",
-            ].join("; "),
-          },
-        ],
-      },
-    ];
   },
 };
 
