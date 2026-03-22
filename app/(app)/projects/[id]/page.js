@@ -147,7 +147,7 @@ const ProjectDetailPage = () => {
         }),
       });
       if (res.ok) {
-        setRequested(true);
+        setRequested("PENDING");
       } else {
         const err = await res.json();
         alert(err.error || "Failed to send request");

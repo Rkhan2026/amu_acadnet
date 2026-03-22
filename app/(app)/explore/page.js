@@ -23,7 +23,7 @@ const ExplorePage = () => {
   const [projectsData, setProjectsData] = useState([]);
   const [researchersData, setResearchersData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [followingIds, setFollowingIds] = useState([]);
+  const [followingStatuses, setFollowingStatuses] = useState({});
 
   React.useEffect(() => {
     Promise.all([
@@ -49,7 +49,11 @@ const ExplorePage = () => {
             })),
           );
         if (!nData.error && nData.following) {
-          setFollowingIds(nData.following.map((f) => f.followingID));
+          const statuses = {};
+          nData.following.forEach((f) => {
+            statuses[f.followingID] = f.requestStatus;
+          });
+          setFollowingStatuses(statuses);
         }
       })
       .catch((_e) => console.error(_e))
@@ -64,7 +68,7 @@ const ExplorePage = () => {
         body: JSON.stringify({ targetID: tid }),
       });
       if (res.ok) {
-        setFollowingIds((prev) => [...prev, tid]);
+        setFollowingStatuses((prev) => ({ ...prev, [tid]: "PENDING" }));
       } else {
         const err = await res.json();
         alert(err.error || "Follow failed");
@@ -235,7 +239,7 @@ const ExplorePage = () => {
               </div>
 
               {/* Results Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-100">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <AnimatePresence mode="wait">
                   {results.length > 0 ? (
                     results.map((item, idx) => (
@@ -308,7 +312,7 @@ const ExplorePage = () => {
                           </div>
                           <div className="flex items-center gap-2">
                             {activeTab === "researchers" &&
-                              !followingIds.includes(item.id) && (
+                              !followingStatuses[item.id] && (
                                 <button
                                   onClick={() => handleFollow(item.id)}
                                   className="px-4 py-2 bg-amu-green/10 text-amu-green text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-amu-green hover:text-white transition-all shadow-sm"
@@ -317,9 +321,17 @@ const ExplorePage = () => {
                                 </button>
                               )}
                             {activeTab === "researchers" &&
-                              followingIds.includes(item.id) && (
-                                <span className="px-4 py-2 bg-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest rounded-xl border border-gray-200">
-                                  Following
+                              followingStatuses[item.id] && (
+                                <span
+                                  className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border ${
+                                    followingStatuses[item.id] === "ACCEPTED"
+                                      ? "bg-amu-green/10 text-amu-green border-amu-green/20"
+                                      : "bg-gray-100 text-gray-400 border-gray-200"
+                                  }`}
+                                >
+                                  {followingStatuses[item.id] === "ACCEPTED"
+                                    ? "Following"
+                                    : "Requested"}
                                 </span>
                               )}
                             <Link
