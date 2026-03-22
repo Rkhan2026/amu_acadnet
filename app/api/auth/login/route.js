@@ -25,7 +25,7 @@ export async function POST(request) {
           email: adminUser.email,
           role: "ADMIN",
         };
-        await setSession({ adminID: adminUser.adminID, role: "ADMIN" });
+        await setSession(sessionUser);
         return NextResponse.json({ user: sessionUser }, { status: 200 });
       } else {
         return NextResponse.json(
@@ -57,10 +57,7 @@ export async function POST(request) {
           accountStatus: standardUser.accountStatus,
           department: standardUser.department,
         };
-        await setSession({
-          universityID: standardUser.universityID,
-          role: standardUser.role,
-        });
+        await setSession(sessionUser);
         return NextResponse.json({ user: sessionUser }, { status: 200 });
       } else {
         return NextResponse.json(
