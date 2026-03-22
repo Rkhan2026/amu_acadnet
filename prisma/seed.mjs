@@ -1,11 +1,11 @@
+import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
+import bcrypt from "bcryptjs";
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+const connectionString = process.env.DATABASE_URL;
+const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
@@ -145,7 +145,7 @@ async function main() {
         "https://arxiv.org/example",
       ],
       universityID: alice.universityID,
-      adminID: admin.adminID,
+
       teamMembers: { connect: [{ universityID: bob.universityID }] },
     },
   });
@@ -160,7 +160,7 @@ async function main() {
       projectStatus: "PROPOSED",
       externalLinks: ["https://doi.org/example-iot"],
       universityID: bob.universityID,
-      adminID: admin.adminID,
+
       teamMembers: {
         connect: [
           { universityID: alice.universityID },
@@ -193,7 +193,6 @@ async function main() {
       projectStatus: "ACTIVE",
       externalLinks: ["https://eprint.iacr.org/example"],
       universityID: eve.universityID,
-      adminID: admin.adminID,
     },
   });
 

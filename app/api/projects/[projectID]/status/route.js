@@ -31,7 +31,6 @@ export async function PATCH(request, { params }) {
       where: { projectID },
       data: {
         moderationStatus,
-        adminID: session.adminID,
         projectStatus: moderationStatus === "APPROVED" ? "ACTIVE" : "ON_HOLD",
       },
     });
