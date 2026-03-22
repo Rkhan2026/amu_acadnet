@@ -3,10 +3,19 @@ import { NextResponse } from "next/server";
 export function proxy(request) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const isDev = process.env.NODE_ENV === "development";
+  const isPreview = process.env.VERCEL_ENV === "preview";
+
+  // In preview deployments Vercel injects feedback.js which creates <style>
+  // elements without a nonce — use 'unsafe-inline' there instead.
+  // In production the strict nonce-only policy is kept.
+  const styleSrc = isPreview
+    ? `style-src 'self' 'unsafe-inline';`
+    : `style-src 'self' 'nonce-${nonce}';`;
+
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://va.vercel-scripts.com${isDev ? " 'unsafe-eval'" : ""};
-    style-src 'self' 'nonce-${nonce}';
+    ${styleSrc}
     style-src-attr 'unsafe-inline';
     img-src 'self' blob: data: https://api.dicebear.com;
     font-src 'self';
