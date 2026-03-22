@@ -20,13 +20,17 @@ const Feed = () => {
       .catch(console.error);
 
     setLoading(true);
-    fetch("/api/projects")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          // In a real app, "for-you" would be AI filtered.
-          // For now, we show all APPROVED projects.
-          const filtered = data
+    Promise.all([fetch("/api/projects"), fetch("/api/network")])
+      .then(async ([projectsRes, networkRes]) => {
+        const projectsData = await projectsRes.json();
+        const networkData = await networkRes.json();
+
+        if (Array.isArray(projectsData)) {
+          const sentCollabIds = new Set(
+            (networkData.sentCollaborations || []).map((c) => c.projectID),
+          );
+
+          const filtered = projectsData
             .filter((p) => p.moderationStatus === "APPROVED")
             .map((p) => ({
               id: p.projectID,
@@ -37,6 +41,7 @@ const Feed = () => {
               ownerID: p.universityID,
               projectStatus: p.projectStatus === "ACTIVE" ? "Active" : "Closed",
               matchScore: 95,
+              hasRequested: sentCollabIds.has(p.projectID),
             }));
           setFeedData(filtered);
         }

@@ -1,11 +1,40 @@
 "use client";
-import React from "react";
-import { MoreHorizontal, BookOpen } from "lucide-react";
+import React, { useState } from "react";
+import { MoreHorizontal, BookOpen, Clock, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
 const FeedItem = ({ post, currentUser }) => {
   const isOwner = currentUser?.universityID === post.ownerID;
+  const [requested, setRequested] = useState(post.hasRequested);
+  const [loading, setLoading] = useState(false);
+
+  const handleAcceptCollab = async () => {
+    if (requested || loading) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/network/collaboration", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectID: post.id,
+          receiverID: post.ownerID,
+        }),
+      });
+      if (res.ok) {
+        setRequested(true);
+      } else {
+        const error = await res.json();
+        alert(error.error || "Failed to send request");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -63,8 +92,23 @@ const FeedItem = ({ post, currentUser }) => {
           Full Project
         </Link>
         {!isOwner && (
-          <button className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-white text-amu-green border-2 border-amu-green rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-amu-green/5 hover:-translate-y-1 transition-all">
-            Accept Collab Request
+          <button
+            onClick={handleAcceptCollab}
+            disabled={requested || loading}
+            className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all ${
+              requested
+                ? "bg-gray-100 text-gray-400 border-2 border-gray-200 cursor-default"
+                : "bg-white text-amu-green border-2 border-amu-green hover:bg-amu-green/5 hover:-translate-y-1"
+            }`}
+          >
+            {loading ? (
+              <Clock className="h-4 w-4 animate-spin" />
+            ) : requested ? (
+              <CheckCircle2 className="h-4 w-4" />
+            ) : null}
+            <span className="ml-2">
+              {requested ? "Requested" : "Send Collab Request"}
+            </span>
           </button>
         )}
       </div>
