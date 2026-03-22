@@ -48,15 +48,36 @@ export async function PUT(request, { params }) {
     }
 
     const body = await request.json();
-    const { researchInterests, biography } = body;
+    const { name, department, researchInterests, biography } = body;
 
-    const updatedProfile = await prisma.academicProfile.upsert({
+    // Update User model data if provided
+    if (name || department) {
+      await prisma.user.update({
+        where: { universityID },
+        data: {
+          ...(name && { name }),
+          ...(department && { department }),
+        },
+      });
+    }
+
+    await prisma.academicProfile.upsert({
       where: { universityID },
       update: { researchInterests, biography },
       create: { universityID, researchInterests, biography },
     });
 
-    return NextResponse.json(updatedProfile);
+    // Option to fetch user with new profile to return updated complete model
+    const fullUser = await prisma.user.findUnique({
+      where: { universityID },
+      include: {
+        academicProfile: true,
+      },
+    });
+
+    const { password: _password, ...safeUser } = fullUser;
+
+    return NextResponse.json(safeUser);
   } catch (error) {
     console.error("Profile PUT Error:", error);
     return NextResponse.json(

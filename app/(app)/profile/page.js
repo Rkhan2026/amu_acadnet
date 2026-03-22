@@ -43,8 +43,10 @@ export default function ProfilePage() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          biography: updatedData.description || updatedData.bio,
-          researchInterests: updatedData.interests,
+          name: updatedData.name,
+          department: updatedData.department,
+          biography: updatedData.biography,
+          researchInterests: updatedData.researchInterests,
         }),
       });
       if (res.ok) {
