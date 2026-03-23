@@ -9,38 +9,39 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const [
-      totalUsers,
-      pendingUsers,
-      totalProjects,
-      pendingProjects,
-      students,
-      faculty,
-      alumni,
-    ] = await Promise.all([
-      prisma.user.count(),
-      prisma.user.count({ where: { accountStatus: "PENDING" } }),
-      prisma.researchProject.count(),
-      prisma.researchProject.count({ where: { moderationStatus: "PENDING" } }),
-      prisma.user.count({ where: { role: "STUDENT" } }),
-      prisma.user.count({ where: { role: "FACULTY" } }),
-      prisma.user.count({ where: { role: "ALUMNI" } }),
+    // Fetch all users to calculate distribution in-memory for better robustness
+    const [users, projects] = await Promise.all([
+      prisma.user.findMany({
+        select: { role: true, accountStatus: true },
+      }),
+      prisma.researchProject.findMany({
+        select: { moderationStatus: true },
+      }),
     ]);
+
+    const totalUsers = users.length;
+    const pendingVerifications = users.filter(
+      (u) => u.accountStatus === "PENDING",
+    ).length;
+    const totalPublications = projects.length;
+    const pendingModerations = projects.filter(
+      (p) => p.moderationStatus === "PENDING",
+    ).length;
+
+    // Dynamically calculate distribution based on current roles in DB
+    const students = users.filter((u) => u.role === "STUDENT").length;
+    const faculty = users.filter((u) => u.role === "FACULTY").length;
+    const scholars = users.filter((u) => u.role === "RESEARCH SCHOLAR").length;
 
     return NextResponse.json({
       totalUsers,
-      pendingVerifications: pendingUsers,
-      totalPublications: totalProjects,
-      pendingModerations: pendingProjects,
+      pendingVerifications,
+      totalPublications,
+      pendingModerations,
       profileDistribution: [
         { label: "Students", value: students, color: "bg-amu-green" },
         { label: "Faculty", value: faculty, color: "bg-amu-gold" },
-        { label: "Alumni", value: alumni, color: "bg-blue-500" },
-        {
-          label: "Staff",
-          value: totalUsers - (students + faculty + alumni),
-          color: "bg-purple-500",
-        },
+        { label: "Research Scholars", value: scholars, color: "bg-blue-500" },
       ],
     });
   } catch (error) {

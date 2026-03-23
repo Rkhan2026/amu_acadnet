@@ -22,7 +22,7 @@ export async function PATCH(request, { params }) {
 
     const updatedUser = await prisma.user.update({
       where: { universityID },
-      data: { accountStatus, adminID: session.adminID },
+      data: { accountStatus },
       select: {
         universityID: true,
         name: true,

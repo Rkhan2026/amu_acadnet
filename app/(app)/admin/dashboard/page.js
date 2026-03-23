@@ -52,7 +52,9 @@ export default function AdminDashboard() {
     fetch("/api/admin/stats")
       .then((r) => r.json())
       .then((data) => {
-        if (!data.error) setStats(data);
+        if (data && !data.error) {
+          setStats(data);
+        }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -64,7 +66,7 @@ export default function AdminDashboard() {
     );
   if (!stats)
     return (
-      <div className="py-20 text-center text-red-400 font-medium font-black uppercase tracking-widest text-xs tracking-widest text-xs">
+      <div className="py-20 text-center text-red-500 font-black uppercase tracking-widest text-[10px]">
         Failed to load analytics.
       </div>
     );
@@ -124,7 +126,7 @@ export default function AdminDashboard() {
               Institutional Composition
             </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {stats.profileDistribution.map((item, idx) => (
               <div
                 key={idx}

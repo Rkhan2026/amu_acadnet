@@ -49,7 +49,7 @@ export default function RegisterForm() {
       description: "For teaching staff & professors",
     },
     {
-      id: "scholar",
+      id: "research scholar",
       label: "Research Scholar",
       icon: User,
       description: "For PhD & research fellows",
@@ -488,7 +488,7 @@ export default function RegisterForm() {
             >
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Domain
+                  Research Interests
                 </label>
                 <input
                   type="text"
