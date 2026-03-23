@@ -15,13 +15,13 @@ async function main() {
   const hashedPassword = await bcrypt.hash("password123", 10);
 
   // Clean up any existing user
-  await prisma.user.deleteMany({ where: { email: "browser_test@test.com" } });
+  await prisma.user.deleteMany({ where: { email: "amit.patel@gmail.com" } });
 
   await prisma.user.create({
     data: {
       universityID: "browser_test_id",
-      name: "Browser Tester",
-      email: "browser_test@test.com",
+      name: "Amit Patel",
+      email: "amit.patel@gmail.com",
       password: hashedPassword,
       role: "STUDENT",
       department: "Computer Science",
@@ -30,12 +30,12 @@ async function main() {
   });
 
   const hashedAdminPassword = await bcrypt.hash("admin123", 10);
-  await prisma.admin.deleteMany({ where: { email: "browser_admin@test.com" } });
+  await prisma.admin.deleteMany({ where: { email: "suresh.nair@gmail.com" } });
   await prisma.admin.create({
     data: {
       adminID: "browser_admin_id",
-      name: "Browser Admin",
-      email: "browser_admin@test.com",
+      name: "Suresh Nair",
+      email: "suresh.nair@gmail.com",
       password: hashedAdminPassword,
     },
   });

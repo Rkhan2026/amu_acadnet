@@ -187,7 +187,7 @@ const ProfileView = ({ user, onEdit }) => {
                   <p className="font-bold text-gray-900">
                     {user.email ||
                       (user.handle
-                        ? `${user.handle.replace("@", "")}@amu.ac.in`
+                        ? `${user.handle.replace("@", "")}@gmail.com`
                         : "N/A")}
                   </p>
                 </div>

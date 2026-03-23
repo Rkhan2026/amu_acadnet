@@ -73,8 +73,8 @@ export default function LoginForm() {
           </p>
           <p className="text-sm font-bold text-gray-700">
             {formData.role === "admin"
-              ? "admin@amu.ac.in / admin123"
-              : "alice.rahman@amu.ac.in / password123"}
+              ? "rajesh.kumar@gmail.com / admin123"
+              : "aarav.sharma@gmail.com / password123"}
           </p>
         </div>
       </div>

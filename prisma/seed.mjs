@@ -26,8 +26,8 @@ async function main() {
   const admin = await prisma.admin.create({
     data: {
       adminID: "admin-001",
-      name: "Dr. Imran Khan",
-      email: "admin@amu.ac.in",
+      name: "Dr. Rajesh Kumar",
+      email: "rajesh.kumar@gmail.com",
       password: adminPassword,
     },
   });
@@ -39,8 +39,8 @@ async function main() {
   const alice = await prisma.user.create({
     data: {
       universityID: "AU-2024-001",
-      name: "Alice Rahman",
-      email: "alice.rahman@amu.ac.in",
+      name: "Aarav Sharma",
+      email: "aarav.sharma@gmail.com",
       password: userPassword,
       role: "STUDENT",
       department: "Computer Science",
@@ -51,8 +51,8 @@ async function main() {
   const bob = await prisma.user.create({
     data: {
       universityID: "AU-2024-002",
-      name: "Bob Siddiqui",
-      email: "bob.siddiqui@amu.ac.in",
+      name: "Bhavya Gupta",
+      email: "bhavya.gupta@gmail.com",
       password: userPassword,
       role: "FACULTY",
       department: "Electrical Engineering",
@@ -63,8 +63,8 @@ async function main() {
   const carol = await prisma.user.create({
     data: {
       universityID: "AU-2024-003",
-      name: "Carol Ansari",
-      email: "carol.ansari@amu.ac.in",
+      name: "Chitra Iyer",
+      email: "chitra.iyer@gmail.com",
       password: userPassword,
       role: "STUDENT",
       department: "Biotechnology",
@@ -75,8 +75,8 @@ async function main() {
   const dave = await prisma.user.create({
     data: {
       universityID: "AU-2024-004",
-      name: "Dave Mirza",
-      email: "dave.mirza@amu.ac.in",
+      name: "Deepak Verma",
+      email: "deepak.verma@gmail.com",
       password: userPassword,
       role: "STUDENT",
       department: "Physics",
@@ -87,8 +87,8 @@ async function main() {
   const eve = await prisma.user.create({
     data: {
       universityID: "AU-2024-005",
-      name: "Eve Qureshi",
-      email: "eve.qureshi@amu.ac.in",
+      name: "Esha Reddy",
+      email: "esha.reddy@gmail.com",
       password: userPassword,
       role: "FACULTY",
       department: "Mathematics",
@@ -276,9 +276,9 @@ async function main() {
   console.log(`✅ Follows created: ${followPairs.length} records.`);
 
   console.log("\n🎉 Seed complete! Summary:");
-  console.log("   Admin  → admin@amu.ac.in          / admin123");
-  console.log("   Users  → *@amu.ac.in              / password123");
-  console.log("   APPROVED: Alice, Bob, Carol, Eve  |  PENDING: Dave");
+  console.log("   Admin  → rajesh.kumar@gmail.com      / admin123");
+  console.log("   Users  → *@gmail.com              / password123");
+  console.log("   APPROVED: Aarav, Bhavya, Chitra, Esha  |  PENDING: Deepak");
   console.log("   Projects: 4  |  Collaborations: 3  |  Follows: 6");
 }
 
