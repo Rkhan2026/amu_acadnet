@@ -2,7 +2,8 @@ name: Preview
 
 on:
   push:
-    branches: [testing]
+    branches-ignore:
+      - main
 
 jobs:
   build-and-test:
