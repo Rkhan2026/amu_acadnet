@@ -67,9 +67,16 @@ const FeedItem = ({ post, currentUser }) => {
               {post.projectStatus}
             </span>
           </div>
-          <h3 className="text-2xl font-black text-gray-900 leading-[1.15] mb-4 group-hover:text-amu-green transition-colors cursor-pointer">
+          <h3 className="text-2xl font-black text-gray-900 leading-[1.15] mb-2 group-hover:text-amu-green transition-colors cursor-pointer">
             {post.title}
           </h3>
+          {post.matchScore > 0 && (
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-[10px] font-black text-amu-gold bg-amu-gold/10 px-2 py-0.5 rounded-md border border-amu-gold/20 uppercase tracking-tighter">
+                {post.matchScore}% Match
+              </span>
+            </div>
+          )}
           <div className="flex items-center gap-4 text-sm font-bold text-gray-500 mb-2">
             <span className="text-gray-900">{post.leadResearcher}</span>
           </div>

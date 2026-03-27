@@ -25,16 +25,18 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    fetch("/api/users")
+    fetch("/api/recommendations/collaborators")
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) {
+        if (data.recommendations && Array.isArray(data.recommendations)) {
           setSuggested(
-            data.map((u) => ({
-              name: u.name,
-              role: u.role,
-              avatar: "/default-avatar.svg", // Fallback
-              universityID: u.universityID,
+            data.recommendations.map((rec) => ({
+              name: rec.user.name,
+              role: rec.user.role,
+              avatar: "/default-avatar.svg",
+              universityID: rec.user.universityID,
+              researchInterests: rec.user.researchInterests,
+              score: Math.round(rec.score * 100),
             })),
           );
         }
@@ -93,8 +95,11 @@ export default function HomePage() {
                       <h4 className="font-black text-sm text-gray-900 leading-tight">
                         {user.name}
                       </h4>
-                      <p className="text-xs font-bold text-amu-green">
-                        {user.role}
+                      <p className="text-[10px] font-bold text-amu-green uppercase tracking-tighter">
+                        {user.role} • {user.score}% Match
+                      </p>
+                      <p className="text-[10px] text-gray-400 line-clamp-1 mt-0.5">
+                        {user.researchInterests}
                       </p>
                     </div>
                   </div>

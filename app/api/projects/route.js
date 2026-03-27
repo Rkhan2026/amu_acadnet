@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { getProjectRecommendations } from "@/lib/recommendations/engine";
 
 export async function GET(request) {
   try {
@@ -19,6 +20,16 @@ export async function GET(request) {
       },
       orderBy: { createdAt: "desc" },
     });
+
+    // Add match scores if a session exists
+    const session = await getSession();
+    if (session && session.universityID) {
+      const projectsWithScores = await getProjectRecommendations(
+        session.universityID,
+        projects,
+      );
+      return NextResponse.json(projectsWithScores);
+    }
 
     return NextResponse.json(projects);
   } catch (error) {

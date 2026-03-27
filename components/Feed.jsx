@@ -59,7 +59,7 @@ const Feed = () => {
                       : p.projectStatus === "COMPLETED"
                         ? "Completed"
                         : "Archived",
-              matchScore: p.moderationStatus === "APPROVED" ? 95 : 0,
+              matchScore: p.matchScore || 0,
               createdAt: p.createdAt,
               hasRequested: sentCollabIds.has(p.projectID),
             }));
