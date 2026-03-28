@@ -1,10 +1,37 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Globe, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { getCurrentUser } from "@/lib/utils/auth";
 
 const Hero = () => {
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    // Initial check from localStorage for speed
+    const localUser = getCurrentUser();
+    if (localUser) setUser(localUser);
+
+    // Verify with API to ensure session is still valid
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.user) setUser(d.user);
+        else setUser(null);
+      })
+      .catch(() => setUser(null));
+  }, []);
+
+  const scrollToFeatures = (e) => {
+    e.preventDefault();
+    const featuresSection = document.getElementById("features");
+    if (featuresSection) {
+      featuresSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.history.pushState(null, "", "#features");
+    }
+  };
+
   return (
     <div
       id="about"
@@ -82,11 +109,17 @@ const Hero = () => {
             className="flex flex-col sm:flex-row items-center justify-center gap-6"
           >
             <Link
-              href="/register"
+              href={
+                user
+                  ? user.role === "ADMIN"
+                    ? "/admin/dashboard"
+                    : "/home"
+                  : "/register"
+              }
               className="group relative w-full sm:w-auto px-10 py-5 bg-amu-green text-white rounded-full font-black text-xl transition-all shadow-2xl hover:shadow-amu-green/40 flex items-center justify-center gap-3 overflow-hidden"
             >
               <span className="relative z-10 transition-transform group-hover:-translate-x-1">
-                Join AMU AcadNet
+                {user ? "Go to Dashboard" : "Join AMU AcadNet"}
               </span>
               <ArrowRight className="h-6 w-6 relative z-10 transition-transform group-hover:translate-x-1" />
               <motion.div
@@ -101,58 +134,11 @@ const Hero = () => {
             </Link>
             <Link
               href="#features"
+              onClick={scrollToFeatures}
               className="w-full sm:w-auto px-10 py-5 bg-white text-gray-900 border-2 border-gray-100 hover:border-amu-green/30 hover:bg-amu-green/5 rounded-full font-black text-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center"
             >
               Explore Features
             </Link>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8"
-          >
-            {[
-              {
-                icon: ShieldCheck,
-                title: "Institutional Trust",
-                desc: "Verified student and faculty profiles ensuring a reliable and professional academic environment.",
-                gradient: "from-blue-500/10 to-transparent",
-              },
-              {
-                icon: Sparkles,
-                title: "AI Discovery",
-                desc: "Intelligent recommendations for research partners based on interests, skills, and publication history.",
-                gradient: "from-amu-gold/10 to-transparent",
-              },
-              {
-                icon: Globe,
-                title: "Seamless Network",
-                desc: "Connect across departments to bridge the gap between diverse research domains and expertise.",
-                gradient: "from-amu-green/10 to-transparent",
-              },
-            ].map((item, idx) => (
-              <motion.div
-                key={idx}
-                whileHover={{ y: -5 }}
-                className={`relative overflow-hidden p-8 bg-white rounded-3xl border border-gray-100 hover:border-amu-green/30 transition-all group flex flex-col items-center text-center shadow-sm hover:shadow-xl`}
-              >
-                <div
-                  className={`absolute inset-0 bg-linear-to-br ${item.gradient} opacity-0 group-hover:opacity-100 transition-opacity`}
-                />
-                <div className="mb-4 p-4 rounded-2xl bg-gray-50 group-hover:bg-white group-hover:shadow-md transition-all">
-                  <item.icon className="h-10 w-10 text-amu-green group-hover:scale-110 transition-transform" />
-                </div>
-                <h3 className="font-bold text-2xl text-gray-900 mb-2">
-                  {item.title}
-                </h3>
-                <p className="text-gray-500 leading-relaxed font-medium">
-                  {item.desc}
-                </p>
-              </motion.div>
-            ))}
           </motion.div>
         </div>
       </div>

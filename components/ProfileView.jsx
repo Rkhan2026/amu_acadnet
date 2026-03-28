@@ -33,20 +33,26 @@ const ProfileView = ({ user, onEdit }) => {
         </div>
 
         <div className="flex flex-col md:flex-row gap-8 items-start relative z-10">
-          <div className="relative w-32 h-32 lg:w-40 lg:h-40 rounded-3xl overflow-hidden border-4 border-white shadow-xl">
-            <Image
-              src={user.avatar}
-              alt={user.name}
-              fill
-              className="object-cover"
-            />
+          <div className="relative w-32 h-32 lg:w-40 lg:h-40 rounded-3xl overflow-hidden border-4 border-white shadow-xl bg-gray-100">
+            {user.avatar ? (
+              <Image
+                src={user.avatar}
+                alt={user.name || "User"}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                <User className="w-16 h-16" />
+              </div>
+            )}
           </div>
 
           <div className="flex-1 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h1 className="text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">
-                  {user.name}
+                  {user.name || "Academic Researcher"}
                 </h1>
               </div>
               <button
@@ -59,25 +65,53 @@ const ProfileView = ({ user, onEdit }) => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-              <div className="flex items-center gap-3 text-gray-600 font-medium">
+              <div className="flex items-center gap-3 text-gray-600 font-medium capitalize">
                 <div className="p-2 bg-gray-50 rounded-xl">
                   <Briefcase className="h-5 w-5 text-gray-400" />
                 </div>
-                {user.designation}
+                {user.designation || user.role || "Researcher"}
               </div>
               <div className="flex items-center gap-3 text-gray-600 font-medium">
                 <div className="p-2 bg-gray-50 rounded-xl">
                   <Building2 className="h-5 w-5 text-gray-400" />
                 </div>
-                {user.department}
+                {user.department || "General Academics"}
               </div>
               <div className="flex items-center gap-3 text-gray-600 font-medium">
                 <div className="p-2 bg-gray-50 rounded-xl">
                   <GraduationCap className="h-5 w-5 text-gray-400" />
                 </div>
-                ID: {user.universityId}
+                ID: {user.universityID || user.universityId || "N/A"}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* User Stats Bar */}
+        <div className="mt-10 pt-8 border-t border-gray-100 grid grid-cols-3 gap-4">
+          <div className="text-center group-hover:bg-gray-50 p-4 rounded-3xl transition-all">
+            <p className="text-2xl lg:text-3xl font-black text-amu-green">
+              {user.stats?.projects || 0}
+            </p>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+              Projects
+            </p>
+          </div>
+          <div className="text-center group-hover:bg-gray-50 p-4 rounded-3xl transition-all border-x border-gray-100">
+            <p className="text-2xl lg:text-3xl font-black text-amu-gold">
+              {user.stats?.citations || 0}
+            </p>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+              Citations
+            </p>
+          </div>
+          <div className="text-center group-hover:bg-gray-50 p-4 rounded-3xl transition-all">
+            <p className="text-2xl lg:text-3xl font-black text-blue-500">
+              {user.stats?.collaborators || 0}
+            </p>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+              Collaborators
+            </p>
           </div>
         </div>
       </div>
@@ -93,8 +127,10 @@ const ProfileView = ({ user, onEdit }) => {
               </div>
               Biography
             </h3>
-            <p className="text-gray-600 leading-relaxed text-lg">
-              {user.biography}
+            <p className="text-gray-600 leading-relaxed text-lg whitespace-pre-wrap">
+              {user.biography ||
+                user.academicProfile?.biography ||
+                "No biography provided yet. This researcher is dedicated to their field of study at Aligarh Muslim University."}
             </p>
           </div>
 
@@ -106,9 +142,13 @@ const ProfileView = ({ user, onEdit }) => {
               Research Interests
             </h3>
             <div className="flex flex-wrap gap-2">
-              {user.researchInterests
+              {(
+                user.researchInterests ||
+                user.academicProfile?.researchInterests ||
+                ""
+              )
                 .split(",")
-                .slice(0, 1)
+                .filter((i) => i.trim() !== "")
                 .map((interest, idx) => (
                   <span
                     key={idx}
@@ -117,6 +157,14 @@ const ProfileView = ({ user, onEdit }) => {
                     {interest.trim()}
                   </span>
                 ))}
+              {!(
+                user.researchInterests ||
+                user.academicProfile?.researchInterests
+              ) && (
+                <span className="text-gray-400 text-sm italic">
+                  No specific interests listed.
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -137,7 +185,10 @@ const ProfileView = ({ user, onEdit }) => {
                     Email Address
                   </p>
                   <p className="font-bold text-gray-900">
-                    {user.handle.replace("@", "")}@amu.ac.in
+                    {user.email ||
+                      (user.handle
+                        ? `${user.handle.replace("@", "")}@gmail.com`
+                        : "N/A")}
                   </p>
                 </div>
               </div>

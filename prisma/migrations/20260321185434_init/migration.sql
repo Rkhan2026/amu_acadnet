@@ -29,7 +29,6 @@ CREATE TABLE "User" (
     "role" TEXT NOT NULL,
     "department" TEXT NOT NULL,
     "accountStatus" "AccountStatus" NOT NULL DEFAULT 'PENDING',
-    "adminID" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("universityID")
 );
@@ -105,9 +104,6 @@ CREATE UNIQUE INDEX "Follows_followerID_followingID_key" ON "Follows"("followerI
 
 -- CreateIndex
 CREATE INDEX "_UserWorksOnProject_B_index" ON "_UserWorksOnProject"("B");
-
--- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_adminID_fkey" FOREIGN KEY ("adminID") REFERENCES "Admin"("adminID") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "AcademicProfile" ADD CONSTRAINT "AcademicProfile_universityID_fkey" FOREIGN KEY ("universityID") REFERENCES "User"("universityID") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -12,58 +12,155 @@ import {
   X,
   Plus,
   Trash2,
+  Clock,
+  CheckCircle2,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
-import {
-  RESEARCH_PUBLICATIONS,
-  FOLLOWING_FEED,
-  CURRENT_USER,
-} from "@/lib/dummyData";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const ProjectDetailPage = () => {
   const router = useRouter();
   const params = useParams();
-  const projectId = parseInt(params.id);
+  const projectId = params.id;
 
-  // Combine projects from both sources to find the right one
-  const allProjects = [...RESEARCH_PUBLICATIONS, ...FOLLOWING_FEED];
-  const initialProject = allProjects.find((p) => p.id === projectId);
-
-  const [project, setProject] = useState(initialProject);
+  const [project, setProject] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({
-    title: initialProject?.title || "",
-    domain: initialProject?.domain || "",
-    department: initialProject?.department || "",
-    description: initialProject?.description || "",
-    projectStatus: initialProject?.projectStatus || "Active",
-    team: initialProject?.team ? [...initialProject.team] : [],
-    externalLinks: initialProject?.externalLinks
-      ? [...initialProject.externalLinks]
-      : [],
-  });
+  const [editForm, setEditForm] = useState(null);
+  const [requested, setRequested] = useState(false);
+  const [requestLoading, setRequestLoading] = useState(false);
 
-  const isOwner = project?.leadResearcher === CURRENT_USER.name;
+  React.useEffect(() => {
+    Promise.all([
+      fetch("/api/auth/me").then((r) => r.json()),
+      fetch(`/api/projects/${projectId}`).then((r) => r.json()),
+      fetch("/api/network").then((r) => r.json()),
+    ])
+      .then(([authRes, projRes, netRes]) => {
+        if (!authRes.error) setCurrentUser(authRes.user);
+        if (!projRes.error) {
+          const mapped = {
+            id: projRes.projectID,
+            title: projRes.title,
+            domain: projRes.researchDomain,
+            department: projRes.creator?.department || "University",
+            description: projRes.description,
+            projectStatus:
+              projRes.projectStatus === "ACTIVE"
+                ? "Active"
+                : projRes.projectStatus === "ON_HOLD"
+                  ? "On Hold"
+                  : projRes.projectStatus === "PROPOSED"
+                    ? "Proposed"
+                    : projRes.projectStatus === "ARCHIVED"
+                      ? "Archived"
+                      : "Completed",
+            leadResearcher: projRes.creator?.name || "Unknown",
+            creatorID: projRes.universityID,
+            time: new Date(projRes.createdAt).toLocaleDateString(),
+            team:
+              projRes.collaborations?.map((c) => ({
+                name: c.sender?.name || "Member",
+                role: c.sender?.role || "Researcher",
+                avatar: "/default-avatar.svg",
+              })) || [],
+            externalLinks: projRes.externalLinks?.map((url) => ({ url })) || [],
+          };
+          setProject(mapped);
+          setEditForm(mapped);
+        }
+        if (!netRes.error) {
+          const sent = netRes.sentCollaborations?.find(
+            (c) => c.projectID === projectId,
+          );
+          const received = netRes.receivedCollaborations?.find(
+            (c) => c.projectID === projectId,
+          );
+          const collab = sent || received;
+          if (collab) {
+            setRequested(collab.requestStatus);
+          } else {
+            setRequested(null);
+          }
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [projectId]);
 
-  const handleSave = () => {
-    setProject((prev) => ({ ...prev, ...editForm }));
-    setIsEditing(false);
+  const isOwner =
+    currentUser &&
+    (project?.creatorID === currentUser.universityID ||
+      currentUser.role === "ADMIN");
+
+  const handleSave = async () => {
+    try {
+      const res = await fetch(`/api/projects/${projectId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm),
+      });
+      if (res.ok) {
+        setProject((prev) => ({ ...prev, ...editForm }));
+        setIsEditing(false);
+      } else {
+        console.error("Failed to save project.");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this research project?"))
+      return;
+    try {
+      const res = await fetch(`/api/projects/${projectId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        router.push("/projects");
+      } else {
+        alert("Failed to delete project");
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleCancel = () => {
-    setEditForm({
-      title: project?.title || "",
-      domain: project?.domain || "",
-      department: project?.department || "",
-      description: project?.description || "",
-      projectStatus: project?.projectStatus || "Active",
-      team: project?.team ? [...project.team] : [],
-      externalLinks: project?.externalLinks ? [...project.externalLinks] : [],
-    });
+    setEditForm({ ...project });
     setIsEditing(false);
   };
+
+  const handleSendRequest = async () => {
+    setRequestLoading(true);
+    try {
+      const res = await fetch("/api/network/collaboration", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectID: projectId,
+          receiverID: project.creatorID,
+        }),
+      });
+      if (res.ok) {
+        setRequested("PENDING");
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to send request");
+      }
+    } catch (_e) {
+      alert("Something went wrong");
+    } finally {
+      setRequestLoading(false);
+    }
+  };
+
+  if (loading)
+    return <LoadingSpinner fullPage message="Loading project data..." />;
 
   if (!project) {
     return (
@@ -132,15 +229,18 @@ const ProjectDetailPage = () => {
                   }
                   className="px-6 py-2.5 text-sm font-black uppercase tracking-widest rounded-2xl border-2 border-amu-green focus:outline-none focus:ring-4 focus:ring-amu-green/20 bg-white text-amu-green appearance-none cursor-pointer"
                 >
+                  <option value="Proposed">Proposed</option>
                   <option value="Active">Active</option>
-                  <option value="Ongoing">Ongoing</option>
-                  <option value="Finished">Finished</option>
+                  <option value="On Hold">On Hold</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Archived">Archived</option>
                 </select>
               ) : (
                 <span
                   className={`px-6 py-2.5 text-sm font-black uppercase tracking-widest rounded-2xl flex items-center gap-3 border shadow-sm ${
                     project.projectStatus === "Active" ||
-                    project.projectStatus === "Ongoing"
+                    project.projectStatus === "On Hold" ||
+                    project.projectStatus === "Proposed"
                       ? "bg-amu-green text-white border-amu-green"
                       : "bg-gray-50 text-gray-400 border-gray-100"
                   }`}
@@ -148,7 +248,8 @@ const ProjectDetailPage = () => {
                   <span
                     className={`w-2 h-2 rounded-full ${
                       project.projectStatus === "Active" ||
-                      project.projectStatus === "Ongoing"
+                      project.projectStatus === "On Hold" ||
+                      project.projectStatus === "Proposed"
                         ? "bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] animate-pulse"
                         : "bg-gray-300"
                     }`}
@@ -270,10 +371,10 @@ const ProjectDetailPage = () => {
                   <div key={i} className="flex gap-2">
                     <input
                       type="text"
-                      value={link.url || link}
+                      value={link.url || (typeof link === "string" ? link : "")}
                       onChange={(e) => {
                         const newLinks = [...editForm.externalLinks];
-                        newLinks[i] = { ...link, url: e.target.value };
+                        newLinks[i] = { url: e.target.value };
                         setEditForm({ ...editForm, externalLinks: newLinks });
                       }}
                       placeholder="https://"
@@ -297,7 +398,7 @@ const ProjectDetailPage = () => {
                   {project.externalLinks?.map((link, i) => (
                     <a
                       key={i}
-                      href={link.url || "#"}
+                      href={typeof link === "string" ? link : link.url || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="bg-white p-6 rounded-2xl border border-gray-200 flex items-center justify-center group hover:border-amu-green transition-all shadow-sm overflow-hidden"
@@ -336,54 +437,39 @@ const ProjectDetailPage = () => {
             </div>
 
             {isOwner ? (
-              <div className="mt-10 pt-8 border-t border-gray-50 text-center">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
-                  Manage Project
+              <div className="mt-10 pt-8 border-t border-gray-50">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 text-center">
+                  Project Team
                 </p>
-                <div className="space-y-6 mb-6">
-                  {(isEditing ? editForm.team : project.team)?.length > 0 ? (
-                    (isEditing ? editForm.team : project.team).map(
-                      (member, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center justify-between group"
-                        >
-                          <div className="flex items-center gap-3">
-                            <Image
-                              src={member.avatar}
-                              alt={member.name}
-                              width={40}
-                              height={40}
-                              className="rounded-xl border border-gray-100"
-                            />
-                            <div className="text-left">
-                              <p className="font-bold text-gray-900 text-sm leading-tight">
-                                {member.name}
-                              </p>
-                              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-0.5">
-                                {member.role}
-                              </p>
-                            </div>
+                <div className="space-y-6 mb-10">
+                  {project.team?.length > 0 ? (
+                    project.team.map((member, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Image
+                            src={member.avatar}
+                            alt={member.name}
+                            width={40}
+                            height={40}
+                            className="rounded-xl border border-gray-100"
+                          />
+                          <div className="text-left">
+                            <p className="font-bold text-gray-900 text-sm leading-tight">
+                              {member.name}
+                            </p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-0.5">
+                              {member.role}
+                            </p>
                           </div>
-                          {isEditing && (
-                            <button
-                              onClick={() => {
-                                const newTeam = editForm.team.filter(
-                                  (_, idx) => idx !== i,
-                                );
-                                setEditForm({ ...editForm, team: newTeam });
-                              }}
-                              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          )}
                         </div>
-                      ),
-                    )
+                      </div>
+                    ))
                   ) : (
-                    <p className="text-sm text-gray-500 italic">
-                      No team members added yet.
+                    <p className="text-sm text-gray-500 italic text-center">
+                      No collaborators as of yet.
                     </p>
                   )}
                 </div>
@@ -404,12 +490,20 @@ const ProjectDetailPage = () => {
                       </button>
                     </>
                   ) : (
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="w-full py-4 bg-gray-900 text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-gray-900/20 hover:shadow-gray-900/40 hover:-translate-y-1 transition-all"
-                    >
-                      Edit Details
-                    </button>
+                    <>
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="w-full py-4 bg-gray-900 text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-gray-900/20 hover:shadow-gray-900/40 hover:-translate-y-1 transition-all"
+                      >
+                        Edit Details
+                      </button>
+                      <button
+                        onClick={handleDelete}
+                        className="w-full py-4 text-red-500 hover:text-red-700 font-bold text-xs uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Trash2 className="h-4 w-4" /> Delete Project
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -418,8 +512,34 @@ const ProjectDetailPage = () => {
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
                   Interested in Collaborating?
                 </p>
-                <button className="w-full py-4 bg-amu-green text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-amu-green/20 hover:shadow-amu-green/40 hover:-translate-y-1 transition-all">
-                  Send Request
+                <button
+                  onClick={handleSendRequest}
+                  disabled={requested || requestLoading}
+                  className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl transition-all flex items-center justify-center gap-2 ${
+                    requested === "PENDING" ||
+                    requested === "ACCEPTED" ||
+                    requestLoading
+                      ? requested === "ACCEPTED"
+                        ? "bg-amu-green/10 text-amu-green shadow-none cursor-default border border-amu-green/20"
+                        : "bg-emerald-100 text-emerald-700 shadow-emerald-green/10 cursor-not-allowed"
+                      : "bg-amu-green text-white shadow-amu-green/20 hover:shadow-amu-green/40 hover:-translate-y-1"
+                  }`}
+                >
+                  {requestLoading ? (
+                    <>
+                      <Clock className="w-4 h-4 animate-spin" /> Sending...
+                    </>
+                  ) : requested === "ACCEPTED" ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" /> Collaborating
+                    </>
+                  ) : requested === "PENDING" ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" /> Requested
+                    </>
+                  ) : (
+                    "Send Request"
+                  )}
                 </button>
               </div>
             )}

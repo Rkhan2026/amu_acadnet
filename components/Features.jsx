@@ -59,7 +59,7 @@ const Features = () => {
   return (
     <section
       id="features"
-      className="py-24 bg-gray-50/50 scroll-mt-24 relative overflow-hidden"
+      className="py-24 bg-gray-50/50 relative overflow-hidden scroll-mt-24"
     >
       {/* Subtle background element */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-200 bg-amu-green/5 blur-[120px] rounded-full -z-10" />
@@ -72,7 +72,7 @@ const Features = () => {
             viewport={{ once: true }}
             className="text-amu-green font-black tracking-[0.2em] uppercase text-sm mb-4"
           >
-            System Modules
+            Features
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}

@@ -4,10 +4,27 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, GraduationCap, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { getCurrentUser } from "@/lib/utils/auth";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    // Initial check from localStorage for speed
+    const localUser = getCurrentUser();
+    if (localUser) setUser(localUser);
+
+    // Verify with API to ensure session is still valid
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.user) setUser(d.user);
+        else setUser(null);
+      })
+      .catch(() => setUser(null));
+  }, []);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -43,13 +60,6 @@ const Navbar = () => {
 
           <div className="hidden md:flex items-center space-x-8 ml-auto">
             <Link
-              href="/#features"
-              onClick={(e) => handleScroll(e, "#features")}
-              className="text-gray-600 hover:text-amu-green transition-colors font-medium"
-            >
-              Features
-            </Link>
-            <Link
               href="/#about"
               onClick={(e) => handleScroll(e, "#about")}
               className="text-gray-600 hover:text-amu-green transition-colors font-medium"
@@ -57,17 +67,35 @@ const Navbar = () => {
               About
             </Link>
             <Link
-              href="/login"
-              className="px-5 py-2 text-gray-700 font-medium hover:text-amu-green transition-colors"
+              href="/#features"
+              onClick={(e) => handleScroll(e, "#features")}
+              className="text-gray-600 hover:text-amu-green transition-colors font-medium"
             >
-              Log in
+              Features
             </Link>
-            <Link
-              href="/register"
-              className="px-5 py-2 bg-amu-green hover:bg-[#004d26] text-white rounded-full font-medium transition-all shadow-md hover:shadow-lg flex items-center gap-1"
-            >
-              Get Started <ArrowRight className="h-4 w-4" />
-            </Link>
+            {user ? (
+              <Link
+                href={user.role === "ADMIN" ? "/admin/dashboard" : "/home"}
+                className="px-6 py-2 bg-amu-green hover:bg-[#004d26] text-white rounded-full font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+              >
+                Dashboard <ArrowRight className="h-4 w-4" />
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="px-5 py-2 text-gray-700 font-medium hover:text-amu-green transition-colors"
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-5 py-2 bg-amu-green hover:bg-[#004d26] text-white rounded-full font-medium transition-all shadow-md hover:shadow-lg flex items-center gap-1"
+                >
+                  Get Started <ArrowRight className="h-4 w-4" />
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -95,16 +123,6 @@ const Navbar = () => {
         >
           <div className="px-4 pt-2 pb-6 space-y-2">
             <Link
-              href="/#features"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-amu-green hover:bg-amu-green/10"
-              onClick={(e) => {
-                toggleMenu();
-                handleScroll(e, "#features");
-              }}
-            >
-              Features
-            </Link>
-            <Link
               href="/#about"
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-amu-green hover:bg-amu-green/10"
               onClick={(e) => {
@@ -115,19 +133,41 @@ const Navbar = () => {
               About
             </Link>
             <Link
-              href="/login"
+              href="/#features"
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-amu-green hover:bg-amu-green/10"
-              onClick={toggleMenu}
+              onClick={(e) => {
+                toggleMenu();
+                handleScroll(e, "#features");
+              }}
             >
-              Log in
+              Features
             </Link>
-            <Link
-              href="/register"
-              className="block w-full text-center mt-4 px-5 py-3 bg-amu-green hover:bg-[#004d26] text-white rounded-lg font-medium transition-all shadow-md"
-              onClick={toggleMenu}
-            >
-              Get Started
-            </Link>
+            {user ? (
+              <Link
+                href={user.role === "ADMIN" ? "/admin/dashboard" : "/home"}
+                className="block w-full text-center mt-4 px-5 py-3 bg-amu-green hover:bg-[#004d26] text-white rounded-lg font-bold transition-all shadow-md"
+                onClick={toggleMenu}
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-amu-green hover:bg-amu-green/10"
+                  onClick={toggleMenu}
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/register"
+                  className="block w-full text-center mt-4 px-5 py-3 bg-amu-green hover:bg-[#004d26] text-white rounded-lg font-medium transition-all shadow-md"
+                  onClick={toggleMenu}
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
         </motion.div>
       )}

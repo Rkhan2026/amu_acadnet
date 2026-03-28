@@ -1,0 +1,26 @@
+
+> amu_acadnet@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 6.6s
+  Running TypeScript ...
+  Collecting page data using 15 workers ...
+Error [PrismaClientConstructorValidationError]: Using engine type "client" requires either "adapter" or "accelerateUrl" to be provided to PrismaClient constructor.
+Read more at https://pris.ly/d/client-constructor
+    at module evaluation (E:\1 - CAMS-4D01 - Dissertation\amu_acadnet\.next\server\chunks\[root-of-the-server]__da7fe0af._.js:1:1160)
+    at instantiateModule (E:\1 - CAMS-4D01 - Dissertation\amu_acadnet\.next\server\chunks\[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (E:\1 - CAMS-4D01 - Dissertation\amu_acadnet\.next\server\chunks\[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (E:\1 - CAMS-4D01 - Dissertation\amu_acadnet\.next\server\chunks\[turbopack]_runtime.js:228:20)
+    at module evaluation (E:\1 - CAMS-4D01 - Dissertation\amu_acadnet\.next\server\chunks\[root-of-the-server]__da7fe0af._.js:1:1495)
+    at instantiateModule (E:\1 - CAMS-4D01 - Dissertation\amu_acadnet\.next\server\chunks\[turbopack]_runtime.js:740:9)
+    at instantiateRuntimeModule (E:\1 - CAMS-4D01 - Dissertation\amu_acadnet\.next\server\chunks\[turbopack]_runtime.js:768:12)
+
+> Build error occurred
+Error: Failed to collect page data for /api/network/collaboration
+    at ignore-listed frames {
+  type: 'Error'
+}

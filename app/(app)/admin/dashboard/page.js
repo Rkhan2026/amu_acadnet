@@ -9,8 +9,8 @@ import {
   PieChart,
 } from "lucide-react";
 import Link from "next/link";
-import { ADMIN_STATS, ANALYTICS_DATA } from "@/lib/dummyData";
 import { motion } from "framer-motion";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const StatsCard = ({ title, value, icon: Icon, trend, color, href }) => {
   const CardContent = (
@@ -45,6 +45,32 @@ const StatsCard = ({ title, value, icon: Icon, trend, color, href }) => {
 };
 
 export default function AdminDashboard() {
+  const [stats, setStats] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    fetch("/api/admin/stats")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && !data.error) {
+          setStats(data);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading)
+    return (
+      <LoadingSpinner fullPage message="Loading institutional analytics..." />
+    );
+  if (!stats)
+    return (
+      <div className="py-20 text-center text-red-500 font-black uppercase tracking-widest text-[10px]">
+        Failed to load analytics.
+      </div>
+    );
+
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
@@ -59,29 +85,31 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
           title="Total Users"
-          value={ADMIN_STATS.totalUsers}
+          value={stats.totalUsers}
           icon={Users}
           color="bg-blue-50 text-blue-500"
+          href="/admin/verifications?mode=APPROVED"
         />
         <StatsCard
           title="Pending User Verifications"
-          value={ADMIN_STATS.pendingVerifications}
+          value={stats.pendingVerifications}
           icon={ShieldCheck}
           color="bg-amu-gold/10 text-amu-gold"
-          href="/admin/verifications"
+          href="/admin/verifications?mode=PENDING"
         />
         <StatsCard
           title="Total Research Projects"
-          value={ADMIN_STATS.totalPublications}
+          value={stats.totalPublications}
           icon={BookOpen}
           color="bg-amu-green/10 text-amu-green"
+          href="/admin/moderation?mode=APPROVED"
         />
         <StatsCard
           title="Pending Research Project Moderations"
-          value={ADMIN_STATS.pendingModerations}
+          value={stats.pendingModerations}
           icon={FileCheck}
           color="bg-purple-50 text-purple-500"
-          href="/admin/moderation"
+          href="/admin/moderation?mode=PENDING"
         />
       </div>
 
@@ -98,15 +126,15 @@ export default function AdminDashboard() {
               Institutional Composition
             </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {ANALYTICS_DATA.profileDistribution.map((item, idx) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {stats.profileDistribution.map((item, idx) => (
               <div
                 key={idx}
                 className="p-6 bg-gray-50 rounded-3xl border border-gray-100 hover:border-amu-green/20 transition-all"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className={`w-3 h-3 rounded-full ${item.color}`} />
-                  <span className="text-xs font-black text-gray-400 uppercase tracking-tighter">
+                  <span className="text-sm font-semibold text-gray-600 uppercase tracking-widest">
                     {item.label}
                   </span>
                 </div>
@@ -116,7 +144,12 @@ export default function AdminDashboard() {
                 <div className="mt-2 w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: `${(item.value / 1240) * 100}%` }}
+                    animate={{
+                      width:
+                        stats.totalUsers > 0
+                          ? `${(item.value / stats.totalUsers) * 100}%`
+                          : "0%",
+                    }}
                     transition={{ duration: 1, delay: idx * 0.1 }}
                     className={`h-full ${item.color}`}
                   />

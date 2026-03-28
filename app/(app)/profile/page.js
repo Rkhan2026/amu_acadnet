@@ -1,22 +1,73 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ProfileView from "@/components/ProfileView";
 import ProfileEditForm from "@/components/ProfileEditForm";
-import { CURRENT_USER } from "@/lib/dummyData";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
-  const [userData, setUserData] = useState(CURRENT_USER);
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleSave = (updatedData) => {
-    setUserData((prev) => ({
-      ...prev,
-      ...updatedData,
-      lastUpdated: new Date().toISOString(),
-    }));
-    setIsEditing(false);
-    // In a real app, you would make an API call here to persist the data
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((authData) => {
+        if (!authData.error && authData.user) {
+          return fetch(`/api/profile/${authData.user.universityID}`).then(
+            (res) => res.json(),
+          );
+        }
+        throw new Error("No session");
+      })
+      .then((profileData) => {
+        if (!profileData.error) {
+          setUserData({
+            ...profileData,
+            avatar: "/default-avatar.svg", // Placeholder
+            stats: {
+              projects: profileData.createdProjects?.length || 0,
+              citations: 0,
+              collaborators:
+                (profileData.sentCollaborations?.length || 0) +
+                (profileData.receivedCollaborations?.length || 0),
+            },
+          });
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleSave = async (updatedData) => {
+    try {
+      const res = await fetch(`/api/profile/${userData.universityID}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: updatedData.name,
+          department: updatedData.department,
+          biography: updatedData.biography,
+          researchInterests: updatedData.researchInterests,
+        }),
+      });
+      if (res.ok) {
+        setUserData((prev) => ({ ...prev, ...updatedData }));
+        setIsEditing(false);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
+
+  if (loading)
+    return <LoadingSpinner fullPage message="Loading researcher profile..." />;
+  if (!userData)
+    return (
+      <div className="py-20 text-center text-red-400 font-medium font-black uppercase tracking-widest text-xs">
+        Profile failed to load.
+      </div>
+    );
 
   return (
     <div className="py-8 px-4 md:px-8 max-w-5xl mx-auto">

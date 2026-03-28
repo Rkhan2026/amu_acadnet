@@ -49,7 +49,7 @@ export default function RegisterForm() {
       description: "For teaching staff & professors",
     },
     {
-      id: "scholar",
+      id: "research scholar",
       label: "Research Scholar",
       icon: User,
       description: "For PhD & research fellows",
@@ -139,15 +139,46 @@ export default function RegisterForm() {
     setStep((prev) => prev - 1);
   };
 
+  const [successMessage, setSuccessMessage] = useState("");
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateStep(step)) {
       setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("Form Submitted:", formData);
-      setIsLoading(false);
-      alert("Registration Successful! (Mock)");
+      setErrors({});
+      try {
+        const response = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            universityID: formData.universityID,
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+            role: formData.role.toUpperCase(),
+            department: formData.department,
+            biography: formData.biography,
+            domain: formData.domain,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setSuccessMessage(data.message || "Registration Successful!");
+          setTimeout(() => {
+            // Optional: window.location.href = "/login";
+          }, 3000);
+        } else {
+          setErrors({ submit: data.error || "Registration failed" });
+        }
+      } catch (_err) {
+        setErrors({
+          submit: "An unexpected error occurred. Please try again.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -182,6 +213,23 @@ export default function RegisterForm() {
         <p className="text-center text-gray-500 mt-2">
           Create your academic profile
         </p>
+
+        {successMessage && (
+          <div className="mt-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl text-center font-medium animate-in fade-in zoom-in">
+            {successMessage}
+            <div className="text-sm mt-2">
+              <Link href="/login" className="underline font-bold">
+                Proceed to Login
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {errors.submit && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-center font-medium animate-in shake">
+            {errors.submit}
+          </div>
+        )}
 
         {/* Progress Bar */}
         <div className="mt-6 flex justify-center gap-2">
@@ -440,7 +488,7 @@ export default function RegisterForm() {
             >
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Domain
+                  Research Interests
                 </label>
                 <input
                   type="text"
