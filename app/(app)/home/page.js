@@ -67,7 +67,7 @@ export default function HomePage() {
             AI Collaboration
           </h3>
 
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+          <p className="text-sm font-bold text-gray-500 uppercase tracking-[0.2em] mb-4">
             Recommended for you
           </p>
 
@@ -92,13 +92,13 @@ export default function HomePage() {
                       />
                     </div>
                     <div>
-                      <h4 className="font-black text-sm text-gray-900 leading-tight">
+                      <h4 className="font-black text-base text-gray-900 leading-tight">
                         {user.name}
                       </h4>
-                      <p className="text-[10px] font-bold text-amu-green uppercase tracking-tighter">
-                        {user.role} • {user.score}% Match
+                      <p className="text-sm font-black text-amu-green uppercase tracking-wide mt-1">
+                        {user.role} - {user.score}% Match
                       </p>
-                      <p className="text-[10px] text-gray-400 line-clamp-1 mt-0.5">
+                      <p className="text-xs text-gray-500 line-clamp-1 mt-1">
                         {user.researchInterests}
                       </p>
                     </div>

@@ -72,7 +72,7 @@ const FeedItem = ({ post, currentUser }) => {
           </h3>
           {post.matchScore > 0 && (
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-[10px] font-black text-amu-gold bg-amu-gold/10 px-2 py-0.5 rounded-md border border-amu-gold/20 uppercase tracking-tighter">
+              <span className="text-sm font-black text-amber-900 bg-amber-100 px-4 py-1.5 rounded-full border border-amber-300 uppercase tracking-wide shadow-sm">
                 {post.matchScore}% Match
               </span>
             </div>

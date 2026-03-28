@@ -134,7 +134,7 @@ export default function AdminDashboard() {
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className={`w-3 h-3 rounded-full ${item.color}`} />
-                  <span className="text-xs font-black text-gray-400 uppercase tracking-tighter">
+                  <span className="text-sm font-semibold text-gray-600 uppercase tracking-widest">
                     {item.label}
                   </span>
                 </div>

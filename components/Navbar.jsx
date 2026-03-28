@@ -60,18 +60,18 @@ const Navbar = () => {
 
           <div className="hidden md:flex items-center space-x-8 ml-auto">
             <Link
-              href="/#features"
-              onClick={(e) => handleScroll(e, "#features")}
-              className="text-gray-600 hover:text-amu-green transition-colors font-medium"
-            >
-              Features
-            </Link>
-            <Link
               href="/#about"
               onClick={(e) => handleScroll(e, "#about")}
               className="text-gray-600 hover:text-amu-green transition-colors font-medium"
             >
               About
+            </Link>
+            <Link
+              href="/#features"
+              onClick={(e) => handleScroll(e, "#features")}
+              className="text-gray-600 hover:text-amu-green transition-colors font-medium"
+            >
+              Features
             </Link>
             {user ? (
               <Link
@@ -123,16 +123,6 @@ const Navbar = () => {
         >
           <div className="px-4 pt-2 pb-6 space-y-2">
             <Link
-              href="/#features"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-amu-green hover:bg-amu-green/10"
-              onClick={(e) => {
-                toggleMenu();
-                handleScroll(e, "#features");
-              }}
-            >
-              Features
-            </Link>
-            <Link
               href="/#about"
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-amu-green hover:bg-amu-green/10"
               onClick={(e) => {
@@ -141,6 +131,16 @@ const Navbar = () => {
               }}
             >
               About
+            </Link>
+            <Link
+              href="/#features"
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-amu-green hover:bg-amu-green/10"
+              onClick={(e) => {
+                toggleMenu();
+                handleScroll(e, "#features");
+              }}
+            >
+              Features
             </Link>
             {user ? (
               <Link
