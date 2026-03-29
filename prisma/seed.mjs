@@ -40,7 +40,7 @@ async function main() {
     data: {
       universityID: "AU-2024-001",
       name: "Aarav Sharma",
-      email: "aarav.sharma@gmail.com",
+      email: "aarav.sharma@sharklasers.com",
       password: userPassword,
       role: "STUDENT",
       department: "Computer Science",
@@ -96,8 +96,20 @@ async function main() {
     },
   });
 
+  const mohd = await prisma.user.create({
+    data: {
+      universityID: "AU-2024-006",
+      name: "Mohammad",
+      email: "mohd1234@sharklasers.com",
+      password: userPassword,
+      role: "STUDENT",
+      department: "Computer Science",
+      accountStatus: "APPROVED",
+    },
+  });
+
   console.log(
-    `✅ Users created: ${[alice, bob, carol, dave, eve].map((u) => u.name).join(", ")}`,
+    `✅ Users created: ${[alice, bob, carol, dave, eve, mohd].map((u) => u.name).join(", ")}`,
   );
 
   // ─── Academic Profiles ───────────────────────────────────────────────────
@@ -278,7 +290,9 @@ async function main() {
   console.log("\n🎉 Seed complete! Summary:");
   console.log("   Admin  → rajesh.kumar@gmail.com      / admin123");
   console.log("   Users  → *@gmail.com              / password123");
-  console.log("   APPROVED: Aarav, Bhavya, Chitra, Esha  |  PENDING: Deepak");
+  console.log(
+    "   APPROVED: Aarav, Bhavya, Chitra, Esha, Mohammad  |  PENDING: Deepak",
+  );
   console.log("   Projects: 4  |  Collaborations: 3  |  Follows: 6");
 }
 

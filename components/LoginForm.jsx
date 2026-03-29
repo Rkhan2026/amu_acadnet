@@ -74,7 +74,7 @@ export default function LoginForm() {
           <p className="text-sm font-bold text-gray-700">
             {formData.role === "admin"
               ? "rajesh.kumar@gmail.com / admin123"
-              : "aarav.sharma@gmail.com / password123"}
+              : "aarav.sharma@sharklasers.com / password123"}
           </p>
         </div>
       </div>
@@ -174,7 +174,7 @@ export default function LoginForm() {
 
           <div className="text-sm">
             <Link
-              href="/forgot-password"
+              href="/forget_password"
               className="font-medium text-amu-green hover:text-green-800 hover:underline transition-colors"
             >
               Forgot password?
