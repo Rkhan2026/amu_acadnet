@@ -1,0 +1,235 @@
+{
+  "_prisma_migrations": [
+    {
+      "id": "0b4f9755-9339-408b-b068-83d1f728cd66",
+      "checksum": "146322e002573cce6ba3a4af3898629ed49bbf1a01bb113ee29d6d28ca86418b",
+      "finished_at": "2026-03-21T18:54:46.757Z",
+      "migration_name": "20260321185434_init",
+      "logs": null,
+      "rolled_back_at": null,
+      "started_at": "2026-03-21T18:54:36.802Z",
+      "applied_steps_count": 1
+    }
+  ],
+  "Admin": [
+    {
+      "adminID": "admin-001",
+      "name": "Dr. Rajesh Kumar",
+      "email": "rajesh.kumar@gmail.com",
+      "password": "$2b$10$/t.3yP6lHNdo6.eokJQ/zuAEVwe1H/UorN7SC.sgFSZbcVwchUIQS"
+    }
+  ],
+  "User": [
+    {
+      "universityID": "AU-2024-001",
+      "name": "Aarav Sharma",
+      "email": "aarav.sharma@sharklasers.com",
+      "password": "$2b$10$UCVqb8qOT1KGsuKGfORjueeZ79GmvAWp1v2NXKaDCOzl25IzC8bx.",
+      "role": "STUDENT",
+      "department": "Computer Science",
+      "accountStatus": "APPROVED"
+    },
+    {
+      "universityID": "AU-2024-002",
+      "name": "Bhavya Gupta",
+      "email": "bhavya.gupta@gmail.com",
+      "password": "$2b$10$UCVqb8qOT1KGsuKGfORjueeZ79GmvAWp1v2NXKaDCOzl25IzC8bx.",
+      "role": "FACULTY",
+      "department": "Electrical Engineering",
+      "accountStatus": "APPROVED"
+    },
+    {
+      "universityID": "AU-2024-003",
+      "name": "Chitra Iyer",
+      "email": "chitra.iyer@gmail.com",
+      "password": "$2b$10$UCVqb8qOT1KGsuKGfORjueeZ79GmvAWp1v2NXKaDCOzl25IzC8bx.",
+      "role": "STUDENT",
+      "department": "Biotechnology",
+      "accountStatus": "APPROVED"
+    },
+    {
+      "universityID": "AU-2024-004",
+      "name": "Deepak Verma",
+      "email": "deepak.verma@gmail.com",
+      "password": "$2b$10$UCVqb8qOT1KGsuKGfORjueeZ79GmvAWp1v2NXKaDCOzl25IzC8bx.",
+      "role": "STUDENT",
+      "department": "Physics",
+      "accountStatus": "PENDING"
+    },
+    {
+      "universityID": "AU-2024-005",
+      "name": "Esha Reddy",
+      "email": "esha.reddy@gmail.com",
+      "password": "$2b$10$UCVqb8qOT1KGsuKGfORjueeZ79GmvAWp1v2NXKaDCOzl25IzC8bx.",
+      "role": "FACULTY",
+      "department": "Mathematics",
+      "accountStatus": "APPROVED"
+    },
+    {
+      "universityID": "AU-2024-006",
+      "name": "Mohammad",
+      "email": "mohd1234@sharklasers.com",
+      "password": "$2b$12$ia1AEhC8bwwi7Yhgpz6NfePfpdNZi1nkiaEkWnlDtBfisLwlGKWbW",
+      "role": "STUDENT",
+      "department": "Computer Science",
+      "accountStatus": "APPROVED"
+    }
+  ],
+  "ResearchProject": [
+    {
+      "projectID": "68d5ea9d-90d7-4f4e-aa11-a45a5f73c158",
+      "title": "AI-Powered Diagnostic Tool for Early Disease Detection",
+      "description": "Developing a machine-learning pipeline that analyses medical imaging data to detect diseases at an early stage with high accuracy.",
+      "researchDomain": "Artificial Intelligence & Healthcare",
+      "moderationStatus": "APPROVED",
+      "projectStatus": "ACTIVE",
+      "createdAt": "2026-03-29T07:55:37.223Z",
+      "externalLinks": [
+        "https://github.com/amu/ai-diagnostics",
+        "https://arxiv.org/example"
+      ],
+      "universityID": "AU-2024-001"
+    },
+    {
+      "projectID": "1b34c9b7-bfe5-4b69-b219-86645caa43b6",
+      "title": "Smart Campus Energy Management via IoT",
+      "description": "Designing an IoT-based framework to monitor, analyse, and optimise energy consumption across AMU campus buildings.",
+      "researchDomain": "Internet of Things & Sustainability",
+      "moderationStatus": "APPROVED",
+      "projectStatus": "ON_HOLD",
+      "createdAt": "2026-03-29T07:55:38.947Z",
+      "externalLinks": ["https://doi.org/example-iot"],
+      "universityID": "AU-2024-002"
+    },
+    {
+      "projectID": "f0cffda4-d254-4a77-9ca6-5fdc608fbed7",
+      "title": "CRISPR-Based Therapeutics for Genetic Disorders",
+      "description": "Investigating gene-editing strategies using CRISPR-Cas9 frameworks to target inherited genetic disorders.",
+      "researchDomain": "Biotechnology & Genomics",
+      "moderationStatus": "PENDING",
+      "projectStatus": "COMPLETED",
+      "createdAt": "2026-03-29T07:55:41.034Z",
+      "externalLinks": [],
+      "universityID": "AU-2024-003"
+    },
+    {
+      "projectID": "ba940c63-8d4c-4bbe-a2e7-52bd238ce106",
+      "title": "Post-Quantum Cryptographic Protocols",
+      "description": "Researching lattice-based cryptographic schemes resilient to quantum computing attacks.",
+      "researchDomain": "Cryptography & Quantum Computing",
+      "moderationStatus": "APPROVED",
+      "projectStatus": "ACTIVE",
+      "createdAt": "2026-03-29T07:55:41.568Z",
+      "externalLinks": ["https://eprint.iacr.org/example"],
+      "universityID": "AU-2024-005"
+    }
+  ],
+  "AcademicProfile": [
+    {
+      "profileID": "4660f0ca-8754-4f36-9ddf-1bdd4a968697",
+      "universityID": "AU-2024-001",
+      "researchInterests": "Machine Learning, Computer Vision, NLP",
+      "biography": "Final year CS student passionate about AI applications in healthcare and education.",
+      "lastUpdated": "2026-03-29T07:55:36.328Z"
+    },
+    {
+      "profileID": "ea2ffb4e-dbeb-445f-8b63-60d3cd972718",
+      "universityID": "AU-2024-002",
+      "researchInterests": "IoT, Embedded Systems, Signal Processing",
+      "biography": "Faculty member with 10+ years of industry experience in smart grid technology.",
+      "lastUpdated": "2026-03-29T07:55:36.328Z"
+    },
+    {
+      "profileID": "a82e6731-2334-4f6a-8124-be1dccd98cac",
+      "universityID": "AU-2024-003",
+      "researchInterests": "Genomics, Bioinformatics, CRISPR",
+      "biography": "Postgraduate researcher exploring gene-editing techniques for disease prevention.",
+      "lastUpdated": "2026-03-29T07:55:36.328Z"
+    },
+    {
+      "profileID": "d64bf033-acfe-477d-8339-73189683580e",
+      "universityID": "AU-2024-005",
+      "researchInterests": "Graph Theory, Cryptography, Quantum Algorithms",
+      "biography": "Associate Professor specializing in applied mathematics and theoretical computer science.",
+      "lastUpdated": "2026-03-29T07:55:36.328Z"
+    }
+  ],
+  "Collaboration": [
+    {
+      "requestID": "29a95422-fbf7-47bb-9279-fb5a950b13c9",
+      "projectID": "68d5ea9d-90d7-4f4e-aa11-a45a5f73c158",
+      "senderID": "AU-2024-003",
+      "receiverID": "AU-2024-001",
+      "requestStatus": "PENDING",
+      "createdAt": "2026-03-29T07:55:41.857Z"
+    },
+    {
+      "requestID": "cb7d8813-5dad-489c-b897-7bea0c8a5de1",
+      "projectID": "ba940c63-8d4c-4bbe-a2e7-52bd238ce106",
+      "senderID": "AU-2024-001",
+      "receiverID": "AU-2024-005",
+      "requestStatus": "ACCEPTED",
+      "createdAt": "2026-03-29T07:55:42.145Z"
+    },
+    {
+      "requestID": "96149694-b55c-40ea-8522-fae58860eb29",
+      "projectID": "f0cffda4-d254-4a77-9ca6-5fdc608fbed7",
+      "senderID": "AU-2024-002",
+      "receiverID": "AU-2024-003",
+      "requestStatus": "REJECTED",
+      "createdAt": "2026-03-29T07:55:42.837Z"
+    }
+  ],
+  "Follows": [
+    {
+      "followID": "e17413bc-adea-4bc4-b3aa-76931ee2885b",
+      "followerID": "AU-2024-001",
+      "followingID": "AU-2024-002",
+      "requestStatus": "ACCEPTED"
+    },
+    {
+      "followID": "621bc4eb-0cc1-4d1a-a4b2-1f8683d0446c",
+      "followerID": "AU-2024-001",
+      "followingID": "AU-2024-003",
+      "requestStatus": "ACCEPTED"
+    },
+    {
+      "followID": "5a0fe698-5f2c-4481-9311-d95ebc901e0a",
+      "followerID": "AU-2024-001",
+      "followingID": "AU-2024-005",
+      "requestStatus": "PENDING"
+    },
+    {
+      "followID": "9183b3ee-aeaf-464b-a128-09f5ec500b5c",
+      "followerID": "AU-2024-002",
+      "followingID": "AU-2024-005",
+      "requestStatus": "ACCEPTED"
+    },
+    {
+      "followID": "6ffeb250-82c4-4877-a319-5f7c747d1d5f",
+      "followerID": "AU-2024-003",
+      "followingID": "AU-2024-001",
+      "requestStatus": "ACCEPTED"
+    },
+    {
+      "followID": "60852ce6-04dd-4c9f-a345-b5980280991c",
+      "followerID": "AU-2024-005",
+      "followingID": "AU-2024-002",
+      "requestStatus": "ACCEPTED"
+    }
+  ],
+  "_UserWorksOnProject": [
+    {
+      "A": "68d5ea9d-90d7-4f4e-aa11-a45a5f73c158",
+      "B": "AU-2024-002"
+    },
+    {
+      "A": "1b34c9b7-bfe5-4b69-b219-86645caa43b6",
+      "B": "AU-2024-001"
+    },
+    {
+      "A": "1b34c9b7-bfe5-4b69-b219-86645caa43b6",
+      "B": "AU-2024-005"
+    }
+  ]
+}
