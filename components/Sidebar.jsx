@@ -13,6 +13,7 @@ import {
   FileCheck,
   GraduationCap,
   PlusCircle,
+  Handshake,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen, onToggle }) => {
@@ -31,6 +32,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
     { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Verifications", href: "/admin/verifications", icon: ShieldCheck },
     { label: "Moderation", href: "/admin/moderation", icon: FileCheck },
+    { label: "Collaborations", href: "/admin/collaborations", icon: Handshake },
   ];
 
   const navItems = isAdminPath ? adminItems : userItems;

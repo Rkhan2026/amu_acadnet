@@ -7,6 +7,7 @@ import {
   BookOpen,
   TrendingUp,
   PieChart,
+  Handshake,
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -14,9 +15,9 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 
 const StatsCard = ({ title, value, icon: Icon, trend, color, href }) => {
   const CardContent = (
-    <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 flex items-start justify-between h-full hover:border-amu-green/30 transition-all cursor-pointer group">
-      <div>
-        <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1 group-hover:text-amu-green/60 transition-colors">
+    <div className="bg-white p-5 lg:p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 flex items-start justify-between gap-3 h-full hover:border-amu-green/30 transition-all cursor-pointer group overflow-hidden">
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] lg:text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 group-hover:text-amu-green/60 transition-colors leading-tight break-words">
           {title}
         </p>
         <h3 className="text-3xl font-black text-gray-900">{value}</h3>
@@ -28,9 +29,9 @@ const StatsCard = ({ title, value, icon: Icon, trend, color, href }) => {
         )}
       </div>
       <div
-        className={`p-4 rounded-2xl ${color} group-hover:scale-110 transition-transform`}
+        className={`p-3 lg:p-4 rounded-2xl ${color} group-hover:scale-110 transition-transform shrink-0`}
       >
-        <Icon className="h-6 w-6" />
+        <Icon className="h-5 w-5 lg:h-6 lg:w-6" />
       </div>
     </div>
   );
@@ -82,7 +83,7 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <StatsCard
           title="Total Users"
           value={stats.totalUsers}
@@ -110,6 +111,13 @@ export default function AdminDashboard() {
           icon={FileCheck}
           color="bg-purple-50 text-purple-500"
           href="/admin/moderation?mode=PENDING"
+        />
+        <StatsCard
+          title="Total Collaborations"
+          value={stats.totalCollaborations || 0}
+          icon={Handshake}
+          color="bg-orange-50 text-orange-500"
+          href="/admin/collaborations"
         />
       </div>
 

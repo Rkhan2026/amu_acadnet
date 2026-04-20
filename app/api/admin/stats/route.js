@@ -10,12 +10,19 @@ export async function GET() {
     }
 
     // Fetch all users to calculate distribution in-memory for better robustness
-    const [users, projects] = await Promise.all([
+    const [users, projects, totalCollaborations] = await Promise.all([
       prisma.user.findMany({
         select: { role: true, accountStatus: true },
       }),
       prisma.researchProject.findMany({
         select: { moderationStatus: true },
+      }),
+      prisma.researchProject.count({
+        where: {
+          teamMembers: {
+            some: {},
+          },
+        },
       }),
     ]);
 
@@ -38,6 +45,7 @@ export async function GET() {
       pendingVerifications,
       totalPublications,
       pendingModerations,
+      totalCollaborations,
       profileDistribution: [
         { label: "Students", value: students, color: "bg-amu-green" },
         { label: "Faculty", value: faculty, color: "bg-amu-gold" },
