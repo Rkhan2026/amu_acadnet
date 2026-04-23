@@ -1,6 +1,6 @@
 # AMU AcadNet
 
-**AMU AcadNet** is a full-stack academic networking and collaboration platform built for Aligarh Muslim University (AMU). It connects researchers, faculty, and students by enabling project discovery, collaboration requests, academic networking, and an AI-powered recommendation engine (powered by Google Gemini).
+**AMU AcadNet** is a Full-Stack academic networking and collaboration platform built for Aligarh Muslim University (AMU). It connects researchers, faculty, and students by enabling project discovery, collaboration requests, academic networking, and an AI-powered recommendation engine (powered by Google Gemini).
 
 ---
 
