@@ -496,7 +496,7 @@ async function main() {
 
   // ─── Collaborations ──────────────────────────────────────────────────────
   // Carol asks to join Alice's AI project
-  const collab1 = await prisma.collaboration.create({
+  await prisma.collaboration.create({
     data: {
       projectID: project1.projectID,
       senderID: carol.universityID,
@@ -506,7 +506,7 @@ async function main() {
   });
 
   // Alice asks to join Eve's crypto project
-  const collab2 = await prisma.collaboration.create({
+  await prisma.collaboration.create({
     data: {
       projectID: project4.projectID,
       senderID: alice.universityID,
@@ -514,20 +514,54 @@ async function main() {
       requestStatus: "ACCEPTED",
     },
   });
+  // Connect Alice to project4 team
+  await prisma.researchProject.update({
+    where: { projectID: project4.projectID },
+    data: { teamMembers: { connect: { universityID: alice.universityID } } },
+  });
 
   // Bob asks to join Carol's bio project
-  const collab3 = await prisma.collaboration.create({
+  await prisma.collaboration.create({
     data: {
       projectID: project3.projectID,
       senderID: bob.universityID,
       receiverID: carol.universityID,
-      requestStatus: "REJECTED",
+      requestStatus: "ACCEPTED", // Changed from REJECTED
     },
   });
+  // Connect Bob to project3 team
+  await prisma.researchProject.update({
+    where: { projectID: project3.projectID },
+    data: { teamMembers: { connect: { universityID: bob.universityID } } },
+  });
 
-  console.log(
-    `✅ Collaborations created: ${[collab1, collab2, collab3].length} records.`,
-  );
+  // Additional 5 collaborations
+  const extraCollabs = [
+    { p: project1, s: eve, r: alice, st: "ACCEPTED" },
+    { p: project4, s: bob, r: eve, st: "PENDING" },
+    { p: project2, s: carol, r: bob, st: "ACCEPTED" },
+    { p: project1, s: additionalUsers[3], r: alice, st: "ACCEPTED" },
+    { p: project4, s: additionalUsers[10], r: eve, st: "PENDING" },
+  ];
+
+  for (const c of extraCollabs) {
+    await prisma.collaboration.create({
+      data: {
+        projectID: c.p.projectID,
+        senderID: c.s.universityID,
+        receiverID: c.r.universityID,
+        requestStatus: c.st,
+      },
+    });
+    if (c.st === "ACCEPTED") {
+      await prisma.researchProject.update({
+        where: { projectID: c.p.projectID },
+        data: { teamMembers: { connect: { universityID: c.s.universityID } } },
+      });
+    }
+  }
+
+  console.log(`✅ Collaborations created: ${3 + extraCollabs.length} records.`);
 
   // ─── Follows ─────────────────────────────────────────────────────────────
   // Alice follows Bob, Carol, Eve
@@ -576,7 +610,7 @@ async function main() {
     "   APPROVED: Aarav, Bhavya, Chitra, Esha, Mohammad  |  PENDING: Deepak",
   );
   console.log(
-    `   Projects: ${4 + additionalProjects.length}  |  Collaborations: 3  |  Follows: 6`,
+    `   Projects: ${4 + additionalProjects.length + collaborationProjects.length}  |  Collaborations: ${3 + extraCollabs.length}  |  Follows: 6`,
   );
 }
 
