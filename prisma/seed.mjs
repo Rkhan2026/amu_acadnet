@@ -152,7 +152,9 @@ async function main() {
   }
 
   await prisma.user.createMany({ data: additionalUsers });
-  console.log(`✅ Generated 24 additional users (4 Students, 10 Faculty, 10 Research Scholars).`);
+  console.log(
+    `✅ Generated 24 additional users (4 Students, 10 Faculty, 10 Research Scholars).`,
+  );
 
   // ─── Academic Profiles ───────────────────────────────────────────────────
   await prisma.academicProfile.createMany({
