@@ -118,19 +118,14 @@ export async function DELETE(request) {
       return NextResponse.json({ error: "Request not found" }, { status: 404 });
     }
 
-    // Only allow the sender to cancel their own request
-    if (collabReq.senderID !== session.universityID) {
+    // Allow both sender and receiver to delete/leave the collaboration
+    if (
+      collabReq.senderID !== session.universityID &&
+      collabReq.receiverID !== session.universityID
+    ) {
       return NextResponse.json(
-        { error: "Only the sender can cancel this request" },
+        { error: "Not authorized to modify this collaboration" },
         { status: 403 },
-      );
-    }
-
-    // Optional: Only allow cancelling if it's still PENDING
-    if (collabReq.requestStatus !== "PENDING") {
-      return NextResponse.json(
-        { error: "Only pending requests can be cancelled" },
-        { status: 400 },
       );
     }
 
@@ -138,7 +133,10 @@ export async function DELETE(request) {
       where: { requestID },
     });
 
-    return NextResponse.json({ success: true, message: "Request cancelled" });
+    return NextResponse.json({
+      success: true,
+      message: "Collaboration removed",
+    });
   } catch (error) {
     console.error("Collaboration DELETE error", error);
     return NextResponse.json(

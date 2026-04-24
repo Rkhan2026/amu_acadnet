@@ -14,7 +14,9 @@ import {
   Trash2,
   Clock,
   CheckCircle2,
+  UserMinus,
 } from "lucide-react";
+
 import { motion } from "framer-motion";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
@@ -32,6 +34,7 @@ const ProjectDetailPage = () => {
   const [editForm, setEditForm] = useState(null);
   const [requested, setRequested] = useState(false);
   const [requestLoading, setRequestLoading] = useState(false);
+  const [collaborationID, setCollaborationID] = useState(null);
 
   React.useEffect(() => {
     Promise.all([
@@ -63,10 +66,12 @@ const ProjectDetailPage = () => {
             time: new Date(projRes.createdAt).toLocaleDateString(),
             team:
               projRes.collaborations?.map((c) => ({
+                requestID: c.requestID,
                 name: c.sender?.name || "Member",
                 role: c.sender?.role || "Researcher",
                 avatar: "/default-avatar.svg",
               })) || [],
+
             externalLinks: projRes.externalLinks?.map((url) => ({ url })) || [],
           };
           setProject(mapped);
@@ -82,8 +87,10 @@ const ProjectDetailPage = () => {
           const collab = sent || received;
           if (collab) {
             setRequested(collab.requestStatus);
+            setCollaborationID(collab.requestID);
           } else {
             setRequested(null);
+            setCollaborationID(null);
           }
         }
       })
@@ -100,9 +107,17 @@ const ProjectDetailPage = () => {
       const res = await fetch(`/api/projects/${projectId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editForm),
+        body: JSON.stringify({
+          ...editForm,
+          removedMembers: project.team
+            .filter(
+              (m) => !editForm.team.find((t) => t.requestID === m.requestID),
+            )
+            .map((m) => m.requestID),
+        }),
       });
       if (res.ok) {
+        await res.json();
         setProject((prev) => ({ ...prev, ...editForm }));
         setIsEditing(false);
       } else {
@@ -133,6 +148,33 @@ const ProjectDetailPage = () => {
   const handleCancel = () => {
     setEditForm({ ...project });
     setIsEditing(false);
+  };
+
+  const handleLeaveCollaboration = async () => {
+    if (
+      !confirm("Are you sure you want to stop collaborating on this project?")
+    )
+      return;
+
+    setRequestLoading(true);
+    try {
+      const res = await fetch("/api/network/collaboration", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestID: collaborationID }),
+      });
+      if (res.ok) {
+        setRequested(null);
+        setCollaborationID(null);
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to leave collaboration");
+      }
+    } catch (_e) {
+      alert("Something went wrong");
+    } finally {
+      setRequestLoading(false);
+    }
   };
 
   const handleSendRequest = async () => {
@@ -436,43 +478,84 @@ const ProjectDetailPage = () => {
               </div>
             </div>
 
-            {isOwner ? (
-              <div className="mt-10 pt-8 border-t border-gray-50">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 text-center">
-                  Project Team
-                </p>
-                <div className="space-y-6 mb-10">
-                  {project.team?.length > 0 ? (
-                    project.team.map((member, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between group"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Image
-                            src={member.avatar}
-                            alt={member.name}
-                            width={40}
-                            height={40}
-                            className="rounded-xl border border-gray-100"
-                          />
-                          <div className="text-left">
-                            <p className="font-bold text-gray-900 text-sm leading-tight">
-                              {member.name}
-                            </p>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-0.5">
-                              {member.role}
-                            </p>
-                          </div>
-                        </div>
+            {/* Project Team Section (Visible to Everyone) */}
+            <div className="mt-10 pt-8 border-t border-gray-50">
+              <div className="space-y-8">
+                {/* Lead Researcher Section */}
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 text-center">
+                    Project Creator
+                  </p>
+                  <div className="flex items-center justify-between group bg-amu-gold/5 p-4 rounded-3xl border border-amu-gold/10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-amu-gold/10 border border-amu-gold/20 flex items-center justify-center">
+                        <User className="h-5 w-5 text-amu-gold" />
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-500 italic text-center">
-                      No collaborators as of yet.
-                    </p>
-                  )}
+                      <div className="text-left">
+                        <p className="font-bold text-gray-900 text-sm leading-tight">
+                          {project.leadResearcher}
+                        </p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-amu-gold mt-0.5">
+                          Lead Researcher
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Collaborators Section */}
+                {project.team?.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 text-center">
+                      Collaborators
+                    </p>
+                    <div className="space-y-4">
+                      {(isEditing ? editForm.team : project.team).map(
+                        (member, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center justify-between group p-3 hover:bg-gray-50 rounded-2xl transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Image
+                                src={member.avatar}
+                                alt={member.name}
+                                width={36}
+                                height={36}
+                                className="rounded-xl border border-gray-100 shadow-sm"
+                              />
+                              <div className="text-left">
+                                <p className="font-bold text-gray-900 text-sm leading-tight">
+                                  {member.name}
+                                </p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-0.5">
+                                  {member.role}
+                                </p>
+                              </div>
+                            </div>
+                            {isEditing && (
+                              <button
+                                onClick={() => {
+                                  const newTeam = editForm.team.filter(
+                                    (_, idx) => idx !== i,
+                                  );
+                                  setEditForm({ ...editForm, team: newTeam });
+                                }}
+                                className="p-2 bg-red-50 text-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white"
+                                title="Remove Team Member"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {isOwner ? (
                 <div className="space-y-3">
                   {isEditing ? (
                     <>
@@ -506,43 +589,54 @@ const ProjectDetailPage = () => {
                     </>
                   )}
                 </div>
-              </div>
-            ) : (
-              <div className="mt-10 pt-8 border-t border-gray-50 text-center">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
-                  Interested in Collaborating?
-                </p>
-                <button
-                  onClick={handleSendRequest}
-                  disabled={requested || requestLoading}
-                  className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl transition-all flex items-center justify-center gap-2 ${
-                    requested === "PENDING" ||
-                    requested === "ACCEPTED" ||
-                    requestLoading
-                      ? requested === "ACCEPTED"
-                        ? "bg-amu-green/10 text-amu-green shadow-none cursor-default border border-amu-green/20"
-                        : "bg-emerald-100 text-emerald-700 shadow-emerald-green/10 cursor-not-allowed"
-                      : "bg-amu-green text-white shadow-amu-green/20 hover:shadow-amu-green/40 hover:-translate-y-1"
-                  }`}
-                >
-                  {requestLoading ? (
-                    <>
-                      <Clock className="w-4 h-4 animate-spin" /> Sending...
-                    </>
-                  ) : requested === "ACCEPTED" ? (
-                    <>
-                      <CheckCircle2 className="w-4 h-4" /> Collaborating
-                    </>
-                  ) : requested === "PENDING" ? (
-                    <>
-                      <CheckCircle2 className="w-4 h-4" /> Requested
-                    </>
-                  ) : (
-                    "Send Request"
-                  )}
-                </button>
-              </div>
-            )}
+              ) : (
+                <div className="text-center">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
+                    Interested in Collaborating?
+                  </p>
+                  <button
+                    onClick={
+                      requested === "ACCEPTED"
+                        ? handleLeaveCollaboration
+                        : requested
+                          ? null
+                          : handleSendRequest
+                    }
+                    disabled={requestLoading || requested === "PENDING"}
+                    className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl transition-all flex items-center justify-center gap-2 group ${
+                      requested === "PENDING" ||
+                      requested === "ACCEPTED" ||
+                      requestLoading
+                        ? requested === "ACCEPTED"
+                          ? "bg-amu-green/10 text-amu-green shadow-none border border-amu-green/20 hover:bg-red-50 hover:text-red-500 hover:border-red-100"
+                          : "bg-emerald-100 text-emerald-700 shadow-emerald-green/10 cursor-not-allowed"
+                        : "bg-amu-green text-white shadow-amu-green/20 hover:shadow-amu-green/40 hover:-translate-y-1"
+                    }`}
+                  >
+                    {requestLoading ? (
+                      <>
+                        <Clock className="w-4 h-4 animate-spin" /> Processing...
+                      </>
+                    ) : requested === "ACCEPTED" ? (
+                      <>
+                        <span className="group-hover:hidden flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4" /> Collaborating
+                        </span>
+                        <span className="hidden group-hover:flex items-center gap-2">
+                          <UserMinus className="w-4 h-4" /> Leave Project
+                        </span>
+                      </>
+                    ) : requested === "PENDING" ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4" /> Requested
+                      </>
+                    ) : (
+                      "Send Request"
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
           </motion.div>
         </div>
       </div>

@@ -3,8 +3,9 @@ import React, { useState } from "react";
 import { MoreHorizontal, BookOpen, Clock, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 
-const FeedItem = ({ post, currentUser }) => {
+const FeedItem = ({ post, currentUser, onProfileClick }) => {
   const isOwner = currentUser?.universityID === post.ownerID;
   const [requested, setRequested] = useState(post.hasRequested);
   const [loading, setLoading] = useState(false);
@@ -78,7 +79,20 @@ const FeedItem = ({ post, currentUser }) => {
             </div>
           )}
           <div className="flex items-center gap-4 text-sm font-bold text-gray-500 mb-2">
-            <span className="text-gray-900">{post.leadResearcher}</span>
+            <button
+              onClick={() => onProfileClick && onProfileClick(post.ownerID)}
+              className="text-gray-900 hover:text-amu-green transition-colors flex items-center gap-2"
+            >
+              <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 overflow-hidden">
+                <Image
+                  src="/default-avatar.svg"
+                  alt=""
+                  width={24}
+                  height={24}
+                />
+              </div>
+              {post.leadResearcher}
+            </button>
           </div>
         </div>
 

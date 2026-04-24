@@ -10,7 +10,10 @@ import {
   Edit3,
   BookOpen,
   Clock,
+  CheckCircle2,
+  ExternalLink,
 } from "lucide-react";
+import Link from "next/link";
 
 const ProfileView = ({ user, onEdit }) => {
   const formatDate = (dateString) => {
@@ -88,21 +91,13 @@ const ProfileView = ({ user, onEdit }) => {
         </div>
 
         {/* User Stats Bar */}
-        <div className="mt-10 pt-8 border-t border-gray-100 grid grid-cols-3 gap-4">
-          <div className="text-center group-hover:bg-gray-50 p-4 rounded-3xl transition-all">
+        <div className="mt-10 pt-8 border-t border-gray-100 grid grid-cols-2 gap-4">
+          <div className="text-center group-hover:bg-gray-50 p-4 rounded-3xl transition-all border-r border-gray-100">
             <p className="text-2xl lg:text-3xl font-black text-amu-green">
               {user.stats?.projects || 0}
             </p>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
-              Projects
-            </p>
-          </div>
-          <div className="text-center group-hover:bg-gray-50 p-4 rounded-3xl transition-all border-x border-gray-100">
-            <p className="text-2xl lg:text-3xl font-black text-amu-gold">
-              {user.stats?.citations || 0}
-            </p>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
-              Citations
+              Projects Created
             </p>
           </div>
           <div className="text-center group-hover:bg-gray-50 p-4 rounded-3xl transition-all">
@@ -164,6 +159,86 @@ const ProfileView = ({ user, onEdit }) => {
                 <span className="text-gray-400 text-sm italic">
                   No specific interests listed.
                 </span>
+              )}
+            </div>
+          </div>
+
+          {/* Projects Created Section */}
+          <div className="bg-white rounded-4xl p-8 shadow-xl shadow-gray-200/50 border border-gray-100">
+            <h3 className="text-xl font-black text-gray-900 mb-8 flex items-center gap-3">
+              <div className="p-2 bg-blue-50 rounded-xl">
+                <Briefcase className="h-5 w-5 text-blue-500" />
+              </div>
+              Projects Created
+            </h3>
+
+            <div className="space-y-6">
+              {user.createdProjects?.length > 0 ? (
+                user.createdProjects.map((project) => (
+                  <Link
+                    key={project.projectID}
+                    href={`/projects/${project.projectID}`}
+                    className="block bg-white border border-gray-100 p-8 rounded-3xl hover:border-amu-green/30 hover:shadow-xl hover:shadow-gray-200/40 transition-all group relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-all">
+                      <ExternalLink className="h-5 w-5 text-amu-green" />
+                    </div>
+
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      <div className="flex-1 space-y-4">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="px-3 py-1 bg-amu-green/5 text-amu-green text-[10px] font-black uppercase tracking-widest rounded-lg border border-amu-green/10">
+                            {project.researchDomain}
+                          </span>
+                          <span
+                            className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg ${
+                              project.projectStatus === "ACTIVE"
+                                ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                                : "bg-amu-gold/5 text-amu-gold border border-amu-gold/10"
+                            }`}
+                          >
+                            {project.projectStatus}
+                          </span>
+                        </div>
+
+                        <div>
+                          <h4 className="font-black text-gray-900 text-xl group-hover:text-amu-green transition-colors mb-2">
+                            {project.title}
+                          </h4>
+                          <p className="text-gray-500 text-sm font-medium line-clamp-2 max-w-2xl">
+                            {project.description}
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-6 pt-2">
+                          <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                            <Clock className="h-3.5 w-3.5" />
+                            {new Date(project.createdAt).toLocaleDateString()}
+                          </div>
+                          {project.moderationStatus === "APPROVED" && (
+                            <div className="flex items-center gap-2 text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                              Verified Research
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="col-span-full py-12 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
+                  <Briefcase className="h-8 w-8 text-gray-300 mb-3" />
+                  <p className="text-gray-400 font-bold text-sm uppercase tracking-widest">
+                    No projects created yet
+                  </p>
+                  <Link
+                    href="/projects/create"
+                    className="mt-4 text-amu-green font-black text-xs uppercase tracking-widest hover:underline"
+                  >
+                    Create your first project
+                  </Link>
+                </div>
               )}
             </div>
           </div>

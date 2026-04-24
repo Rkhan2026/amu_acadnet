@@ -18,7 +18,17 @@ export async function GET(request, { params }) {
         following: {
           include: { following: { select: { name: true, role: true } } },
         },
-        createdProjects: { select: { projectID: true } },
+        createdProjects: {
+          select: {
+            projectID: true,
+            title: true,
+            description: true,
+            researchDomain: true,
+            projectStatus: true,
+            createdAt: true,
+            moderationStatus: true,
+          },
+        },
         sentCollaborations: {
           where: { requestStatus: "ACCEPTED" },
           select: { requestID: true },

@@ -66,6 +66,18 @@ export default function NetworkPage() {
     executeCollabAction(requestID, action);
   };
 
+  const handleLeaveCollaboration = (requestID) => {
+    setModalConfig({
+      isOpen: true,
+      title: "Stop Collaborating?",
+      message:
+        "Are you sure you want to stop collaborating on this project? This action cannot be undone.",
+      confirmText: "Stop Collaborating",
+      variant: "danger",
+      onConfirm: () => executeCollabAction(requestID, "cancel"),
+    });
+  };
+
   const executeCollabAction = async (requestID, action) => {
     try {
       const res = await fetch("/api/network/collaboration", {
@@ -220,8 +232,7 @@ export default function NetworkPage() {
         name: c.project?.title || "Project",
         partners: [c.receiver?.name || "Member"],
         avatar: "/default-avatar.svg",
-        progress: 50,
-        status: "Active",
+        status: c.project?.projectStatus || "ACTIVE",
       })),
     ...networkData.receivedCollaborations
       .filter(
@@ -235,8 +246,7 @@ export default function NetworkPage() {
         name: c.project?.title || "Project",
         partners: [c.sender?.name || "Member"],
         avatar: "/default-avatar.svg",
-        progress: 50,
-        status: "Active",
+        status: c.project?.projectStatus || "ACTIVE",
       })),
   ];
 
@@ -253,8 +263,7 @@ export default function NetworkPage() {
         name: c.project?.title || "Project",
         partners: [c.receiver?.name || "Member"],
         avatar: "/default-avatar.svg",
-        progress: 100,
-        status: "Completed",
+        status: "COMPLETED",
       })),
     ...networkData.receivedCollaborations
       .filter(
@@ -268,8 +277,7 @@ export default function NetworkPage() {
         name: c.project?.title || "Project",
         partners: [c.sender?.name || "Member"],
         avatar: "/default-avatar.svg",
-        progress: 100,
-        status: "Completed",
+        status: "COMPLETED",
       })),
   ];
 
@@ -366,12 +374,21 @@ export default function NetworkPage() {
       case "collaborations":
         if (subTab === "ongoing")
           return collabOngoing.map((c) => (
-            <CollaborationCard key={c.id} collab={c} />
+            <CollaborationCard
+              key={c.id}
+              collab={c}
+              onLeave={() => handleLeaveCollaboration(c.id)}
+            />
           ));
         if (subTab === "finished")
           return collabFinished.map((c) => (
-            <CollaborationCard key={c.id} collab={c} />
+            <CollaborationCard
+              key={c.id}
+              collab={c}
+              onLeave={() => handleLeaveCollaboration(c.id)}
+            />
           ));
+
         if (subTab === "received")
           return collabReceived.map((r) => (
             <CollabRequestCard
@@ -575,13 +592,10 @@ function NetworkCard({ user, type, onAction }) {
   );
 }
 
-function CollaborationCard({ collab }) {
+function CollaborationCard({ collab, onLeave }) {
   return (
-    <Link
-      href={`/projects/${collab.projectId}`}
-      className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-amu-green/30 transition-all group relative overflow-hidden block"
-    >
-      <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+    <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-amu-green/30 transition-all group relative overflow-hidden">
+      <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
         <Briefcase className="h-16 w-16 text-amu-green" />
       </div>
 
@@ -594,10 +608,12 @@ function CollaborationCard({ collab }) {
             className="object-cover"
           />
         </div>
-        <div>
-          <h4 className="font-bold text-gray-900 leading-tight line-clamp-1 group-hover:text-amu-green transition-colors">
-            {collab.name}
-          </h4>
+        <div className="flex-1">
+          <Link href={`/projects/${collab.projectId}`}>
+            <h4 className="font-bold text-gray-900 leading-tight line-clamp-1 group-hover:text-amu-green transition-colors cursor-pointer">
+              {collab.name}
+            </h4>
+          </Link>
           <p className="text-sm text-gray-500">
             with{" "}
             <span className="font-bold text-amu-green">
@@ -607,18 +623,39 @@ function CollaborationCard({ collab }) {
         </div>
       </div>
 
-      <div className="mb-6">
-        <div className="flex justify-end text-xs font-bold mb-2">
-          <span className="text-amu-green">{collab.progress}%</span>
-        </div>
-        <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-amu-green rounded-full transition-all duration-1000"
-            style={{ width: `${collab.progress}%` }}
-          />
-        </div>
+      <div className="mb-6 flex items-center justify-between">
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+          Project Status
+        </p>
+        <span
+          className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg border ${
+            collab.status === "ACTIVE"
+              ? "bg-amu-green/10 text-amu-green border-amu-green/20"
+              : collab.status === "COMPLETED"
+                ? "bg-blue-50 text-blue-500 border-blue-100"
+                : "bg-amu-gold/5 text-amu-gold border-amu-gold/10"
+          }`}
+        >
+          {collab.status.replace("_", " ")}
+        </span>
       </div>
-    </Link>
+
+      <div className="flex gap-2">
+        <Link
+          href={`/projects/${collab.projectId}`}
+          className="flex-1 py-3 bg-amu-green/5 text-amu-green font-bold text-xs rounded-xl hover:bg-amu-green hover:text-white transition-all text-center"
+        >
+          Project Details
+        </Link>
+        <button
+          onClick={onLeave}
+          className="px-4 py-3 bg-gray-50 text-gray-400 font-bold rounded-xl hover:bg-red-50 hover:text-red-500 transition-all"
+          title="Stop Collaborating"
+        >
+          <UserMinus className="h-5 w-5" />
+        </button>
+      </div>
+    </div>
   );
 }
 

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import FeedItem from "./FeedItem";
 import { Sparkles, Users } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import UserProfileModal from "./UserProfileModal";
 
 const Feed = () => {
   const [activeTab, setActiveTab] = useState("for-you"); // "for-you" or "following"
@@ -10,6 +11,13 @@ const Feed = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sortOption, setSortOption] = useState("Recent");
+  const [selectedUserID, setSelectedUserID] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openProfile = (uid) => {
+    setSelectedUserID(uid);
+    setIsModalOpen(true);
+  };
 
   React.useEffect(() => {
     // Fetch current user
@@ -147,7 +155,12 @@ const Feed = () => {
           <LoadingSpinner message="Loading research discovery feed..." />
         ) : feedData.length > 0 ? (
           feedData.map((post) => (
-            <FeedItem key={post.id} post={post} currentUser={currentUser} />
+            <FeedItem
+              key={post.id}
+              post={post}
+              currentUser={currentUser}
+              onProfileClick={openProfile}
+            />
           ))
         ) : (
           <div className="text-center py-20 text-gray-400 font-medium">
@@ -155,6 +168,11 @@ const Feed = () => {
           </div>
         )}
       </div>
+      <UserProfileModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        universityID={selectedUserID}
+      />
     </div>
   );
 };

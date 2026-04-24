@@ -109,6 +109,15 @@ export async function PUT(request, { params }) {
       },
     });
 
+    if (body.removedMembers && body.removedMembers.length > 0) {
+      await prisma.collaboration.deleteMany({
+        where: {
+          requestID: { in: body.removedMembers },
+          projectID: projectID,
+        },
+      });
+    }
+
     return NextResponse.json(updated);
   } catch (error) {
     console.error("Project PUT Error:", error);

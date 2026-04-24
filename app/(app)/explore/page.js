@@ -1,5 +1,7 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -14,9 +16,24 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { AMU_DEPARTMENTS } from "@/lib/utils";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import UserProfileModal from "@/components/UserProfileModal";
+
 const ExplorePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("projects");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+
+  const activeTab = useMemo(() => {
+    return tabParam === "researchers" ? "researchers" : "projects";
+  }, [tabParam]);
+
+  const setActiveTab = (tab) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("tab", tab);
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
   const [selectedDept, setSelectedDept] = useState("");
   const [selectedDomain, setSelectedDomain] = useState("");
 
@@ -24,8 +41,17 @@ const ExplorePage = () => {
   const [researchersData, setResearchersData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [followingStatuses, setFollowingStatuses] = useState({});
+  const [selectedUserID, setSelectedUserID] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  React.useEffect(() => {
+  // Removed useEffect syncing activeTab as it is now derived from URL
+
+  const openProfile = (uid) => {
+    setSelectedUserID(uid);
+    setIsModalOpen(true);
+  };
+
+  useEffect(() => {
     Promise.all([
       fetch("/api/projects").then((r) => r.json()),
       fetch("/api/users").then((r) => r.json()),
@@ -69,17 +95,26 @@ const ExplorePage = () => {
   }, []);
 
   const handleFollow = async (tid) => {
+    const isFollowing = followingStatuses[tid];
     try {
       const res = await fetch("/api/network/follow", {
-        method: "POST",
+        method: isFollowing ? "DELETE" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ targetID: tid }),
       });
       if (res.ok) {
-        setFollowingStatuses((prev) => ({ ...prev, [tid]: "PENDING" }));
+        setFollowingStatuses((prev) => {
+          const next = { ...prev };
+          if (isFollowing) {
+            delete next[tid];
+          } else {
+            next[tid] = "PENDING";
+          }
+          return next;
+        });
       } else {
         const err = await res.json();
-        alert(err.error || "Follow failed");
+        alert(err.error || "Action failed");
       }
     } catch (_e) {
       alert("Something went wrong");
@@ -115,7 +150,7 @@ const ExplorePage = () => {
   return (
     <div className="max-w-7xl mx-auto py-4 px-6 space-y-8">
       {/* Search Header */}
-      <section className="relative h-64 rounded-4xl overflow-hidden flex flex-col items-center justify-center text-center p-8 bg-amu-green text-white shadow-2xl shadow-amu-green/20">
+      <section className="relative h-96 rounded-4xl overflow-hidden flex flex-col items-center justify-center text-center p-8 bg-amu-green text-white shadow-2xl shadow-amu-green/20">
         <div className="absolute inset-0 bg-linear-to-tr from-amu-green via-amu-green to-amu-green-light opacity-50" />
         <motion.div
           initial={{ y: 20, opacity: 0 }}
@@ -331,30 +366,49 @@ const ExplorePage = () => {
                                     Follow
                                   </button>
                                 )}
-                              {activeTab === "researchers" &&
-                                followingStatuses[item.id] && (
+                              {followingStatuses[item.id] && (
+                                <button
+                                  onClick={() => handleFollow(item.id)}
+                                  className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border transition-all relative group/btn ${
+                                    followingStatuses[item.id] === "ACCEPTED"
+                                      ? "bg-amu-green/10 text-amu-green border-amu-green/20"
+                                      : "bg-gray-100 text-gray-400 border-gray-200"
+                                  }`}
+                                >
                                   <span
-                                    className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border ${
-                                      followingStatuses[item.id] === "ACCEPTED"
-                                        ? "bg-amu-green/10 text-amu-green border-amu-green/20"
-                                        : "bg-gray-100 text-gray-400 border-gray-200"
-                                    }`}
+                                    className={
+                                      followingStatuses[item.id] === "PENDING"
+                                        ? "group-hover/btn:opacity-0 transition-opacity"
+                                        : ""
+                                    }
                                   >
                                     {followingStatuses[item.id] === "ACCEPTED"
                                       ? "Following"
                                       : "Requested"}
                                   </span>
-                                )}
-                              <Link
-                                href={
-                                  activeTab === "projects"
-                                    ? `/projects/${item.projectID}`
-                                    : `/profile/${item.id}`
-                                }
-                                className="p-2 bg-gray-50 text-gray-400 group-hover:bg-amu-green group-hover:text-white rounded-xl transition-all"
-                              >
-                                <ArrowRight className="h-5 w-5" />
-                              </Link>
+                                  {followingStatuses[item.id] === "PENDING" && (
+                                    <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/btn:opacity-100 transition-opacity text-red-500">
+                                      Cancel
+                                    </span>
+                                  )}
+                                </button>
+                              )}
+
+                              {activeTab === "researchers" ? (
+                                <button
+                                  onClick={() => openProfile(item.id)}
+                                  className="p-2 bg-gray-50 text-gray-400 group-hover:bg-amu-green group-hover:text-white rounded-xl transition-all"
+                                >
+                                  <ArrowRight className="h-5 w-5" />
+                                </button>
+                              ) : (
+                                <Link
+                                  href={`/projects/${item.projectID}`}
+                                  className="p-2 bg-gray-50 text-gray-400 group-hover:bg-amu-green group-hover:text-white rounded-xl transition-all"
+                                >
+                                  <ArrowRight className="h-5 w-5" />
+                                </Link>
+                              )}
                             </div>
                           </div>
                         </motion.div>
@@ -378,6 +432,11 @@ const ExplorePage = () => {
           )}
         </main>
       </div>
+      <UserProfileModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        universityID={selectedUserID}
+      />
     </div>
   );
 };
