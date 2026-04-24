@@ -258,30 +258,131 @@ async function main() {
 
   // ─── Generate Additional Projects ────────────────────────────────────────
   const additionalProjects = [];
-  // 9 Pending Projects
-  for (let i = 1; i <= 9; i++) {
+
+  const pendingProjectData = [
+    {
+      title: "Quantum Error Correction Algorithms",
+      domain: "Quantum Computing",
+      desc: "Developing novel algorithms to mitigate errors in near-term quantum devices.",
+    },
+    {
+      title: "Neuromorphic Computing Architectures",
+      domain: "Computer Architecture",
+      desc: "Designing brain-inspired computing hardware for low-power AI applications.",
+    },
+    {
+      title: "Sustainable Urban Drainage Systems",
+      domain: "Civil Engineering",
+      desc: "Analyzing the impact of permeable pavements on urban flood mitigation.",
+    },
+    {
+      title: "Biodegradable Polymers from Agricultural Waste",
+      domain: "Materials Science",
+      desc: "Synthesizing and characterizing new biodegradable plastics using corn stover.",
+    },
+    {
+      title: "Privacy-Preserving Federated Learning",
+      domain: "Cybersecurity",
+      desc: "Creating frameworks for secure multi-party machine learning without exposing raw data.",
+    },
+    {
+      title: "Next-Generation Perovskite Solar Cells",
+      domain: "Renewable Energy",
+      desc: "Improving the stability and efficiency of perovskite-based photovoltaic cells.",
+    },
+    {
+      title: "Natural Language Processing for Low-Resource Languages",
+      domain: "Artificial Intelligence",
+      desc: "Building robust NLP models for regional Indian languages with limited datasets.",
+    },
+    {
+      title: "Microplastic Contamination in Groundwater",
+      domain: "Environmental Science",
+      desc: "Tracking the transport and degradation of microplastics in subsurface aquifers.",
+    },
+    {
+      title: "Blockchain for Supply Chain Transparency",
+      domain: "Information Technology",
+      desc: "Implementing decentralized ledgers to trace pharmaceutical supply chains.",
+    },
+  ];
+
+  pendingProjectData.forEach((data, index) => {
     additionalProjects.push({
-      title: `Pending Project ${i}`,
-      description: `Description for pending project ${i}. Investigating various aspects of science and technology.`,
-      researchDomain: "General Science",
+      title: data.title,
+      description: data.desc,
+      researchDomain: data.domain,
       moderationStatus: "PENDING",
       projectStatus: "ACTIVE",
-      universityID: additionalUsers[i % additionalUsers.length].universityID,
+      universityID:
+        additionalUsers[index % additionalUsers.length].universityID,
     });
-  }
+  });
 
-  // 10 Approved Projects
-  for (let i = 1; i <= 10; i++) {
+  const approvedProjectData = [
+    {
+      title: "Targeted Drug Delivery via Nanoparticles",
+      domain: "Nanotechnology",
+      desc: "Engineering lipid nanoparticles for precise delivery of chemotherapeutics.",
+    },
+    {
+      title: "Autonomous Swarm Robotics for Search and Rescue",
+      domain: "Robotics",
+      desc: "Developing coordination protocols for robot swarms in disaster zones.",
+    },
+    {
+      title: "Deep Learning for Climate Modeling",
+      domain: "Climate Science",
+      desc: "Applying neural networks to predict localized climate change impacts.",
+    },
+    {
+      title: "Advanced Materials for Solid-State Batteries",
+      domain: "Materials Engineering",
+      desc: "Investigating solid electrolytes for safer and higher-capacity lithium batteries.",
+    },
+    {
+      title: "Explainable AI in Medical Diagnostics",
+      domain: "Healthcare AI",
+      desc: "Designing interpretability methods for deep learning models used in radiology.",
+    },
+    {
+      title: "Smart Grid Resilience Against Cyber Attacks",
+      domain: "Cyber-Physical Systems",
+      desc: "Formulating defense mechanisms to protect smart electrical grids from intrusions.",
+    },
+    {
+      title: "Precision Agriculture using Drone Imagery",
+      domain: "Agricultural Tech",
+      desc: "Using computer vision to analyze multispectral drone imagery for crop health assessment.",
+    },
+    {
+      title: "5G Network Optimization via Machine Learning",
+      domain: "Telecommunications",
+      desc: "Applying reinforcement learning to optimize resource allocation in 5G networks.",
+    },
+    {
+      title: "Cognitive Behavioral Therapy via Chatbots",
+      domain: "Human-Computer Interaction",
+      desc: "Evaluating the effectiveness of conversational agents in delivering initial mental health support.",
+    },
+    {
+      title: "Genetic Basis of Drought Tolerance in Wheat",
+      domain: "Plant Genetics",
+      desc: "Identifying key genes responsible for drought resilience in various wheat cultivars.",
+    },
+  ];
+
+  approvedProjectData.forEach((data, index) => {
     additionalProjects.push({
-      title: `Approved Project ${i}`,
-      description: `Description for approved project ${i}. Focusing on advanced research methodologies.`,
-      researchDomain: "Applied Sciences",
+      title: data.title,
+      description: data.desc,
+      researchDomain: data.domain,
       moderationStatus: "APPROVED",
       projectStatus: "ACTIVE",
       universityID:
-        additionalUsers[(i + 9) % additionalUsers.length].universityID,
+        additionalUsers[(index + 9) % additionalUsers.length].universityID,
     });
-  }
+  });
 
   await prisma.researchProject.createMany({ data: additionalProjects });
   console.log(
