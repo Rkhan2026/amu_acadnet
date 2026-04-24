@@ -121,7 +121,10 @@ export default function AdminCollaborationsPage() {
                     </td>
                     <td className="p-6 align-top">
                       <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border bg-blue-50 text-blue-500 border-blue-100 whitespace-nowrap">
-                        {project.projectStatus || "PROPOSED"}
+                        {(project.projectStatus || "PROPOSED").replace(
+                          /_/g,
+                          " ",
+                        )}
                       </span>
                     </td>
                     <td className="p-6 align-top text-sm font-medium text-gray-500 whitespace-nowrap">
@@ -272,7 +275,9 @@ export default function AdminCollaborationsPage() {
                         {selectedProjectDetails.moderationStatus || "PENDING"}
                       </span>
                       <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border bg-blue-50 text-blue-500 border-blue-100">
-                        {selectedProjectDetails.projectStatus || "PROPOSED"}
+                        {(
+                          selectedProjectDetails.projectStatus || "PROPOSED"
+                        ).replace(/_/g, " ")}
                       </span>
                     </div>
 

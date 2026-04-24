@@ -422,6 +422,78 @@ async function main() {
     `✅ Generated ${additionalProjects.length} additional projects (9 Pending, 10 Approved).`,
   );
 
+  // ─── Generate Additional Collaborations (Projects with Team Members) ─────
+  const collaborationProjects = [
+    {
+      title: "AMU Neural Network Research Initiative",
+      desc: "Investigating deep learning architectures for Urdu text recognition and translation.",
+      domain: "AI & Linguistics",
+      status: "ACTIVE",
+      creator: alice,
+      members: [mohd, additionalUsers[0]],
+    },
+    {
+      title: "Smart Grid Deployment in Aligarh City",
+      desc: "Pilot project for implementing smart meters and load balancing in local residential areas.",
+      domain: "Electrical Engineering",
+      status: "ON_HOLD",
+      creator: bob,
+      members: [eve, additionalUsers[5]],
+    },
+    {
+      title: "Ethical AI Framework for Academic Research",
+      desc: "Developing guidelines for the responsible use of generative AI in university environments.",
+      domain: "Ethics & Technology",
+      status: "ACTIVE",
+      creator: additionalUsers[1],
+      members: [alice, additionalUsers[2]],
+    },
+    {
+      title: "Water Quality Monitoring in North India",
+      desc: "Using sensors and satellite imagery to track pollutant levels in the Ganges basin.",
+      domain: "Environmental Engineering",
+      status: "ACTIVE",
+      creator: additionalUsers[8],
+      members: [additionalUsers[9], bob],
+    },
+    {
+      title: "Ancient Manuscript Digitization Project",
+      desc: "Preserving historical AMU library manuscripts using high-resolution scanning and OCR.",
+      domain: "Digital Humanities",
+      status: "COMPLETED",
+      creator: additionalUsers[15],
+      members: [additionalUsers[16]],
+    },
+    {
+      title: "Low-Cost Prosthetic Development",
+      desc: "Engineering affordable 3D-printed prosthetic limbs for underprivileged communities.",
+      domain: "Biomedical Engineering",
+      status: "ON_HOLD",
+      creator: carol,
+      members: [additionalUsers[20], additionalUsers[21]],
+    },
+  ];
+
+  for (const proj of collaborationProjects) {
+    await prisma.researchProject.create({
+      data: {
+        title: proj.title,
+        description: proj.desc,
+        researchDomain: proj.domain,
+        moderationStatus: "APPROVED",
+        projectStatus: proj.status,
+        universityID: proj.creator.universityID,
+        teamMembers: {
+          connect: proj.members.map((m) => ({ universityID: m.universityID })),
+        },
+      },
+    });
+  }
+
+  console.log(
+    `✅ Generated ${collaborationProjects.length} additional collaborative projects.`,
+  );
+
   // ─── Collaborations ──────────────────────────────────────────────────────
   // Carol asks to join Alice's AI project
   const collab1 = await prisma.collaboration.create({
