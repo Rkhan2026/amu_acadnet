@@ -278,12 +278,15 @@ async function main() {
       researchDomain: "Applied Sciences",
       moderationStatus: "APPROVED",
       projectStatus: "ACTIVE",
-      universityID: additionalUsers[(i + 9) % additionalUsers.length].universityID,
+      universityID:
+        additionalUsers[(i + 9) % additionalUsers.length].universityID,
     });
   }
 
   await prisma.researchProject.createMany({ data: additionalProjects });
-  console.log(`✅ Generated ${additionalProjects.length} additional projects (9 Pending, 10 Approved).`);
+  console.log(
+    `✅ Generated ${additionalProjects.length} additional projects (9 Pending, 10 Approved).`,
+  );
 
   // ─── Collaborations ──────────────────────────────────────────────────────
   // Carol asks to join Alice's AI project
@@ -366,7 +369,9 @@ async function main() {
   console.log(
     "   APPROVED: Aarav, Bhavya, Chitra, Esha, Mohammad  |  PENDING: Deepak",
   );
-  console.log(`   Projects: ${4 + additionalProjects.length}  |  Collaborations: 3  |  Follows: 6`);
+  console.log(
+    `   Projects: ${4 + additionalProjects.length}  |  Collaborations: 3  |  Follows: 6`,
+  );
 }
 
 main()
