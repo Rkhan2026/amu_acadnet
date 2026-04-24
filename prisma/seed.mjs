@@ -112,6 +112,48 @@ async function main() {
     `✅ Users created: ${[alice, bob, carol, dave, eve, mohd].map((u) => u.name).join(", ")}`,
   );
 
+  // ─── Generate Additional Users ───────────────────────────────────────────
+  const additionalUsers = [];
+  // 4 more students (total 8)
+  for (let i = 1; i <= 4; i++) {
+    additionalUsers.push({
+      universityID: `AU-2024-10${i}`,
+      name: `Student ${i}`,
+      email: `student${i}@sharklasers.com`,
+      password: userPassword,
+      role: "STUDENT",
+      department: "Computer Science",
+      accountStatus: "APPROVED",
+    });
+  }
+  // 10 more faculty (total 12)
+  for (let i = 1; i <= 10; i++) {
+    additionalUsers.push({
+      universityID: `AU-2024-20${i}`,
+      name: `Faculty ${i}`,
+      email: `faculty${i}@sharklasers.com`,
+      password: userPassword,
+      role: "FACULTY",
+      department: "Mathematics",
+      accountStatus: "APPROVED",
+    });
+  }
+  // 10 research scholars (total 10)
+  for (let i = 1; i <= 10; i++) {
+    additionalUsers.push({
+      universityID: `AU-2024-30${i}`,
+      name: `Research Scholar ${i}`,
+      email: `scholar${i}@sharklasers.com`,
+      password: userPassword,
+      role: "RESEARCH SCHOLAR",
+      department: "Physics",
+      accountStatus: "APPROVED",
+    });
+  }
+
+  await prisma.user.createMany({ data: additionalUsers });
+  console.log(`✅ Generated 24 additional users (4 Students, 10 Faculty, 10 Research Scholars).`);
+
   // ─── Academic Profiles ───────────────────────────────────────────────────
   await prisma.academicProfile.createMany({
     data: [
