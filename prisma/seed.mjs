@@ -256,6 +256,35 @@ async function main() {
     `✅ Research projects created: "${project1.title}", "${project2.title}", "${project3.title}", "${project4.title}"`,
   );
 
+  // ─── Generate Additional Projects ────────────────────────────────────────
+  const additionalProjects = [];
+  // 9 Pending Projects
+  for (let i = 1; i <= 9; i++) {
+    additionalProjects.push({
+      title: `Pending Project ${i}`,
+      description: `Description for pending project ${i}. Investigating various aspects of science and technology.`,
+      researchDomain: "General Science",
+      moderationStatus: "PENDING",
+      projectStatus: "ACTIVE",
+      universityID: additionalUsers[i % additionalUsers.length].universityID,
+    });
+  }
+
+  // 10 Approved Projects
+  for (let i = 1; i <= 10; i++) {
+    additionalProjects.push({
+      title: `Approved Project ${i}`,
+      description: `Description for approved project ${i}. Focusing on advanced research methodologies.`,
+      researchDomain: "Applied Sciences",
+      moderationStatus: "APPROVED",
+      projectStatus: "ACTIVE",
+      universityID: additionalUsers[(i + 9) % additionalUsers.length].universityID,
+    });
+  }
+
+  await prisma.researchProject.createMany({ data: additionalProjects });
+  console.log(`✅ Generated ${additionalProjects.length} additional projects (9 Pending, 10 Approved).`);
+
   // ─── Collaborations ──────────────────────────────────────────────────────
   // Carol asks to join Alice's AI project
   const collab1 = await prisma.collaboration.create({
@@ -337,7 +366,7 @@ async function main() {
   console.log(
     "   APPROVED: Aarav, Bhavya, Chitra, Esha, Mohammad  |  PENDING: Deepak",
   );
-  console.log("   Projects: 4  |  Collaborations: 3  |  Follows: 6");
+  console.log(`   Projects: ${4 + additionalProjects.length}  |  Collaborations: 3  |  Follows: 6`);
 }
 
 main()
