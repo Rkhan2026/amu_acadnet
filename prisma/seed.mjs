@@ -114,42 +114,75 @@ async function main() {
 
   // ─── Generate Additional Users ───────────────────────────────────────────
   const additionalUsers = [];
-  // 4 more students (total 8)
-  for (let i = 1; i <= 4; i++) {
+
+  const studentData = [
+    { name: "Rohan Mehra", email: "rohan.mehra@sharklasers.com" },
+    { name: "Anjali Patel", email: "anjali.patel@sharklasers.com" },
+    { name: "Vikram Singh", email: "vikram.singh@sharklasers.com" },
+    { name: "Neha Kapoor", email: "neha.kapoor@sharklasers.com" },
+  ];
+
+  studentData.forEach((student, index) => {
     additionalUsers.push({
-      universityID: `AU-2024-10${i}`,
-      name: `Student ${i}`,
-      email: `student${i}@sharklasers.com`,
+      universityID: `AU-2024-10${index + 1}`,
+      name: student.name,
+      email: student.email,
       password: userPassword,
       role: "STUDENT",
       department: "Computer Science",
       accountStatus: "APPROVED",
     });
-  }
-  // 10 more faculty (total 12)
-  for (let i = 1; i <= 10; i++) {
+  });
+
+  const facultyData = [
+    { name: "Dr. Ramesh Rao", email: "ramesh.rao@sharklasers.com" },
+    { name: "Dr. Sunita Menon", email: "sunita.menon@sharklasers.com" },
+    { name: "Dr. Arvind Kumar", email: "arvind.k@sharklasers.com" },
+    { name: "Dr. Lakshmi Iyer", email: "lakshmi.iyer@sharklasers.com" },
+    { name: "Dr. Prakash Desai", email: "prakash.desai@sharklasers.com" },
+    { name: "Dr. Kavita Krishnan", email: "kavita.krishnan@sharklasers.com" },
+    { name: "Dr. Sanjay Dutt", email: "sanjay.dutt@sharklasers.com" },
+    { name: "Dr. Meena Kumari", email: "meena.kumari@sharklasers.com" },
+    { name: "Dr. Anand Bhatia", email: "anand.bhatia@sharklasers.com" },
+    { name: "Dr. Ritu Nanda", email: "ritu.nanda@sharklasers.com" },
+  ];
+
+  facultyData.forEach((faculty, index) => {
     additionalUsers.push({
-      universityID: `AU-2024-20${i}`,
-      name: `Faculty ${i}`,
-      email: `faculty${i}@sharklasers.com`,
+      universityID: `AU-2024-20${index + 1}`,
+      name: faculty.name,
+      email: faculty.email,
       password: userPassword,
       role: "FACULTY",
       department: "Mathematics",
       accountStatus: "APPROVED",
     });
-  }
-  // 10 research scholars (total 10)
-  for (let i = 1; i <= 10; i++) {
+  });
+
+  const scholarData = [
+    { name: "Amit Joshi", email: "amit.joshi@sharklasers.com" },
+    { name: "Pooja Chawla", email: "pooja.chawla@sharklasers.com" },
+    { name: "Rahul Khanna", email: "rahul.khanna@sharklasers.com" },
+    { name: "Sneha Reddy", email: "sneha.reddy@sharklasers.com" },
+    { name: "Karan Singh", email: "karan.singh@sharklasers.com" },
+    { name: "Divya Agarwal", email: "divya.agarwal@sharklasers.com" },
+    { name: "Sameer Nair", email: "sameer.nair@sharklasers.com" },
+    { name: "Priya Das", email: "priya.das@sharklasers.com" },
+    { name: "Tarun Kumar", email: "tarun.kumar@sharklasers.com" },
+    { name: "Swati Mishra", email: "swati.mishra@sharklasers.com" },
+  ];
+
+  scholarData.forEach((scholar, index) => {
     additionalUsers.push({
-      universityID: `AU-2024-30${i}`,
-      name: `Research Scholar ${i}`,
-      email: `scholar${i}@sharklasers.com`,
+      universityID: `AU-2024-30${index + 1}`,
+      name: scholar.name,
+      email: scholar.email,
       password: userPassword,
       role: "RESEARCH SCHOLAR",
       department: "Physics",
       accountStatus: "APPROVED",
     });
-  }
+  });
 
   await prisma.user.createMany({ data: additionalUsers });
   console.log(
