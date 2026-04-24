@@ -67,16 +67,6 @@ export default function LoginForm() {
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
         <p className="text-gray-500 mt-2">Sign in to your academic account</p>
-        <div className="mt-4 p-2 bg-amu-gold/10 border border-amu-gold/20 rounded-lg">
-          <p className="text-[10px] font-black uppercase tracking-widest text-amu-gold">
-            Preview Credentials
-          </p>
-          <p className="text-sm font-bold text-gray-700">
-            {formData.role === "admin"
-              ? "rajesh.kumar@gmail.com / admin123"
-              : "aarav.sharma@sharklasers.com / password123"}
-          </p>
-        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
