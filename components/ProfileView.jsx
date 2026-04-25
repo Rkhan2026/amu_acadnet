@@ -102,11 +102,19 @@ const ProfileView = ({ user, onEdit }) => {
           </div>
           <div className="text-center group-hover:bg-gray-50 p-4 rounded-3xl transition-all">
             <p className="text-2xl lg:text-3xl font-black text-blue-500">
-              {[
-                ...(user.sentCollaborations || []),
-                ...(user.receivedCollaborations || []),
-              ].filter((c) => c.project.universityID !== user.universityID)
-                .length || 0}
+              {
+                Object.keys(
+                  [
+                    ...(user.sentCollaborations || []),
+                    ...(user.receivedCollaborations || []),
+                  ].reduce((acc, c) => {
+                    if (c.project.universityID !== user.universityID) {
+                      acc[c.project.projectID] = true;
+                    }
+                    return acc;
+                  }, {}),
+                ).length
+              }
             </p>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
               Collaborations
@@ -209,6 +217,56 @@ const ProfileView = ({ user, onEdit }) => {
                           <h4 className="font-black text-gray-900 text-xl group-hover:text-amu-green transition-colors mb-2">
                             {project.title}
                           </h4>
+                          <div className="mb-2 space-y-0.5">
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                              Creator:{" "}
+                              <span className="text-gray-700 normal-case font-bold">
+                                {user.name} (You)
+                              </span>
+                            </p>
+                            {(() => {
+                              const collaborators = (
+                                project.collaborations || []
+                              )
+                                .map((c) => {
+                                  const partner =
+                                    c.senderID === user.universityID
+                                      ? c.receiver
+                                      : c.sender;
+                                  return partner;
+                                })
+                                .filter(
+                                  (p) =>
+                                    p && p.universityID !== user.universityID,
+                                );
+
+                              const uniqueCollabs = Array.from(
+                                new Map(
+                                  collaborators.map((c) => [c.universityID, c]),
+                                ).values(),
+                              );
+
+                              if (uniqueCollabs.length === 0) return null;
+
+                              return (
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                  Team:{" "}
+                                  <span className="text-amu-gold normal-case font-bold">
+                                    {uniqueCollabs
+                                      .slice(0, 2)
+                                      .map((m) =>
+                                        m.universityID === user.universityID
+                                          ? `${m.name} (You)`
+                                          : m.name,
+                                      )
+                                      .join(", ")}
+                                    {uniqueCollabs.length > 2 &&
+                                      ` +${uniqueCollabs.length - 2} others`}
+                                  </span>
+                                </p>
+                              );
+                            })()}
+                          </div>
                           <p className="text-gray-500 text-sm font-medium line-clamp-2 max-w-2xl">
                             {project.description}
                           </p>
@@ -219,12 +277,6 @@ const ProfileView = ({ user, onEdit }) => {
                             <Clock className="h-3.5 w-3.5" />
                             {new Date(project.createdAt).toLocaleDateString()}
                           </div>
-                          {project.moderationStatus === "APPROVED" && (
-                            <div className="flex items-center gap-2 text-[10px] font-black text-emerald-600 uppercase tracking-widest">
-                              <CheckCircle2 className="h-3.5 w-3.5" />
-                              Verified Research
-                            </div>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -256,21 +308,47 @@ const ProfileView = ({ user, onEdit }) => {
             </h3>
 
             <div className="space-y-6">
-              {[
-                ...(user.sentCollaborations || []),
-                ...(user.receivedCollaborations || []),
-              ].filter(
-                (collab) => collab.project.universityID !== user.universityID,
-              ).length > 0 ? (
+              {(() => {
+                const groupedCollabs = {};
                 [
                   ...(user.sentCollaborations || []),
                   ...(user.receivedCollaborations || []),
-                ]
-                  .filter(
-                    (collab) =>
-                      collab.project.universityID !== user.universityID,
-                  )
-                  .map((collab, index) => (
+                ].forEach((c) => {
+                  const pid = c.project.projectID;
+                  const creatorID = c.project.universityID;
+                  if (creatorID === user.universityID) return;
+
+                  const partnerName =
+                    c.senderID === user.universityID
+                      ? c.receiver?.name
+                      : c.sender?.name;
+                  const partnerID =
+                    c.senderID === user.universityID
+                      ? c.receiverID
+                      : c.senderID;
+
+                  if (!groupedCollabs[pid]) {
+                    groupedCollabs[pid] = {
+                      ...c,
+                      partners: [`${user.name} (You)`],
+                      partnerIDs: [user.universityID],
+                    };
+                  }
+
+                  if (
+                    partnerID !== creatorID &&
+                    partnerID !== user.universityID &&
+                    !groupedCollabs[pid].partnerIDs.includes(partnerID)
+                  ) {
+                    groupedCollabs[pid].partners.push(partnerName);
+                    groupedCollabs[pid].partnerIDs.push(partnerID);
+                  }
+                });
+
+                const collabs = Object.values(groupedCollabs);
+
+                return collabs.length > 0 ? (
+                  collabs.map((collab, index) => (
                     <Link
                       key={`collab-${index}`}
                       href={`/projects/${collab.project.projectID}`}
@@ -301,22 +379,50 @@ const ProfileView = ({ user, onEdit }) => {
                             <h4 className="font-black text-gray-900 text-xl group-hover:text-amu-gold transition-colors mb-2">
                               {collab.project.title}
                             </h4>
-                            <p className="text-gray-500 text-sm font-medium line-clamp-2 max-w-2xl">
-                              {collab.project.description}
-                            </p>
+                            <div className="mb-2 space-y-0.5">
+                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                Creator:{" "}
+                                <span className="text-gray-700 normal-case font-bold">
+                                  {collab.project.creator?.universityID ===
+                                  user.universityID
+                                    ? `${collab.project.creator?.name} (You)`
+                                    : collab.project.creator?.name || "Unknown"}
+                                </span>
+                              </p>
+                              {collab.partners.length > 0 && (
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                  Team:{" "}
+                                  <span className="text-amu-gold normal-case font-bold">
+                                    {collab.partners.slice(0, 2).join(", ")}
+                                    {collab.partners.length > 2 &&
+                                      ` +${collab.partners.length - 2} others`}
+                                  </span>
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <p className="text-gray-500 text-sm font-medium line-clamp-2 mb-4">
+                            {collab.project.description}
+                          </p>
+                          <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest pt-2">
+                            <Clock className="h-3.5 w-3.5" />
+                            {new Date(
+                              collab.project.createdAt,
+                            ).toLocaleDateString()}
                           </div>
                         </div>
                       </div>
                     </Link>
                   ))
-              ) : (
-                <div className="col-span-full py-12 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
-                  <CheckCircle2 className="h-8 w-8 text-gray-300 mb-3" />
-                  <p className="text-gray-400 font-bold text-sm uppercase tracking-widest">
-                    No collaborations yet
-                  </p>
-                </div>
-              )}
+                ) : (
+                  <div className="col-span-full py-12 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
+                    <CheckCircle2 className="h-8 w-8 text-gray-300 mb-3" />
+                    <p className="text-gray-400 font-bold text-sm uppercase tracking-widest">
+                      No collaborations yet
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>
@@ -332,11 +438,11 @@ const ProfileView = ({ user, onEdit }) => {
                 <div className="p-3 bg-blue-50 rounded-2xl">
                   <Mail className="h-6 w-6 text-blue-500" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                     Email Address
                   </p>
-                  <p className="font-bold text-gray-900">
+                  <p className="font-bold text-gray-900 break-all">
                     {user.email ||
                       (user.handle
                         ? `${user.handle.replace("@", "")}@gmail.com`
@@ -349,7 +455,7 @@ const ProfileView = ({ user, onEdit }) => {
                 <div className="p-3 bg-amu-green/5 rounded-2xl">
                   <Clock className="h-6 w-6 text-amu-green" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                     Last Updated
                   </p>

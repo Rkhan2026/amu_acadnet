@@ -10,11 +10,13 @@ import {
   Briefcase,
   UserCheck,
   UserMinus,
+  Clock,
 } from "lucide-react";
 import Link from "next/link";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import UserProfileModal from "@/components/UserProfileModal";
+import ProjectModal from "@/components/ProjectModal";
 
 export default function NetworkPage() {
   const [activeTab, setActiveTab] = useState("following");
@@ -37,10 +39,17 @@ export default function NetworkPage() {
 
   const [selectedUserID, setSelectedUserID] = useState(null);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [selectedProjectID, setSelectedProjectID] = useState(null);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 
   const openProfile = (uid) => {
     setSelectedUserID(uid);
     setIsUserModalOpen(true);
+  };
+
+  const openProject = (pid) => {
+    setSelectedProjectID(pid);
+    setIsProjectModalOpen(true);
   };
 
   const closeModal = () =>
@@ -182,7 +191,7 @@ export default function NetworkPage() {
   const followingAccepted = networkData.following
     .filter((f) => f.requestStatus === "ACCEPTED")
     .map((f) => ({
-      id: f.followingID,
+      id: f.id,
       universityID: f.followingID,
       name: f.following.name,
       department: f.following.department,
@@ -194,7 +203,7 @@ export default function NetworkPage() {
   const followingSent = networkData.following
     .filter((f) => f.requestStatus === "PENDING")
     .map((f) => ({
-      id: f.followingID,
+      id: f.id,
       universityID: f.followingID,
       name: f.following.name,
       department: f.following.department,
@@ -208,7 +217,7 @@ export default function NetworkPage() {
   const followersAccepted = networkData.followers
     .filter((f) => f.requestStatus === "ACCEPTED")
     .map((f) => ({
-      id: f.followerID,
+      id: f.id,
       universityID: f.followerID,
       name: f.follower.name,
       department: f.follower.department,
@@ -220,7 +229,7 @@ export default function NetworkPage() {
   const followersReceived = networkData.followers
     .filter((f) => f.requestStatus === "PENDING")
     .map((f) => ({
-      id: f.followID,
+      id: f.id,
       universityID: f.followerID,
       name: f.follower.name,
       department: f.follower.department,
@@ -231,90 +240,146 @@ export default function NetworkPage() {
       mutualConnections: 0,
     }));
 
-  const collabOngoing = [
-    ...networkData.sentCollaborations
-      .filter(
-        (c) =>
-          c.requestStatus === "ACCEPTED" &&
-          c.project?.projectStatus !== "COMPLETED",
-      )
-      .map((c) => ({
-        id: c.requestID,
-        projectId: c.projectID,
-        name: c.project?.title || "Project",
-        partners: [c.receiver?.name || "Member"],
-        partnerID: c.receiverID,
-        avatar: "/default-avatar.svg",
-        status: c.project?.projectStatus || "ACTIVE",
-      })),
-    ...networkData.receivedCollaborations
-      .filter(
-        (c) =>
-          c.requestStatus === "ACCEPTED" &&
-          c.project?.projectStatus !== "COMPLETED",
-      )
-      .map((c) => ({
-        id: c.requestID,
-        projectId: c.projectID,
-        name: c.project?.title || "Project",
-        partners: [c.sender?.name || "Member"],
-        partnerID: c.senderID,
-        avatar: "/default-avatar.svg",
-        status: c.project?.projectStatus || "ACTIVE",
-      })),
+  const groupCollabs = (collabs) => {
+    const grouped = {};
+    const myID = networkData.currentUser?.universityID;
+
+    collabs.forEach((c) => {
+      const pid = c.projectID;
+      const creatorID = c.project?.universityID;
+      const isSent = networkData.sentCollaborations.some(
+        (sc) => sc.requestID === c.requestID,
+      );
+      const partnerName = isSent
+        ? c.receiver?.name || "Member"
+        : c.sender?.name || "Member";
+      const partnerID = isSent ? c.receiverID : c.senderID;
+
+      if (!grouped[pid]) {
+        const isCreatorMe = creatorID === myID;
+        grouped[pid] = {
+          isCreatorMe,
+          id: c.requestID,
+          projectId: pid,
+          name: c.project?.title || "Project",
+          creator: isCreatorMe
+            ? `${c.project?.creator?.name} (You)`
+            : c.project?.creator?.name || "Unknown",
+          team: [],
+          teamIDs: [],
+          avatar: "/default-avatar.svg",
+          status: c.project?.projectStatus || "ACTIVE",
+          createdAt: c.project?.createdAt,
+        };
+
+        // Always add current user ("You") if they are not the creator
+        if (myID && myID !== creatorID) {
+          const myNameWithYou = networkData.currentUser?.name
+            ? `${networkData.currentUser.name} (You)`
+            : "You";
+          grouped[pid].team.push(myNameWithYou);
+          grouped[pid].teamIDs.push(myID);
+        }
+      }
+
+      // Add partner if not creator and not already added
+      if (
+        partnerID !== creatorID &&
+        partnerID !== myID &&
+        !grouped[pid].teamIDs.includes(partnerID)
+      ) {
+        const isPartnerMe = partnerID === myID;
+        const finalPartnerName = isPartnerMe
+          ? `${partnerName} (You)`
+          : partnerName;
+        grouped[pid].team.push(finalPartnerName);
+        grouped[pid].teamIDs.push(partnerID);
+      }
+    });
+    return Object.values(grouped);
+  };
+
+  const allAcceptedCollabs = [
+    ...networkData.sentCollaborations.filter(
+      (c) => c.requestStatus === "ACCEPTED",
+    ),
+    ...networkData.receivedCollaborations.filter(
+      (c) => c.requestStatus === "ACCEPTED",
+    ),
   ];
 
-  const collabFinished = [
-    ...networkData.sentCollaborations
-      .filter(
-        (c) =>
-          c.requestStatus === "ACCEPTED" &&
-          c.project?.projectStatus === "COMPLETED",
-      )
-      .map((c) => ({
-        id: c.requestID,
-        projectId: c.projectID,
-        name: c.project?.title || "Project",
-        partners: [c.receiver?.name || "Member"],
-        partnerID: c.receiverID,
-        avatar: "/default-avatar.svg",
-        status: "COMPLETED",
-      })),
-    ...networkData.receivedCollaborations
-      .filter(
-        (c) =>
-          c.requestStatus === "ACCEPTED" &&
-          c.project?.projectStatus === "COMPLETED",
-      )
-      .map((c) => ({
-        id: c.requestID,
-        projectId: c.projectID,
-        name: c.project?.title || "Project",
-        partners: [c.sender?.name || "Member"],
-        partnerID: c.senderID,
-        avatar: "/default-avatar.svg",
-        status: "COMPLETED",
-      })),
-  ];
+  const collabOngoing = groupCollabs(
+    allAcceptedCollabs.filter((c) => c.project?.projectStatus !== "COMPLETED"),
+  );
+
+  const collabFinished = groupCollabs(
+    allAcceptedCollabs.filter((c) => c.project?.projectStatus === "COMPLETED"),
+  );
 
   const collabReceived = networkData.receivedCollaborations
-    .filter((c) => c.requestStatus === "PENDING")
+    .filter(
+      (c) =>
+        c.requestStatus === "PENDING" &&
+        c.receiverID === c.project?.universityID,
+    )
     .map((c) => ({
       id: c.requestID,
+      projectId: c.projectID,
       name: c.project?.title || "Project",
       from: c.sender?.name,
+      senderID: c.senderID,
       avatar: "/default-avatar.svg",
       status: "PENDING",
+      isInvite: false,
+    }));
+
+  const collabInvitesReceived = networkData.receivedCollaborations
+    .filter(
+      (c) =>
+        c.requestStatus === "PENDING" &&
+        c.receiverID !== c.project?.universityID,
+    )
+    .map((c) => ({
+      id: c.requestID,
+      projectId: c.projectID,
+      name: c.project?.title || "Project",
+      from: c.sender?.name,
+      senderID: c.senderID,
+      avatar: "/default-avatar.svg",
+      status: "PENDING",
+      isInvite: true,
     }));
 
   const collabSent = networkData.sentCollaborations
-    .filter((c) => c.requestStatus === "PENDING")
+    .filter(
+      (c) =>
+        c.requestStatus === "PENDING" && c.senderID !== c.project?.universityID,
+    )
     .map((c) => ({
       id: c.requestID,
+      projectId: c.projectID,
       name: c.project?.title || "Project",
       to: c.receiver?.name,
+      receiverID: c.receiverID,
       avatar: "/default-avatar.svg",
       status: "PENDING",
+      isInvite: false,
+    }));
+
+  const collabInvitesSent = networkData.sentCollaborations
+    .filter(
+      (c) =>
+        c.requestStatus === "PENDING" && c.senderID === c.project?.universityID,
+    )
+    .map((c) => ({
+      id: c.requestID,
+      projectId: c.projectID,
+      name: c.project?.title || "Project",
+      to: c.receiver?.name,
+      receiverID: c.receiverID,
+      avatar: "/default-avatar.svg",
+      status: "PENDING",
+      isInvite: true,
     }));
 
   const tabs = [
@@ -337,7 +402,9 @@ export default function NetworkPage() {
         collabOngoing.length +
         collabFinished.length +
         collabReceived.length +
-        collabSent.length,
+        collabSent.length +
+        collabInvitesSent.length +
+        collabInvitesReceived.length,
       icon: Briefcase,
     },
   ];
@@ -353,18 +420,18 @@ export default function NetworkPage() {
     switch (activeTab) {
       case "following":
         return subTab === "accepted"
-          ? followingAccepted.map((u) => (
+          ? followingAccepted.map((u, index) => (
               <NetworkCard
-                key={u.id}
+                key={u.id || `follow-acc-${index}`}
                 user={u}
                 type="following"
                 onAction={handleUnfollowRequest}
                 onViewProfile={openProfile}
               />
             ))
-          : followingSent.map((u) => (
+          : followingSent.map((u, index) => (
               <FollowRequestCard
-                key={u.id}
+                key={u.id || `follow-sent-${index}`}
                 request={u}
                 type="sent"
                 onAction={handleFollowRequest}
@@ -373,18 +440,18 @@ export default function NetworkPage() {
             ));
       case "followers":
         return subTab === "accepted"
-          ? followersAccepted.map((u) => (
+          ? followersAccepted.map((u, index) => (
               <NetworkCard
-                key={u.id}
+                key={u.id || `follower-acc-${index}`}
                 user={u}
                 type="follower"
                 onAction={(id) => handleUnfollowRequest(id, true)}
                 onViewProfile={openProfile}
               />
             ))
-          : followersReceived.map((u) => (
+          : followersReceived.map((u, index) => (
               <FollowRequestCard
-                key={u.id}
+                key={u.id || `follower-rec-${index}`}
                 request={u}
                 type="received"
                 onAction={handleFollowRequest}
@@ -393,38 +460,68 @@ export default function NetworkPage() {
             ));
       case "collaborations":
         if (subTab === "ongoing")
-          return collabOngoing.map((c) => (
+          return collabOngoing.map((c, index) => (
             <CollaborationCard
-              key={c.id}
+              key={c.id || `collab-on-${index}`}
               collab={c}
               onLeave={() => handleLeaveCollaboration(c.id)}
+              onViewProfile={openProfile}
+              onViewProject={openProject}
             />
           ));
         if (subTab === "finished")
-          return collabFinished.map((c) => (
+          return collabFinished.map((c, index) => (
             <CollaborationCard
-              key={c.id}
+              key={c.id || `collab-fin-${index}`}
               collab={c}
               onLeave={() => handleLeaveCollaboration(c.id)}
+              onViewProfile={openProfile}
+              onViewProject={openProject}
             />
           ));
 
         if (subTab === "received")
-          return collabReceived.map((r) => (
+          return collabReceived.map((r, index) => (
             <CollabRequestCard
-              key={r.id}
+              key={r.id || `collab-rec-${index}`}
               request={r}
               type="received"
               onAction={handleCollabRequest}
+              onViewProfile={openProfile}
+              onViewProject={openProject}
+            />
+          ));
+        if (subTab === "invites_rec")
+          return collabInvitesReceived.map((r, index) => (
+            <CollabRequestCard
+              key={r.id || `collab-inv-rec-${index}`}
+              request={r}
+              type="received"
+              onAction={handleCollabRequest}
+              onViewProfile={openProfile}
+              onViewProject={openProject}
             />
           ));
         if (subTab === "sent")
-          return collabSent.map((r) => (
+          return collabSent.map((r, index) => (
             <CollabRequestCard
-              key={r.id}
+              key={r.id || `collab-sent-${index}`}
               request={r}
               type="sent"
               onAction={handleCollabRequest}
+              onViewProfile={openProfile}
+              onViewProject={openProject}
+            />
+          ));
+        if (subTab === "invites_sent")
+          return collabInvitesSent.map((r, index) => (
+            <CollabRequestCard
+              key={r.id || `collab-inv-sent-${index}`}
+              request={r}
+              type="sent"
+              onAction={handleCollabRequest}
+              onViewProfile={openProfile}
+              onViewProject={openProject}
             />
           ));
         return null;
@@ -483,10 +580,22 @@ export default function NetworkPage() {
               count={collabReceived.length}
             />
             <SubTabButton
+              active={subTab === "invites_rec"}
+              onClick={() => setSubTab("invites_rec")}
+              label="Invites (In)"
+              count={collabInvitesReceived.length}
+            />
+            <SubTabButton
               active={subTab === "sent"}
               onClick={() => setSubTab("sent")}
               label="Sent"
               count={collabSent.length}
+            />
+            <SubTabButton
+              active={subTab === "invites_sent"}
+              onClick={() => setSubTab("invites_sent")}
+              label="Invites (Out)"
+              count={collabInvitesSent.length}
             />
             <SubTabButton
               active={subTab === "ongoing"}
@@ -535,6 +644,37 @@ export default function NetworkPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {activeTab === "collaborations" && (
+          <div className="col-span-full mb-2 p-6 bg-gray-50/50 rounded-3xl border border-gray-100">
+            <h2 className="text-lg font-black text-gray-900 mb-1">
+              {subTab === "received"
+                ? "Received Requests"
+                : subTab === "invites_rec"
+                  ? "Incoming Invitations"
+                  : subTab === "sent"
+                    ? "Sent Requests"
+                    : subTab === "invites_sent"
+                      ? "Sent Invitations"
+                      : subTab === "ongoing"
+                        ? "Ongoing Collaborations"
+                        : "Finished Collaborations"}
+            </h2>
+            <p className="text-sm text-gray-500 font-medium">
+              {subTab === "received" &&
+                "This is specifically for researchers applying for a spot on your project team. You are the lead here."}
+              {subTab === "invites_rec" &&
+                "These are incoming invitations from other leads asking you to join their project"}
+              {subTab === "sent" &&
+                "These are your applications to join someone elses project team"}
+              {subTab === "invites_sent" &&
+                "These are the recruitment invitations you have sent to other users for joining your project team"}
+              {subTab === "ongoing" &&
+                "These remain for your active research collaborations."}
+              {subTab === "finished" &&
+                "These remain for your completed research collaborations."}
+            </p>
+          </div>
+        )}
         {renderContent()}
       </div>
 
@@ -553,6 +693,12 @@ export default function NetworkPage() {
         onClose={() => setIsUserModalOpen(false)}
         universityID={selectedUserID}
       />
+
+      <ProjectModal
+        isOpen={isProjectModalOpen}
+        onClose={() => setIsProjectModalOpen(false)}
+        projectID={selectedProjectID}
+      />
     </div>
   );
 }
@@ -561,10 +707,7 @@ function NetworkCard({ user, type, onAction, onViewProfile }) {
   return (
     <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-amu-green/30 transition-all group">
       <div className="flex justify-between items-start mb-4">
-        <div
-          onClick={() => onViewProfile(user.universityID || user.id)}
-          className="relative h-16 w-16 rounded-2xl overflow-hidden shadow-lg border-2 border-white cursor-pointer hover:opacity-80 transition-opacity"
-        >
+        <div className="relative h-16 w-16 rounded-2xl overflow-hidden shadow-lg border-2 border-white bg-gray-50">
           <Image
             src={user.avatar}
             alt={user.name}
@@ -578,10 +721,7 @@ function NetworkCard({ user, type, onAction, onViewProfile }) {
       </div>
 
       <div className="mb-6">
-        <h3
-          onClick={() => onViewProfile(user.universityID || user.id)}
-          className="text-lg font-black text-gray-900 group-hover:text-amu-green transition-colors cursor-pointer"
-        >
+        <h3 className="text-lg font-black text-gray-900 group-hover:text-amu-green transition-colors">
           {user.name}
         </h3>
         <p className="text-sm font-bold text-amu-green mb-1">{user.role}</p>
@@ -620,7 +760,10 @@ function NetworkCard({ user, type, onAction, onViewProfile }) {
   );
 }
 
-function CollaborationCard({ collab, onLeave, onViewProfile }) {
+function CollaborationCard({ collab, onLeave, onViewProfile, onViewProject }) {
+  const displayTeam = collab.team.slice(0, 2);
+  const hasMore = collab.team.length > 2;
+
   return (
     <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-amu-green/30 transition-all group relative overflow-hidden">
       <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
@@ -631,33 +774,53 @@ function CollaborationCard({ collab, onLeave, onViewProfile }) {
         <div className="relative h-12 w-12 rounded-xl overflow-hidden shadow-md border-2 border-white">
           <Image
             src={collab.avatar}
-            alt={collab.partners.join(", ")}
+            alt={collab.name}
             fill
             className="object-cover"
           />
         </div>
-        <div className="flex-1">
-          <Link href={`/projects/${collab.projectId}`}>
-            <h4 className="font-bold text-gray-900 leading-tight line-clamp-1 group-hover:text-amu-green transition-colors cursor-pointer">
-              {collab.name}
-            </h4>
-          </Link>
-          <p className="text-sm text-gray-500">
-            with{" "}
-            <span
-              onClick={() => onViewProfile(collab.partnerID)}
-              className="font-bold text-amu-green cursor-pointer hover:underline"
-            >
-              {collab.partners.join(" & ")}
-            </span>
-          </p>
+        <div className="flex-1 min-w-0">
+          <h4
+            onClick={() => onViewProject(collab.projectId)}
+            className="font-bold text-gray-900 leading-tight line-clamp-1 group-hover:text-amu-green transition-colors cursor-pointer"
+          >
+            {collab.name}
+          </h4>
+          <div className="mt-1 space-y-0.5">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+              Creator:{" "}
+              <span className="text-gray-700 normal-case font-bold">
+                {collab.creator}
+              </span>
+            </p>
+            {collab.team.length > 0 && (
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                Team:{" "}
+                <span className="text-amu-green normal-case font-bold">
+                  {displayTeam.map((name, idx) => (
+                    <React.Fragment key={idx}>
+                      <span
+                        onClick={() => onViewProfile(collab.teamIDs[idx])}
+                        className="cursor-pointer hover:underline"
+                      >
+                        {name}
+                      </span>
+                      {idx < displayTeam.length - 1 ? ", " : ""}
+                    </React.Fragment>
+                  ))}
+                  {hasMore && ` +${collab.team.length - 2} others`}
+                </span>
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="mb-6 flex items-center justify-between">
-        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-          Project Status
-        </p>
+        <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+          <Clock className="h-3 w-3" />
+          {new Date(collab.createdAt).toLocaleDateString()}
+        </div>
         <span
           className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg border ${
             collab.status === "ACTIVE"
@@ -678,30 +841,31 @@ function CollaborationCard({ collab, onLeave, onViewProfile }) {
         >
           Project Details
         </Link>
-        <button
-          onClick={onLeave}
-          className="px-4 py-3 bg-gray-50 text-gray-400 font-bold rounded-xl hover:bg-red-50 hover:text-red-500 transition-all"
-          title="Stop Collaborating"
-        >
-          <UserMinus className="h-5 w-5" />
-        </button>
+        {!collab.isCreatorMe && (
+          <button
+            onClick={onLeave}
+            className="px-4 py-3 bg-gray-50 text-gray-400 font-bold rounded-xl hover:bg-red-50 hover:text-red-500 transition-all"
+            title="Stop Collaborating"
+          >
+            <UserMinus className="h-5 w-5" />
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
-function CollabRequestCard({ request, type, onAction, onViewProfile }) {
+function CollabRequestCard({
+  request,
+  type,
+  onAction,
+  onViewProfile,
+  onViewProject,
+}) {
   return (
     <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-amu-green/30 transition-all group">
       <div className="flex items-center gap-4 mb-4">
-        <div
-          onClick={() =>
-            onViewProfile(
-              type === "received" ? request.senderID : request.receiverID,
-            )
-          }
-          className="relative h-14 w-14 rounded-2xl overflow-hidden shadow-md border-2 border-white text-transparent cursor-pointer hover:opacity-80 transition-opacity"
-        >
+        <div className="relative h-14 w-14 rounded-2xl overflow-hidden shadow-md border-2 border-white text-transparent bg-gray-50">
           <Image
             src={request.avatar}
             alt={type === "received" ? request.from : request.to}
@@ -710,9 +874,23 @@ function CollabRequestCard({ request, type, onAction, onViewProfile }) {
           />
         </div>
         <div className="flex-1">
-          <h4 className="font-bold text-gray-900 leading-tight">
-            {request.name}
-          </h4>
+          <div className="flex items-center gap-2 mb-1">
+            <h4
+              onClick={() => onViewProject(request.projectId)}
+              className="font-bold text-gray-900 leading-tight cursor-pointer hover:text-amu-green transition-colors"
+            >
+              {request.name}
+            </h4>
+            <span
+              className={`px-2 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-md border ${
+                request.isInvite
+                  ? "bg-amu-gold/10 text-amu-gold border-amu-gold/20"
+                  : "bg-blue-50 text-blue-500 border-blue-100"
+              }`}
+            >
+              {request.isInvite ? "Invite" : "Request"}
+            </span>
+          </div>
           <p className="text-sm text-gray-500">
             {type === "received" ? "From " : "To "}
             <span
@@ -732,11 +910,6 @@ function CollabRequestCard({ request, type, onAction, onViewProfile }) {
             {request.status}
           </div>
         )}
-      </div>
-
-      <div className="mb-6 p-3 bg-gray-100/50 rounded-2xl border border-gray-100 italic text-sm text-gray-600">
-        &quot;Interested in collaborating on {request.name.toLowerCase()}{" "}
-        research...&quot;
       </div>
 
       <div className="flex gap-2">
@@ -769,14 +942,11 @@ function CollabRequestCard({ request, type, onAction, onViewProfile }) {
   );
 }
 
-function FollowRequestCard({ request, type, onAction, onViewProfile }) {
+function FollowRequestCard({ request, type, onAction }) {
   return (
     <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-amu-green/30 transition-all group">
       <div className="flex items-center gap-4 mb-6">
-        <div
-          onClick={() => onViewProfile(request.universityID || request.id)}
-          className="relative h-14 w-14 rounded-2xl overflow-hidden shadow-md border-2 border-white cursor-pointer hover:opacity-80 transition-opacity"
-        >
+        <div className="relative h-14 w-14 rounded-2xl overflow-hidden shadow-md border-2 border-white bg-gray-50">
           <Image
             src={request.avatar}
             alt={request.name}
@@ -785,10 +955,7 @@ function FollowRequestCard({ request, type, onAction, onViewProfile }) {
           />
         </div>
         <div className="flex-1">
-          <h4
-            onClick={() => onViewProfile(request.universityID || request.id)}
-            className="font-bold text-gray-900 leading-tight group-hover:text-amu-green transition-colors cursor-pointer"
-          >
+          <h4 className="font-bold text-gray-900 leading-tight">
             {request.name}
           </h4>
           <p className="text-xs font-semibold text-gray-500">

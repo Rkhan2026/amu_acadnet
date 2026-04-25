@@ -27,6 +27,29 @@ export async function GET(request, { params }) {
             projectStatus: true,
             createdAt: true,
             moderationStatus: true,
+            teamMembers: {
+              select: {
+                name: true,
+                universityID: true,
+              },
+            },
+            collaborations: {
+              where: { requestStatus: "ACCEPTED" },
+              select: {
+                sender: {
+                  select: {
+                    name: true,
+                    universityID: true,
+                  },
+                },
+                receiver: {
+                  select: {
+                    name: true,
+                    universityID: true,
+                  },
+                },
+              },
+            },
           },
         },
         sentCollaborations: {
@@ -42,6 +65,18 @@ export async function GET(request, { params }) {
                 projectStatus: true,
                 createdAt: true,
                 moderationStatus: true,
+                creator: {
+                  select: {
+                    name: true,
+                    universityID: true,
+                  },
+                },
+              },
+            },
+            receiver: {
+              select: {
+                name: true,
+                universityID: true,
               },
             },
           },
@@ -59,6 +94,18 @@ export async function GET(request, { params }) {
                 projectStatus: true,
                 createdAt: true,
                 moderationStatus: true,
+                creator: {
+                  select: {
+                    name: true,
+                    universityID: true,
+                  },
+                },
+              },
+            },
+            sender: {
+              select: {
+                name: true,
+                universityID: true,
               },
             },
           },

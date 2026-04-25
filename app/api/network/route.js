@@ -14,7 +14,13 @@ export async function GET(_request) {
     const sentCollaborations = await prisma.collaboration.findMany({
       where: { senderID: universityID },
       include: {
-        project: true,
+        project: {
+          include: {
+            creator: {
+              select: { name: true },
+            },
+          },
+        },
         receiver: { select: { name: true, department: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -23,7 +29,13 @@ export async function GET(_request) {
     const receivedCollaborations = await prisma.collaboration.findMany({
       where: { receiverID: universityID },
       include: {
-        project: true,
+        project: {
+          include: {
+            creator: {
+              select: { name: true },
+            },
+          },
+        },
         sender: { select: { name: true, department: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -61,7 +73,13 @@ export async function GET(_request) {
       },
     });
 
+    const currentUser = await prisma.user.findUnique({
+      where: { universityID },
+      select: { name: true, universityID: true },
+    });
+
     return NextResponse.json({
+      currentUser,
       sentCollaborations,
       receivedCollaborations,
       following,

@@ -17,6 +17,29 @@ export async function GET(request) {
       where: whereClause,
       include: {
         creator: { select: { name: true, department: true } },
+        teamMembers: {
+          select: {
+            name: true,
+            universityID: true,
+          },
+        },
+        collaborations: {
+          where: { requestStatus: "ACCEPTED" },
+          select: {
+            sender: {
+              select: {
+                name: true,
+                universityID: true,
+              },
+            },
+            receiver: {
+              select: {
+                name: true,
+                universityID: true,
+              },
+            },
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
