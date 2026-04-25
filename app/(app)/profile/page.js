@@ -28,9 +28,12 @@ export default function ProfilePage() {
             stats: {
               projects: profileData.createdProjects?.length || 0,
               citations: 0,
-              collaborators:
-                (profileData.sentCollaborations?.length || 0) +
-                (profileData.receivedCollaborations?.length || 0),
+              collaborators: [
+                ...(profileData.sentCollaborations || []),
+                ...(profileData.receivedCollaborations || []),
+              ].filter(
+                (c) => c.project.universityID !== profileData.universityID,
+              ).length,
             },
           });
         }

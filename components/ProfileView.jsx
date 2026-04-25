@@ -102,7 +102,11 @@ const ProfileView = ({ user, onEdit }) => {
           </div>
           <div className="text-center group-hover:bg-gray-50 p-4 rounded-3xl transition-all">
             <p className="text-2xl lg:text-3xl font-black text-blue-500">
-              {user.stats?.collaborators || 0}
+              {[
+                ...(user.sentCollaborations || []),
+                ...(user.receivedCollaborations || []),
+              ].filter((c) => c.project.universityID !== user.universityID)
+                .length || 0}
             </p>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
               Collaborations
@@ -255,49 +259,56 @@ const ProfileView = ({ user, onEdit }) => {
               {[
                 ...(user.sentCollaborations || []),
                 ...(user.receivedCollaborations || []),
-              ].length > 0 ? (
+              ].filter(
+                (collab) => collab.project.universityID !== user.universityID,
+              ).length > 0 ? (
                 [
                   ...(user.sentCollaborations || []),
                   ...(user.receivedCollaborations || []),
-                ].map((collab, index) => (
-                  <Link
-                    key={`collab-${index}`}
-                    href={`/projects/${collab.project.projectID}`}
-                    className="block bg-white border border-gray-100 p-8 rounded-3xl hover:border-amu-gold/30 hover:shadow-xl hover:shadow-gray-200/40 transition-all group relative overflow-hidden"
-                  >
-                    <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-all">
-                      <ExternalLink className="h-5 w-5 text-amu-gold" />
-                    </div>
+                ]
+                  .filter(
+                    (collab) =>
+                      collab.project.universityID !== user.universityID,
+                  )
+                  .map((collab, index) => (
+                    <Link
+                      key={`collab-${index}`}
+                      href={`/projects/${collab.project.projectID}`}
+                      className="block bg-white border border-gray-100 p-8 rounded-3xl hover:border-amu-gold/30 hover:shadow-xl hover:shadow-gray-200/40 transition-all group relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-all">
+                        <ExternalLink className="h-5 w-5 text-amu-gold" />
+                      </div>
 
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                      <div className="flex-1 space-y-4">
-                        <div className="flex flex-wrap items-center gap-3">
-                          <span className="px-3 py-1 bg-amu-gold/5 text-amu-gold text-[10px] font-black uppercase tracking-widest rounded-lg border border-amu-gold/10">
-                            {collab.project.researchDomain}
-                          </span>
-                          <span
-                            className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg ${
-                              collab.project.projectStatus === "ACTIVE"
-                                ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                                : "bg-amu-gold/5 text-amu-gold border border-amu-gold/10"
-                            }`}
-                          >
-                            {collab.project.projectStatus}
-                          </span>
-                        </div>
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div className="flex-1 space-y-4">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <span className="px-3 py-1 bg-amu-gold/5 text-amu-gold text-[10px] font-black uppercase tracking-widest rounded-lg border border-amu-gold/10">
+                              {collab.project.researchDomain}
+                            </span>
+                            <span
+                              className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg ${
+                                collab.project.projectStatus === "ACTIVE"
+                                  ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                                  : "bg-amu-gold/5 text-amu-gold border border-amu-gold/10"
+                              }`}
+                            >
+                              {collab.project.projectStatus}
+                            </span>
+                          </div>
 
-                        <div>
-                          <h4 className="font-black text-gray-900 text-xl group-hover:text-amu-gold transition-colors mb-2">
-                            {collab.project.title}
-                          </h4>
-                          <p className="text-gray-500 text-sm font-medium line-clamp-2 max-w-2xl">
-                            {collab.project.description}
-                          </p>
+                          <div>
+                            <h4 className="font-black text-gray-900 text-xl group-hover:text-amu-gold transition-colors mb-2">
+                              {collab.project.title}
+                            </h4>
+                            <p className="text-gray-500 text-sm font-medium line-clamp-2 max-w-2xl">
+                              {collab.project.description}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Link>
-                ))
+                    </Link>
+                  ))
               ) : (
                 <div className="col-span-full py-12 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
                   <CheckCircle2 className="h-8 w-8 text-gray-300 mb-3" />

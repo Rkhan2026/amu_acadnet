@@ -35,6 +35,7 @@ export async function GET(request, { params }) {
             project: {
               select: {
                 projectID: true,
+                universityID: true,
                 title: true,
                 description: true,
                 researchDomain: true,
@@ -51,6 +52,7 @@ export async function GET(request, { params }) {
             project: {
               select: {
                 projectID: true,
+                universityID: true,
                 title: true,
                 description: true,
                 researchDomain: true,
