@@ -277,7 +277,7 @@ const ProfileView = ({ user, onEdit }) => {
                     Last Updated
                   </p>
                   <p className="font-bold text-gray-900 text-sm">
-                    {formatDate(user.lastUpdated)}
+                    {formatDate(user.academicProfile?.lastUpdated)}
                   </p>
                 </div>
               </div>
