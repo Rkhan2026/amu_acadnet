@@ -105,7 +105,7 @@ const ProfileView = ({ user, onEdit }) => {
               {user.stats?.collaborators || 0}
             </p>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
-              Collaborators
+              Collaborations
             </p>
           </div>
         </div>
@@ -238,6 +238,72 @@ const ProfileView = ({ user, onEdit }) => {
                   >
                     Create your first project
                   </Link>
+                </div>
+              )}
+            </div>
+          </div>
+          {/* Collaborations Section */}
+          <div className="bg-white rounded-4xl p-8 shadow-xl shadow-gray-200/50 border border-gray-100">
+            <h3 className="text-xl font-black text-gray-900 mb-8 flex items-center gap-3">
+              <div className="p-2 bg-amu-gold/10 rounded-xl">
+                <CheckCircle2 className="h-5 w-5 text-amu-gold" />
+              </div>
+              Collaborations
+            </h3>
+
+            <div className="space-y-6">
+              {[
+                ...(user.sentCollaborations || []),
+                ...(user.receivedCollaborations || []),
+              ].length > 0 ? (
+                [
+                  ...(user.sentCollaborations || []),
+                  ...(user.receivedCollaborations || []),
+                ].map((collab, index) => (
+                  <Link
+                    key={`collab-${index}`}
+                    href={`/projects/${collab.project.projectID}`}
+                    className="block bg-white border border-gray-100 p-8 rounded-3xl hover:border-amu-gold/30 hover:shadow-xl hover:shadow-gray-200/40 transition-all group relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-all">
+                      <ExternalLink className="h-5 w-5 text-amu-gold" />
+                    </div>
+
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      <div className="flex-1 space-y-4">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="px-3 py-1 bg-amu-gold/5 text-amu-gold text-[10px] font-black uppercase tracking-widest rounded-lg border border-amu-gold/10">
+                            {collab.project.researchDomain}
+                          </span>
+                          <span
+                            className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg ${
+                              collab.project.projectStatus === "ACTIVE"
+                                ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                                : "bg-amu-gold/5 text-amu-gold border border-amu-gold/10"
+                            }`}
+                          >
+                            {collab.project.projectStatus}
+                          </span>
+                        </div>
+
+                        <div>
+                          <h4 className="font-black text-gray-900 text-xl group-hover:text-amu-gold transition-colors mb-2">
+                            {collab.project.title}
+                          </h4>
+                          <p className="text-gray-500 text-sm font-medium line-clamp-2 max-w-2xl">
+                            {collab.project.description}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="col-span-full py-12 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
+                  <CheckCircle2 className="h-8 w-8 text-gray-300 mb-3" />
+                  <p className="text-gray-400 font-bold text-sm uppercase tracking-widest">
+                    No collaborations yet
+                  </p>
                 </div>
               )}
             </div>

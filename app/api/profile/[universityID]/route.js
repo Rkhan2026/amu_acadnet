@@ -31,11 +31,35 @@ export async function GET(request, { params }) {
         },
         sentCollaborations: {
           where: { requestStatus: "ACCEPTED" },
-          select: { requestID: true },
+          include: {
+            project: {
+              select: {
+                projectID: true,
+                title: true,
+                description: true,
+                researchDomain: true,
+                projectStatus: true,
+                createdAt: true,
+                moderationStatus: true,
+              },
+            },
+          },
         },
         receivedCollaborations: {
           where: { requestStatus: "ACCEPTED" },
-          select: { requestID: true },
+          include: {
+            project: {
+              select: {
+                projectID: true,
+                title: true,
+                description: true,
+                researchDomain: true,
+                projectStatus: true,
+                createdAt: true,
+                moderationStatus: true,
+              },
+            },
+          },
         },
       },
     });

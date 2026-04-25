@@ -280,6 +280,73 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
                           )}
                         </div>
                       </section>
+                      {/* Collaborating In Section */}
+                      <section>
+                        <h3 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-3">
+                          <div className="p-2 bg-amu-gold/10 rounded-xl">
+                            <CheckCircle2 className="h-5 w-5 text-amu-gold" />
+                          </div>
+                          Collaborations
+                        </h3>
+                        <div className="space-y-4">
+                          {[
+                            ...(user.sentCollaborations || []),
+                            ...(user.receivedCollaborations || []),
+                          ].length > 0 ? (
+                            [
+                              ...(user.sentCollaborations || []),
+                              ...(user.receivedCollaborations || []),
+                            ].map((collab, index) => (
+                              <button
+                                key={`collab-${index}`}
+                                onClick={() => {
+                                  setSelectedProjectID(
+                                    collab.project.projectID,
+                                  );
+                                  setIsProjectModalOpen(true);
+                                }}
+                                className="w-full text-left block bg-white border border-gray-100 p-6 rounded-3xl hover:border-amu-gold/30 hover:shadow-xl hover:shadow-gray-200/40 transition-all group"
+                              >
+                                <div className="flex justify-between items-start mb-4">
+                                  <div>
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <span className="px-2.5 py-1 bg-gray-50 text-gray-500 text-[10px] font-black uppercase tracking-widest rounded-lg border border-gray-100">
+                                        {collab.project.researchDomain}
+                                      </span>
+                                      <span
+                                        className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg ${
+                                          collab.project.projectStatus ===
+                                          "ACTIVE"
+                                            ? "bg-emerald-50 text-emerald-600"
+                                            : "bg-amu-gold/5 text-amu-gold"
+                                        }`}
+                                      >
+                                        {collab.project.projectStatus}
+                                      </span>
+                                    </div>
+                                    <h4 className="font-black text-gray-900 text-lg group-hover:text-amu-gold transition-colors">
+                                      {collab.project.title}
+                                    </h4>
+                                  </div>
+                                  <div className="p-2 bg-gray-50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <ExternalLink className="h-4 w-4 text-gray-400" />
+                                  </div>
+                                </div>
+                                <p className="text-gray-500 text-sm line-clamp-2 font-medium">
+                                  {collab.project.description}
+                                </p>
+                              </button>
+                            ))
+                          ) : (
+                            <div className="py-12 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
+                              <CheckCircle2 className="h-8 w-8 text-gray-300 mb-3" />
+                              <p className="text-gray-400 font-bold text-sm uppercase tracking-widest">
+                                No collaborations yet
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </section>
                     </div>
 
                     {/* Right Column - Stats & Interests */}
@@ -357,10 +424,11 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
                         </div>
                         <div className="bg-gray-50 p-6 rounded-3xl text-center">
                           <p className="text-2xl font-black text-amu-gold">
-                            {user.followers?.length || 0}
+                            {(user.sentCollaborations?.length || 0) +
+                              (user.receivedCollaborations?.length || 0)}
                           </p>
                           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
-                            Followers
+                            Collaborations
                           </p>
                         </div>
                       </div>
