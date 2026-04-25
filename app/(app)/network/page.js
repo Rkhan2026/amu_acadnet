@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import UserProfileModal from "@/components/UserProfileModal";
 
 export default function NetworkPage() {
   const [activeTab, setActiveTab] = useState("following");
@@ -33,6 +34,14 @@ export default function NetworkPage() {
     onConfirm: () => {},
     variant: "danger",
   });
+
+  const [selectedUserID, setSelectedUserID] = useState(null);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+
+  const openProfile = (uid) => {
+    setSelectedUserID(uid);
+    setIsUserModalOpen(true);
+  };
 
   const closeModal = () =>
     setModalConfig((prev) => ({ ...prev, isOpen: false }));
@@ -174,6 +183,7 @@ export default function NetworkPage() {
     .filter((f) => f.requestStatus === "ACCEPTED")
     .map((f) => ({
       id: f.followingID,
+      universityID: f.followingID,
       name: f.following.name,
       department: f.following.department,
       avatar: "/default-avatar.svg",
@@ -185,6 +195,7 @@ export default function NetworkPage() {
     .filter((f) => f.requestStatus === "PENDING")
     .map((f) => ({
       id: f.followingID,
+      universityID: f.followingID,
       name: f.following.name,
       department: f.following.department,
       avatar: "/default-avatar.svg",
@@ -198,6 +209,7 @@ export default function NetworkPage() {
     .filter((f) => f.requestStatus === "ACCEPTED")
     .map((f) => ({
       id: f.followerID,
+      universityID: f.followerID,
       name: f.follower.name,
       department: f.follower.department,
       avatar: "/default-avatar.svg",
@@ -209,12 +221,12 @@ export default function NetworkPage() {
     .filter((f) => f.requestStatus === "PENDING")
     .map((f) => ({
       id: f.followID,
+      universityID: f.followerID,
       name: f.follower.name,
       department: f.follower.department,
       avatar: "/default-avatar.svg",
       role: "USER",
       status: "PENDING",
-      appliedAt: new Date(f.createdAt).toLocaleDateString(),
       followers: f.follower.followers?.length || 0,
       mutualConnections: 0,
     }));
@@ -231,6 +243,7 @@ export default function NetworkPage() {
         projectId: c.projectID,
         name: c.project?.title || "Project",
         partners: [c.receiver?.name || "Member"],
+        partnerID: c.receiverID,
         avatar: "/default-avatar.svg",
         status: c.project?.projectStatus || "ACTIVE",
       })),
@@ -245,6 +258,7 @@ export default function NetworkPage() {
         projectId: c.projectID,
         name: c.project?.title || "Project",
         partners: [c.sender?.name || "Member"],
+        partnerID: c.senderID,
         avatar: "/default-avatar.svg",
         status: c.project?.projectStatus || "ACTIVE",
       })),
@@ -262,6 +276,7 @@ export default function NetworkPage() {
         projectId: c.projectID,
         name: c.project?.title || "Project",
         partners: [c.receiver?.name || "Member"],
+        partnerID: c.receiverID,
         avatar: "/default-avatar.svg",
         status: "COMPLETED",
       })),
@@ -276,6 +291,7 @@ export default function NetworkPage() {
         projectId: c.projectID,
         name: c.project?.title || "Project",
         partners: [c.sender?.name || "Member"],
+        partnerID: c.senderID,
         avatar: "/default-avatar.svg",
         status: "COMPLETED",
       })),
@@ -343,6 +359,7 @@ export default function NetworkPage() {
                 user={u}
                 type="following"
                 onAction={handleUnfollowRequest}
+                onViewProfile={openProfile}
               />
             ))
           : followingSent.map((u) => (
@@ -351,6 +368,7 @@ export default function NetworkPage() {
                 request={u}
                 type="sent"
                 onAction={handleFollowRequest}
+                onViewProfile={openProfile}
               />
             ));
       case "followers":
@@ -361,6 +379,7 @@ export default function NetworkPage() {
                 user={u}
                 type="follower"
                 onAction={(id) => handleUnfollowRequest(id, true)}
+                onViewProfile={openProfile}
               />
             ))
           : followersReceived.map((u) => (
@@ -369,6 +388,7 @@ export default function NetworkPage() {
                 request={u}
                 type="received"
                 onAction={handleFollowRequest}
+                onViewProfile={openProfile}
               />
             ));
       case "collaborations":
@@ -527,15 +547,24 @@ export default function NetworkPage() {
         confirmText={modalConfig.confirmText}
         variant={modalConfig.variant}
       />
+
+      <UserProfileModal
+        isOpen={isUserModalOpen}
+        onClose={() => setIsUserModalOpen(false)}
+        universityID={selectedUserID}
+      />
     </div>
   );
 }
 
-function NetworkCard({ user, type, onAction }) {
+function NetworkCard({ user, type, onAction, onViewProfile }) {
   return (
     <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-amu-green/30 transition-all group">
       <div className="flex justify-between items-start mb-4">
-        <div className="relative h-16 w-16 rounded-2xl overflow-hidden shadow-lg border-2 border-white">
+        <div
+          onClick={() => onViewProfile(user.universityID || user.id)}
+          className="relative h-16 w-16 rounded-2xl overflow-hidden shadow-lg border-2 border-white cursor-pointer hover:opacity-80 transition-opacity"
+        >
           <Image
             src={user.avatar}
             alt={user.name}
@@ -549,24 +578,23 @@ function NetworkCard({ user, type, onAction }) {
       </div>
 
       <div className="mb-6">
-        <h3 className="text-lg font-black text-gray-900 group-hover:text-amu-green transition-colors">
+        <h3
+          onClick={() => onViewProfile(user.universityID || user.id)}
+          className="text-lg font-black text-gray-900 group-hover:text-amu-green transition-colors cursor-pointer"
+        >
           {user.name}
         </h3>
         <p className="text-sm font-bold text-amu-green mb-1">{user.role}</p>
         <p className="text-xs font-semibold text-gray-500">{user.department}</p>
       </div>
 
-      <div className="flex items-center gap-2 mb-6 text-gray-400">
-        <Users className="h-4 w-4" />
-        <p className="text-[10px] font-bold uppercase tracking-wider">
-          {type === "following"
-            ? `${user.mutualConnections} Mutual Connections`
-            : `${user.followers} Followers`}
-        </p>
-      </div>
+      <div className="mb-6 h-4" />
 
       <div className="flex gap-2">
-        <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-amu-green/5 text-amu-green font-bold rounded-xl hover:bg-amu-green hover:text-white transition-all">
+        <button
+          onClick={() => onViewProfile(user.universityID || user.id)}
+          className="flex-1 flex items-center justify-center gap-2 py-3 bg-amu-green/5 text-amu-green font-bold rounded-xl hover:bg-amu-green hover:text-white transition-all"
+        >
           View Profile
         </button>
         {type === "following" && (
@@ -592,7 +620,7 @@ function NetworkCard({ user, type, onAction }) {
   );
 }
 
-function CollaborationCard({ collab, onLeave }) {
+function CollaborationCard({ collab, onLeave, onViewProfile }) {
   return (
     <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-amu-green/30 transition-all group relative overflow-hidden">
       <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
@@ -616,7 +644,10 @@ function CollaborationCard({ collab, onLeave }) {
           </Link>
           <p className="text-sm text-gray-500">
             with{" "}
-            <span className="font-bold text-amu-green">
+            <span
+              onClick={() => onViewProfile(collab.partnerID)}
+              className="font-bold text-amu-green cursor-pointer hover:underline"
+            >
               {collab.partners.join(" & ")}
             </span>
           </p>
@@ -659,11 +690,18 @@ function CollaborationCard({ collab, onLeave }) {
   );
 }
 
-function CollabRequestCard({ request, type, onAction }) {
+function CollabRequestCard({ request, type, onAction, onViewProfile }) {
   return (
     <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-amu-green/30 transition-all group">
       <div className="flex items-center gap-4 mb-4">
-        <div className="relative h-14 w-14 rounded-2xl overflow-hidden shadow-md border-2 border-white text-transparent">
+        <div
+          onClick={() =>
+            onViewProfile(
+              type === "received" ? request.senderID : request.receiverID,
+            )
+          }
+          className="relative h-14 w-14 rounded-2xl overflow-hidden shadow-md border-2 border-white text-transparent cursor-pointer hover:opacity-80 transition-opacity"
+        >
           <Image
             src={request.avatar}
             alt={type === "received" ? request.from : request.to}
@@ -677,7 +715,14 @@ function CollabRequestCard({ request, type, onAction }) {
           </h4>
           <p className="text-sm text-gray-500">
             {type === "received" ? "From " : "To "}
-            <span className="font-bold text-amu-green">
+            <span
+              onClick={() =>
+                onViewProfile(
+                  type === "received" ? request.senderID : request.receiverID,
+                )
+              }
+              className="font-bold text-amu-green cursor-pointer hover:underline"
+            >
               {type === "received" ? request.from : request.to}
             </span>
           </p>
@@ -724,11 +769,14 @@ function CollabRequestCard({ request, type, onAction }) {
   );
 }
 
-function FollowRequestCard({ request, type, onAction }) {
+function FollowRequestCard({ request, type, onAction, onViewProfile }) {
   return (
     <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:border-amu-green/30 transition-all group">
       <div className="flex items-center gap-4 mb-6">
-        <div className="relative h-14 w-14 rounded-2xl overflow-hidden shadow-md border-2 border-white">
+        <div
+          onClick={() => onViewProfile(request.universityID || request.id)}
+          className="relative h-14 w-14 rounded-2xl overflow-hidden shadow-md border-2 border-white cursor-pointer hover:opacity-80 transition-opacity"
+        >
           <Image
             src={request.avatar}
             alt={request.name}
@@ -737,7 +785,10 @@ function FollowRequestCard({ request, type, onAction }) {
           />
         </div>
         <div className="flex-1">
-          <h4 className="font-bold text-gray-900 leading-tight group-hover:text-amu-green transition-colors">
+          <h4
+            onClick={() => onViewProfile(request.universityID || request.id)}
+            className="font-bold text-gray-900 leading-tight group-hover:text-amu-green transition-colors cursor-pointer"
+          >
             {request.name}
           </h4>
           <p className="text-xs font-semibold text-gray-500">
@@ -754,14 +805,7 @@ function FollowRequestCard({ request, type, onAction }) {
         )}
       </div>
 
-      <div className="mb-6 flex items-center gap-2 text-gray-400">
-        <span className="text-[10px] font-black uppercase tracking-widest">
-          {type === "received" ? "Applied:" : "Sent:"}
-        </span>
-        <span className="text-xs font-bold text-gray-600">
-          {type === "received" ? request.appliedAt : "Today"}
-        </span>
-      </div>
+      <div className="mb-6 h-1" />
 
       <div className="flex gap-2">
         {type === "received" ? (
