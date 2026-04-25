@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AMU_DEPARTMENTS } from "@/lib/utils";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import UserProfileModal from "@/components/UserProfileModal";
+import ProjectModal from "@/components/ProjectModal";
 
 const ExplorePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,13 +43,20 @@ const ExplorePage = () => {
   const [loading, setLoading] = useState(true);
   const [followingStatuses, setFollowingStatuses] = useState({});
   const [selectedUserID, setSelectedUserID] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProjectID, setSelectedProjectID] = useState(null);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 
   // Removed useEffect syncing activeTab as it is now derived from URL
 
   const openProfile = (uid) => {
     setSelectedUserID(uid);
-    setIsModalOpen(true);
+    setIsUserModalOpen(true);
+  };
+
+  const openProject = (pid) => {
+    setSelectedProjectID(pid);
+    setIsProjectModalOpen(true);
   };
 
   useEffect(() => {
@@ -293,7 +301,11 @@ const ExplorePage = () => {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ delay: idx * 0.05 }}
-                          className="group bg-white p-6 rounded-3xl border border-gray-100 hover:border-amu-green/30 transition-all hover:shadow-2xl hover:shadow-gray-200/50 flex flex-col justify-between"
+                          onClick={() =>
+                            activeTab === "projects" &&
+                            openProject(item.projectID)
+                          }
+                          className="group bg-white p-6 rounded-3xl border border-gray-100 hover:border-amu-green/30 transition-all hover:shadow-2xl hover:shadow-gray-200/50 flex flex-col justify-between cursor-pointer"
                         >
                           <div>
                             <div className="flex items-start justify-between mb-4">
@@ -404,6 +416,8 @@ const ExplorePage = () => {
                               ) : (
                                 <Link
                                   href={`/projects/${item.projectID}`}
+                                  target="_blank"
+                                  onClick={(e) => e.stopPropagation()}
                                   className="p-2 bg-gray-50 text-gray-400 group-hover:bg-amu-green group-hover:text-white rounded-xl transition-all"
                                 >
                                   <ArrowRight className="h-5 w-5" />
@@ -433,9 +447,14 @@ const ExplorePage = () => {
         </main>
       </div>
       <UserProfileModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isUserModalOpen}
+        onClose={() => setIsUserModalOpen(false)}
         universityID={selectedUserID}
+      />
+      <ProjectModal
+        isOpen={isProjectModalOpen}
+        onClose={() => setIsProjectModalOpen(false)}
+        projectID={selectedProjectID}
       />
     </div>
   );

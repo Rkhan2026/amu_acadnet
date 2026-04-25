@@ -17,13 +17,15 @@ import {
 } from "lucide-react";
 
 import Image from "next/image";
-import Link from "next/link";
+import ProjectModal from "./ProjectModal";
 
 const UserProfileModal = ({ isOpen, onClose, universityID }) => {
   const [user, setUser] = useState(null);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [followingStatus, setFollowingStatus] = useState(null);
+  const [selectedProjectID, setSelectedProjectID] = useState(null);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [prevId, setPrevId] = useState(null);
   if (universityID !== prevId) {
     setPrevId(universityID);
@@ -217,12 +219,13 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
                         <div className="space-y-4">
                           {projects.length > 0 ? (
                             projects.map((project) => (
-                              <Link
+                              <button
                                 key={project.projectID}
-                                href={`/projects/${project.projectID}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block bg-white border border-gray-100 p-6 rounded-3xl hover:border-amu-green/30 hover:shadow-xl hover:shadow-gray-200/40 transition-all group"
+                                onClick={() => {
+                                  setSelectedProjectID(project.projectID);
+                                  setIsProjectModalOpen(true);
+                                }}
+                                className="w-full text-left block bg-white border border-gray-100 p-6 rounded-3xl hover:border-amu-green/30 hover:shadow-xl hover:shadow-gray-200/40 transition-all group"
                               >
                                 <div className="flex justify-between items-start mb-4">
                                   <div>
@@ -265,7 +268,7 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
                                     </span>
                                   )}
                                 </div>
-                              </Link>
+                              </button>
                             ))
                           ) : (
                             <div className="py-12 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
@@ -375,6 +378,11 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
           </motion.div>
         </div>
       )}
+      <ProjectModal
+        isOpen={isProjectModalOpen}
+        onClose={() => setIsProjectModalOpen(false)}
+        projectID={selectedProjectID}
+      />
     </AnimatePresence>
   );
 };

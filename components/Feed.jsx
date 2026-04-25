@@ -4,6 +4,7 @@ import FeedItem from "./FeedItem";
 import { Sparkles, Users } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import UserProfileModal from "./UserProfileModal";
+import ProjectModal from "./ProjectModal";
 
 const Feed = () => {
   const [activeTab, setActiveTab] = useState("for-you"); // "for-you" or "following"
@@ -12,11 +13,18 @@ const Feed = () => {
   const [loading, setLoading] = useState(true);
   const [sortOption, setSortOption] = useState("Recent");
   const [selectedUserID, setSelectedUserID] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProjectID, setSelectedProjectID] = useState(null);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 
   const openProfile = (uid) => {
     setSelectedUserID(uid);
-    setIsModalOpen(true);
+    setIsUserModalOpen(true);
+  };
+
+  const openProject = (pid) => {
+    setSelectedProjectID(pid);
+    setIsProjectModalOpen(true);
   };
 
   React.useEffect(() => {
@@ -160,6 +168,7 @@ const Feed = () => {
               post={post}
               currentUser={currentUser}
               onProfileClick={openProfile}
+              onProjectClick={openProject}
             />
           ))
         ) : (
@@ -169,9 +178,14 @@ const Feed = () => {
         )}
       </div>
       <UserProfileModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isUserModalOpen}
+        onClose={() => setIsUserModalOpen(false)}
         universityID={selectedUserID}
+      />
+      <ProjectModal
+        isOpen={isProjectModalOpen}
+        onClose={() => setIsProjectModalOpen(false)}
+        projectID={selectedProjectID}
       />
     </div>
   );

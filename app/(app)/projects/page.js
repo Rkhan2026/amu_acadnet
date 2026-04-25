@@ -10,9 +10,17 @@ import {
   MoreVertical,
 } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import ProjectModal from "@/components/ProjectModal";
 export default function MyProjectsPage() {
   const [myProjects, setMyProjects] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const [selectedProjectID, setSelectedProjectID] = React.useState(null);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+  const openProject = (pid) => {
+    setSelectedProjectID(pid);
+    setIsModalOpen(true);
+  };
 
   React.useEffect(() => {
     Promise.all([
@@ -85,7 +93,11 @@ export default function MyProjectsPage() {
           </div>
         ) : myProjects.length > 0 ? (
           myProjects.map((project) => (
-            <MyProjectCard key={project.id} project={project} />
+            <MyProjectCard
+              key={project.id}
+              project={project}
+              onOpen={openProject}
+            />
           ))
         ) : (
           <div className="col-span-full py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-center px-6">
@@ -108,11 +120,16 @@ export default function MyProjectsPage() {
           </div>
         )}
       </div>
+      <ProjectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        projectID={selectedProjectID}
+      />
     </div>
   );
 }
 
-function MyProjectCard({ project }) {
+function MyProjectCard({ project, onOpen }) {
   return (
     <div className="bg-white rounded-3xl p-8 shadow-2xl shadow-gray-200/40 border border-gray-100/50 hover:border-amu-green/30 transition-all group relative">
       <div className="flex justify-between items-start mb-6">
@@ -176,9 +193,16 @@ function MyProjectCard({ project }) {
           <span>Created {project.time}</span>
         </div>
         <div className="flex gap-3">
+          <button
+            onClick={() => onOpen(project.id)}
+            className="px-5 py-2.5 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-gray-800 transition-all flex items-center gap-2"
+          >
+            View Details
+          </button>
           <Link
             href={`/projects/${project.id}`}
-            className="px-5 py-2.5 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-gray-800 transition-all flex items-center gap-2"
+            target="_blank"
+            className="px-5 py-2.5 bg-gray-100 text-gray-900 text-sm font-bold rounded-xl hover:bg-gray-200 transition-all flex items-center gap-2"
           >
             Manage
           </Link>

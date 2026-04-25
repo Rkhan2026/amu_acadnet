@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 
-const FeedItem = ({ post, currentUser, onProfileClick }) => {
+const FeedItem = ({ post, currentUser, onProfileClick, onProjectClick }) => {
   const isOwner = currentUser?.universityID === post.ownerID;
   const [requested, setRequested] = useState(post.hasRequested);
   const [loading, setLoading] = useState(false);
@@ -68,7 +68,10 @@ const FeedItem = ({ post, currentUser, onProfileClick }) => {
               {post.projectStatus}
             </span>
           </div>
-          <h3 className="text-2xl font-black text-gray-900 leading-[1.15] mb-2 group-hover:text-amu-green transition-colors cursor-pointer">
+          <h3
+            onClick={() => onProjectClick && onProjectClick(post.id)}
+            className="text-2xl font-black text-gray-900 leading-[1.15] mb-2 group-hover:text-amu-green transition-colors cursor-pointer"
+          >
             {post.title}
           </h3>
           {post.matchScore > 0 && (
@@ -107,6 +110,7 @@ const FeedItem = ({ post, currentUser, onProfileClick }) => {
       <div className="flex items-center justify-between mt-10 pt-8 border-t border-gray-50 gap-4">
         <Link
           href={`/projects/${post.id}`}
+          target="_blank"
           className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-amu-green text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:shadow-amu-green/40 hover:-translate-y-1 transition-all"
         >
           <BookOpen className="h-4 w-4" />
