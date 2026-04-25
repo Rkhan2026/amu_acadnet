@@ -54,7 +54,7 @@ const ExplorePage = () => {
   useEffect(() => {
     Promise.all([
       fetch("/api/projects").then((r) => r.json()),
-      fetch("/api/users").then((r) => r.json()),
+      fetch("/api/users?all=true").then((r) => r.json()),
       fetch("/api/network").then((r) => r.json()),
     ])
       .then(([pData, rData, nData]) => {
