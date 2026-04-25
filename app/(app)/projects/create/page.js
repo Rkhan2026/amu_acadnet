@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const CreateProjectPage = () => {
   const router = useRouter();
@@ -309,14 +310,18 @@ const CreateProjectPage = () => {
               </>
             )}
           </button>
-          <button
-            type="button"
-            onClick={() => router.back()}
-            disabled={isSubmitting}
-            className="px-10 bg-gray-100 text-gray-400 py-5 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-gray-200 hover:text-gray-600 transition-all"
+          <Link
+            href="/projects"
+            onClick={(e) => {
+              if (typeof window !== "undefined" && window.history.length > 1) {
+                e.preventDefault();
+                router.back();
+              }
+            }}
+            className="px-10 bg-gray-100 text-gray-400 py-5 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-gray-200 hover:text-gray-600 transition-all flex items-center justify-center"
           >
             Cancel
-          </button>
+          </Link>
         </div>
       </form>
     </div>

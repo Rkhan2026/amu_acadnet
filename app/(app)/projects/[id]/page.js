@@ -19,6 +19,7 @@ import {
 
 import { motion } from "framer-motion";
 import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
@@ -217,28 +218,43 @@ const ProjectDetailPage = () => {
           The research project you are looking for might have been moved or
           archived.
         </p>
-        <button
-          onClick={() => router.back()}
+        <Link
+          href="/projects"
+          onClick={(e) => {
+            if (typeof window !== "undefined" && window.history.length > 1) {
+              e.preventDefault();
+              router.back();
+            }
+          }}
           className="px-8 py-3 bg-gray-100 text-gray-600 font-bold rounded-2xl hover:bg-gray-200 transition-all flex items-center gap-2"
         >
           <ArrowLeft className="h-5 w-5" />
           Go Back
-        </button>
+        </Link>
       </div>
     );
   }
 
   return (
     <div className="max-w-7xl mx-auto py-12 px-6">
-      <motion.button
+      <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        onClick={() => router.back()}
-        className="group flex items-center gap-2 text-gray-400 hover:text-amu-green font-bold mb-10 transition-colors uppercase tracking-widest text-[10px]"
       >
-        <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-        Go Back
-      </motion.button>
+        <Link
+          href={isOwner ? "/projects" : "/explore"}
+          onClick={(e) => {
+            if (typeof window !== "undefined" && window.history.length > 1) {
+              e.preventDefault();
+              router.back();
+            }
+          }}
+          className="group flex items-center gap-2 text-gray-400 hover:text-amu-green font-bold mb-10 transition-colors uppercase tracking-widest text-[10px] w-fit"
+        >
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+          Go Back
+        </Link>
+      </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         {/* Left Column: Main Content */}
