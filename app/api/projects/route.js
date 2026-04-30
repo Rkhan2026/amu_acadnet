@@ -8,10 +8,12 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const universityID = searchParams.get("universityID");
     const moderationStatus = searchParams.get("moderationStatus");
+    const projectDomain = searchParams.get("projectDomain");
 
     const whereClause = {};
     if (universityID) whereClause.universityID = universityID;
     if (moderationStatus) whereClause.moderationStatus = moderationStatus;
+    if (projectDomain) whereClause.projectDomain = projectDomain;
 
     const projects = await prisma.researchProject.findMany({
       where: whereClause,
@@ -21,6 +23,9 @@ export async function GET(request) {
           select: {
             name: true,
             universityID: true,
+            email: true,
+            role: true,
+            department: true,
           },
         },
         collaborations: {
@@ -80,10 +85,17 @@ export async function POST(request) {
     }
 
     const data = await request.json();
-    const { title, description, researchDomain, externalLinks, projectStatus } =
-      data;
+    const {
+      title,
+      description,
+      projectDomain: domain,
+      externalLinks,
+      projectStatus,
+    } = data;
 
-    if (!title || !description || !researchDomain) {
+    const projectDomain = domain ? domain.toLowerCase() : "";
+
+    if (!title || !description || !projectDomain) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
@@ -94,7 +106,7 @@ export async function POST(request) {
       data: {
         title,
         description,
-        researchDomain,
+        projectDomain,
         externalLinks: Array.isArray(externalLinks) ? externalLinks : [],
         universityID: session.universityID,
         moderationStatus: "PENDING",

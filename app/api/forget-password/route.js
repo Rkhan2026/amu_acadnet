@@ -61,7 +61,7 @@ export async function POST(request) {
       ? `https://${process.env.VERCEL_URL}`
       : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
-    const resetLink = `${baseUrl}/reset_password?token=${token}`;
+    const resetLink = `${baseUrl}/reset-password?token=${token}`;
 
     // EmailJS config
     const templateId =

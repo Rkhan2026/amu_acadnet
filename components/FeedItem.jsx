@@ -94,7 +94,7 @@ const FeedItem = ({ post, currentUser, onProfileClick, onProjectClick }) => {
                   height={24}
                 />
               </div>
-              {post.leadResearcher}
+              {post.projectCreator}
             </button>
           </div>
         </div>

@@ -61,9 +61,9 @@ const Feed = () => {
             .map((p) => ({
               id: p.projectID,
               title: p.title,
-              domain: p.researchDomain,
+              domain: p.projectDomain,
               description: p.description,
-              leadResearcher: p.creator?.name || "Member",
+              projectCreator: p.creator?.name || "Member",
               ownerID: p.universityID,
               projectStatus:
                 p.projectStatus === "ACTIVE"

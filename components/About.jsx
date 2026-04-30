@@ -7,7 +7,7 @@ const aims = [
   "Centralized platform for managing official academic profiles.",
   "Encourage intra-departmental and interdisciplinary collaboration.",
   "Introduce controlled academic networking under institutional governance.",
-  "AI-based collaboration recommendations based on research interests.",
+  "AI-based collaboration recommendations based on interests.",
   "Ensure authenticity through moderation and verification.",
 ];
 

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { GraduationCap, LogOut, User as UserIcon } from "lucide-react";
 import { clearCurrentUser } from "@/lib/utils/auth";
@@ -9,13 +10,19 @@ const AppNavbar = () => {
   const isAdmin = pathname.startsWith("/admin");
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
+  const fetchUser = () => {
     fetch("/api/auth/me")
       .then((r) => r.json())
       .then((d) => {
         if (d.user) setUser(d.user);
       })
       .catch(console.error);
+  };
+
+  useEffect(() => {
+    fetchUser();
+    window.addEventListener("user-updated", fetchUser);
+    return () => window.removeEventListener("user-updated", fetchUser);
   }, []);
 
   return (
@@ -43,8 +50,23 @@ const AppNavbar = () => {
                 : user?.role || "USER"}
             </p>
           </div>
-          <div className="h-10 w-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400">
-            <UserIcon className="h-5 w-5" />
+          <div className="h-12 w-12 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 overflow-hidden shadow-sm">
+            {user?.profilePhoto &&
+            user.profilePhoto !== "/default-avatar.svg" ? (
+              <Image
+                src={
+                  user.profilePhoto.match(/\.[a-zA-Z0-9]+$/)
+                    ? user.profilePhoto
+                    : `${user.profilePhoto}.jpg`
+                }
+                alt={user.name || "User"}
+                width={48}
+                height={48}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <UserIcon className="h-6 w-6" />
+            )}
           </div>
         </div>
 

@@ -1,11 +1,92 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import AppNavbar from "@/components/AppNavbar";
-import { PanelLeftOpen } from "lucide-react";
+import { PanelLeftOpen, AlertCircle, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback } from "react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function AppLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  const fetchUser = useCallback(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.user) {
+          router.push("/login");
+        } else {
+          setUser(data.user);
+          setLoading(false);
+        }
+      })
+      .catch(() => router.push("/login"));
+  }, [router]);
+
+  useEffect(() => {
+    fetchUser();
+    window.addEventListener("user-updated", fetchUser);
+    return () => window.removeEventListener("user-updated", fetchUser);
+  }, [fetchUser]);
+
+  if (loading) return <LoadingSpinner fullPage message="Verifying access..." />;
+
+  if (user?.accountStatus === "REJECTED") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md text-center border border-gray-100">
+          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-red-100">
+            <AlertCircle className="h-10 w-10 text-red-500" />
+          </div>
+          <h2 className="text-2xl font-black text-gray-900 mb-3 tracking-tight">
+            Access Denied
+          </h2>
+          <p className="text-gray-500 mb-8 font-medium">
+            You cannot access the dashboard without your status being approved.
+            Please update your profile.
+          </p>
+          <button
+            onClick={() => router.push("/resubmit-profile")}
+            className="w-full py-4 bg-amu-green text-white font-black rounded-2xl hover:bg-green-800 transition-all shadow-lg shadow-amu-green/20"
+          >
+            Update Profile
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (user?.accountStatus === "PENDING") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md text-center border border-gray-100">
+          <div className="w-20 h-20 bg-amu-gold/10 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-amu-gold/20">
+            <Loader2 className="h-10 w-10 text-amu-gold animate-spin" />
+          </div>
+          <h2 className="text-2xl font-black text-gray-900 mb-3 tracking-tight">
+            Approval Pending
+          </h2>
+          <p className="text-gray-500 mb-8 font-medium">
+            Your account is still awaiting administrator approval. Please check
+            back later.
+          </p>
+          <button
+            onClick={async () => {
+              await fetch("/api/auth/logout", { method: "POST" });
+              router.push("/login");
+            }}
+            className="w-full py-4 bg-amu-green text-white font-black rounded-2xl hover:bg-green-800 transition-all shadow-lg shadow-amu-green/20"
+          >
+            Return to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen">

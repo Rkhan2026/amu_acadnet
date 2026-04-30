@@ -97,6 +97,19 @@ export default function NetworkPage() {
   };
 
   const executeCollabAction = async (requestID, action) => {
+    // Optimistic update for cancellation
+    if (action === "cancel") {
+      setNetworkData((prev) => ({
+        ...prev,
+        sentCollaborations: prev.sentCollaborations.filter(
+          (c) => c.requestID !== requestID,
+        ),
+        receivedCollaborations: prev.receivedCollaborations.filter(
+          (c) => c.requestID !== requestID,
+        ),
+      }));
+    }
+
     try {
       const res = await fetch("/api/network/collaboration", {
         method: action === "cancel" ? "DELETE" : "PATCH",
@@ -110,10 +123,14 @@ export default function NetworkPage() {
         fetchNetworkData();
       } else {
         const err = await res.json();
+        // If it failed, we might want to revert but usually for delete/cancel it's fine
+        // since we refresh the data anyway.
         alert(err.error || "Action failed");
+        fetchNetworkData(); // Revert by fetching fresh data
       }
     } catch (_e) {
       alert("Something went wrong");
+      fetchNetworkData();
     }
   };
 
@@ -133,6 +150,19 @@ export default function NetworkPage() {
   };
 
   const executeFollowAction = async (id, action, type) => {
+    // Optimistic update for cancellation
+    if (action === "cancel") {
+      setNetworkData((prev) => ({
+        ...prev,
+        following: prev.following.filter(
+          (f) => f.followingID !== id && f.id !== id,
+        ),
+        followers: prev.followers.filter(
+          (f) => f.followerID !== id && f.id !== id,
+        ),
+      }));
+    }
+
     try {
       const isCancel = action === "cancel";
       const res = await fetch("/api/network/follow", {
@@ -149,9 +179,11 @@ export default function NetworkPage() {
       } else {
         const err = await res.json();
         alert(err.error || "Action failed");
+        fetchNetworkData(); // Revert
       }
     } catch (_e) {
       alert("Something went wrong");
+      fetchNetworkData();
     }
   };
 
@@ -698,6 +730,7 @@ export default function NetworkPage() {
         isOpen={isProjectModalOpen}
         onClose={() => setIsProjectModalOpen(false)}
         projectID={selectedProjectID}
+        onProfileClick={openProfile}
       />
     </div>
   );
@@ -739,7 +772,7 @@ function NetworkCard({ user, type, onAction, onViewProfile }) {
         </button>
         {type === "following" && (
           <button
-            onClick={() => onAction(user.id)}
+            onClick={() => onAction(user.universityID)}
             className="px-4 py-3 bg-gray-50 text-gray-400 font-bold rounded-xl hover:bg-red-50 hover:text-red-500 transition-all"
             title="Unfollow"
           >
@@ -748,7 +781,7 @@ function NetworkCard({ user, type, onAction, onViewProfile }) {
         )}
         {type === "follower" && (
           <button
-            onClick={() => onAction(user.id)}
+            onClick={() => onAction(user.universityID)}
             className="px-4 py-3 bg-gray-50 text-gray-400 font-bold rounded-xl hover:bg-red-50 hover:text-red-500 transition-all"
             title="Remove Follower"
           >
@@ -993,7 +1026,13 @@ function FollowRequestCard({ request, type, onAction }) {
           </>
         ) : (
           <button
-            onClick={() => onAction(request.id, "cancel", "sent")}
+            onClick={() =>
+              onAction(
+                type === "sent" ? request.universityID : request.id,
+                "cancel",
+                type,
+              )
+            }
             className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-500 font-bold rounded-xl hover:bg-gray-100 transition-all"
           >
             Cancel Request

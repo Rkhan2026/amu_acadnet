@@ -74,12 +74,22 @@ const Navbar = () => {
               Features
             </Link>
             {user ? (
-              <Link
-                href={user.role === "ADMIN" ? "/admin/dashboard" : "/home"}
-                className="px-6 py-2 bg-amu-green hover:bg-[#004d26] text-white rounded-full font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2"
-              >
-                Dashboard <ArrowRight className="h-4 w-4" />
-              </Link>
+              user.accountStatus === "REJECTED" ? (
+                <button
+                  disabled
+                  title="Rejected users cannot log into the dashboard."
+                  className="px-6 py-2 bg-gray-400 text-white rounded-full font-bold shadow-md flex items-center gap-2 cursor-not-allowed opacity-70"
+                >
+                  Dashboard <ArrowRight className="h-4 w-4" />
+                </button>
+              ) : (
+                <Link
+                  href={user.role === "ADMIN" ? "/admin/dashboard" : "/home"}
+                  className="px-6 py-2 bg-amu-green hover:bg-[#004d26] text-white rounded-full font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+                >
+                  Dashboard <ArrowRight className="h-4 w-4" />
+                </Link>
+              )
             ) : (
               <>
                 <Link
@@ -143,13 +153,23 @@ const Navbar = () => {
               Features
             </Link>
             {user ? (
-              <Link
-                href={user.role === "ADMIN" ? "/admin/dashboard" : "/home"}
-                className="block w-full text-center mt-4 px-5 py-3 bg-amu-green hover:bg-[#004d26] text-white rounded-lg font-bold transition-all shadow-md"
-                onClick={toggleMenu}
-              >
-                Dashboard
-              </Link>
+              user.accountStatus === "REJECTED" ? (
+                <button
+                  disabled
+                  title="Rejected users cannot log into the dashboard."
+                  className="block w-full text-center mt-4 px-5 py-3 bg-gray-400 text-white rounded-lg font-bold shadow-md cursor-not-allowed opacity-70"
+                >
+                  Dashboard
+                </button>
+              ) : (
+                <Link
+                  href={user.role === "ADMIN" ? "/admin/dashboard" : "/home"}
+                  className="block w-full text-center mt-4 px-5 py-3 bg-amu-green hover:bg-[#004d26] text-white rounded-lg font-bold transition-all shadow-md"
+                  onClick={toggleMenu}
+                >
+                  Dashboard
+                </Link>
+              )
             ) : (
               <>
                 <Link

@@ -10,12 +10,32 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url);
     const all = searchParams.get("all") === "true";
+    const interests = searchParams.get("interests");
+
+    const whereClause = {
+      accountStatus: "APPROVED",
+      universityID: { not: session.universityID },
+    };
+
+    if (interests) {
+      const topics = interests
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+      if (topics.length > 0) {
+        whereClause.academicProfile = {
+          OR: topics.map((topic) => ({
+            researchInterests: {
+              contains: topic,
+              mode: "insensitive",
+            },
+          })),
+        };
+      }
+    }
 
     const users = await prisma.user.findMany({
-      where: {
-        accountStatus: "APPROVED",
-        universityID: { not: session.universityID },
-      },
+      where: whereClause,
       select: {
         universityID: true,
         name: true,

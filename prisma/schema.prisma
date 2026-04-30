@@ -28,6 +28,10 @@ model User {
   followers              Follows[]         @relation("FollowingRelation")
   createdProjects        ResearchProject[] @relation("UserCreatesProject")
   workingProjects        ResearchProject[] @relation("UserWorksOnProject")
+  identityProof          String?
+  profilePhoto           String?           @default("/default-avatar.svg")
+  adminFeedback          String?           @default("No feedback yet")
+  createdAt              DateTime          @default(now())
 }
 
 model AcademicProfile {
@@ -43,7 +47,7 @@ model ResearchProject {
   projectID        String           @id @default(uuid())
   title            String
   description      String
-  researchDomain   String
+  projectDomain   String
   moderationStatus ModerationStatus @default(PENDING)
   projectStatus    ProjectStatus    @default(PROPOSED)
   createdAt        DateTime         @default(now())
@@ -52,6 +56,7 @@ model ResearchProject {
   collaborations   Collaboration[]
   creator          User             @relation("UserCreatesProject", fields: [universityID], references: [universityID])
   teamMembers      User[]           @relation("UserWorksOnProject")
+  adminFeedback     String?          @default("No feedback yet")
 }
 
 model Collaboration {

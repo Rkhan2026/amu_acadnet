@@ -40,14 +40,16 @@ export async function POST(request) {
     if (standardUser) {
       const match = await bcrypt.compare(password, standardUser.password);
       if (match) {
-        // Prevent login if rejected or pending?
-        // Wait, often pending users can't fully login, but let's just authenticate them and let UI handle lockouts
-        if (standardUser.accountStatus === "REJECTED") {
+        // Block login if account status is still PENDING
+        if (standardUser.accountStatus === "PENDING") {
           return NextResponse.json(
-            { error: "Your account has been rejected" },
+            { error: "Admin approval still pending" },
             { status: 403 },
           );
         }
+
+        // Allow REJECTED users to login so they can view the rejection reason and resubmit
+        // We will just set their session normally. The UI will redirect them.
 
         const sessionUser = {
           universityID: standardUser.universityID,

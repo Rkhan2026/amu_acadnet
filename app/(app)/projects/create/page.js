@@ -20,11 +20,12 @@ const CreateProjectPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
-    researchDomain: "",
+    projectDomain: "",
     projectStatus: "Proposed",
     description: "",
     externalLinks: [""],
   });
+  const [showCustomDomain, setShowCustomDomain] = useState(false);
 
   const domains = [
     "Artificial Intelligence",
@@ -47,7 +48,7 @@ const CreateProjectPage = () => {
       const payload = {
         title: formData.title,
         description: formData.description,
-        researchDomain: formData.researchDomain,
+        projectDomain: formData.projectDomain,
         projectStatus: formData.projectStatus,
         externalLinks: formData.externalLinks.filter((l) => l.trim() !== ""),
       };
@@ -178,22 +179,55 @@ const CreateProjectPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">
-                  Research Domain
+                  Project Domain
                 </label>
-                <select
-                  name="researchDomain"
-                  required
-                  value={formData.researchDomain}
-                  onChange={handleChange}
-                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amu-green/20 focus:border-amu-green transition-all font-bold text-gray-900 appearance-none bg-[url('/chevron-down.svg')] bg-size-[24px] bg-position-[right_1rem_center] bg-no-repeat"
-                >
-                  <option value="">Select Research Domain</option>
-                  {domains.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
+                <div className="space-y-3">
+                  <select
+                    name="projectDomainSelect"
+                    required
+                    value={showCustomDomain ? "Other" : formData.projectDomain}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "Other") {
+                        setShowCustomDomain(true);
+                        setFormData((prev) => ({ ...prev, projectDomain: "" }));
+                      } else {
+                        setShowCustomDomain(false);
+                        setFormData((prev) => ({
+                          ...prev,
+                          projectDomain: val,
+                        }));
+                      }
+                    }}
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amu-green/20 focus:border-amu-green transition-all font-bold text-gray-900 appearance-none"
+                  >
+                    <option value="">Select Project Domain</option>
+                    {domains.map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                    <option value="Other">Other (Custom Domain)</option>
+                  </select>
+
+                  {showCustomDomain && (
+                    <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
+                      <input
+                        type="text"
+                        name="projectDomain"
+                        required
+                        autoFocus
+                        value={formData.projectDomain}
+                        onChange={handleChange}
+                        placeholder="Enter custom domain name..."
+                        className="w-full px-5 py-4 bg-white border-2 border-amu-green/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amu-green/20 focus:border-amu-green transition-all font-bold text-gray-900 placeholder:text-gray-300"
+                      />
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-amu-green uppercase tracking-widest bg-amu-green/5 px-2 py-1 rounded-md">
+                        Custom
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               <div>
                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">

@@ -1,21 +1,19 @@
 "use client";
 import React, { Suspense } from "react";
 import {
-  ShieldCheck,
   CheckCircle2,
   XCircle,
   User,
   Building2,
   Clock,
-  ArrowLeft,
-  Mail,
-  GraduationCap,
-  BookOpen,
+  ShieldCheck,
+  ExternalLink,
 } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import UserProfileModal from "@/components/UserProfileModal";
 
 const VerificationCard = ({ request, onAction, onClick }) => (
   <div
@@ -24,8 +22,18 @@ const VerificationCard = ({ request, onAction, onClick }) => (
   >
     <div className="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between">
       <div className="flex gap-6 items-center">
-        <div className="p-4 bg-gray-50 rounded-2xl group-hover:bg-amu-green/5 transition-colors">
-          <User className="h-8 w-8 text-gray-400 group-hover:text-amu-green transition-colors" />
+        <div className="w-16 h-16 bg-gray-50 rounded-2xl group-hover:bg-amu-green/5 transition-all flex items-center justify-center overflow-hidden shrink-0 border border-gray-100">
+          {request.avatar && request.avatar !== "/default-avatar.svg" ? (
+            <Image
+              src={request.avatar}
+              alt={request.name}
+              width={64}
+              height={64}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <User className="h-8 w-8 text-gray-400 group-hover:text-amu-green transition-colors" />
+          )}
         </div>
         <div className="space-y-1">
           <div className="flex items-center gap-3">
@@ -47,22 +55,47 @@ const VerificationCard = ({ request, onAction, onClick }) => (
               <Clock className="h-4 w-4" />
               {request.appliedAt}
             </div>
+            {request.accountStatus !== "PENDING" && (
+              <StatusBadge status={request.accountStatus} />
+            )}
           </div>
         </div>
       </div>
 
-      {request.accountStatus !== "APPROVED" && (
-        <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onAction(request.id, "approve");
-            }}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-amu-green text-white font-bold rounded-2xl hover:bg-amu-green/90 transition-all shadow-lg shadow-amu-green/20"
-          >
-            <CheckCircle2 className="h-5 w-5" />
-            Verify
-          </button>
+      <div className="flex flex-col md:flex-row items-center gap-8 w-full md:w-auto">
+        {/* Identity Proof Preview Section */}
+        <a
+          href={request.identityProof}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="flex flex-col items-center gap-2 p-3 px-6 bg-amu-gold/5 border border-amu-gold/20 rounded-2xl hover:bg-amu-gold/10 transition-all cursor-pointer group/proof min-w-[140px]"
+        >
+          <div className="flex items-center gap-2 text-amu-gold">
+            <ShieldCheck className="h-5 w-5" />
+            <span className="text-[10px] font-black uppercase tracking-widest">
+              Identity Proof
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-gray-400 group-hover/proof:text-amu-gold transition-colors">
+            <ExternalLink className="h-4 w-4" />
+            <span className="text-xs font-bold">View Document</span>
+          </div>
+        </a>
+
+        <div className="flex items-center gap-3">
+          {request.accountStatus !== "APPROVED" && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAction(request.id, "approve");
+              }}
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-amu-green text-white font-bold rounded-2xl hover:bg-amu-green/90 transition-all shadow-lg shadow-amu-green/20"
+            >
+              <CheckCircle2 className="h-5 w-5" />
+              Verify
+            </button>
+          )}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -71,200 +104,13 @@ const VerificationCard = ({ request, onAction, onClick }) => (
             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-gray-50 text-gray-400 font-bold rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all"
           >
             <XCircle className="h-5 w-5" />
-            Reject
+            {request.accountStatus === "REJECTED" ? "Edit Reason" : "Reject"}
           </button>
         </div>
-      )}
+      </div>
     </div>
   </div>
 );
-
-const UserModal = ({ user, onClose, onAction }) => {
-  if (!user) return null;
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm overflow-y-auto"
-        onClick={onClose}
-      >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          onClick={(e) => e.stopPropagation()}
-          className="bg-gray-50 w-full max-w-5xl rounded-[3rem] shadow-2xl overflow-hidden my-8"
-        >
-          <div className="p-8 md:p-14 pb-0 max-h-[85vh] overflow-y-auto custom-scrollbar">
-            <div className="flex items-center justify-between mb-10">
-              <button
-                onClick={onClose}
-                className="flex items-center gap-2 text-gray-400 hover:text-gray-900 font-bold text-sm uppercase tracking-widest transition-colors"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Go Back
-              </button>
-              {user.accountStatus !== "APPROVED" && (
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => {
-                      onAction(user.id, "approve");
-                      onClose();
-                    }}
-                    className="flex items-center gap-2 px-6 py-3 bg-amu-green text-white font-bold rounded-2xl hover:bg-[#004d26] transition-all shadow-lg shadow-amu-green/20"
-                  >
-                    <CheckCircle2 className="h-5 w-5" />
-                    Verify Profile
-                  </button>
-                  <button
-                    onClick={() => {
-                      onAction(user.id, "reject");
-                      onClose();
-                    }}
-                    className="flex items-center gap-2 px-6 py-3 bg-white text-gray-400 font-bold rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all border border-gray-100"
-                  >
-                    <XCircle className="h-5 w-5" />
-                    Reject
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-8 pb-14">
-              {/* Profile Header Card */}
-              <div className="bg-white rounded-[3rem] p-10 md:p-12 shadow-sm border border-gray-100 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-amu-green/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-
-                <div className="flex flex-col md:flex-row items-center md:items-start gap-10 relative z-10">
-                  <div className="w-40 h-40 md:w-48 md:h-48 rounded-[2.5rem] overflow-hidden bg-gray-50 border-4 border-white shadow-xl shadow-gray-200/50 shrink-0">
-                    <Image
-                      src={user.avatar}
-                      alt={user.name}
-                      width={192}
-                      height={192}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  <div className="text-center md:text-left pt-2 flex-1">
-                    <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight mb-6">
-                      {user.name}
-                    </h1>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 max-w-2xl">
-                      <div className="flex items-center justify-center md:justify-start gap-3 text-gray-500 font-medium">
-                        <div className="p-2 bg-gray-50 rounded-xl">
-                          <User className="h-4 w-4 text-gray-400" />
-                        </div>
-                        {user.role}
-                      </div>
-
-                      <div className="flex items-center justify-center md:justify-start gap-3 text-gray-500 font-medium">
-                        <div className="p-2 bg-gray-50 rounded-xl">
-                          <Building2 className="h-4 w-4 text-gray-400" />
-                        </div>
-                        {user.department}
-                      </div>
-
-                      <div className="flex items-center justify-center md:justify-start gap-3 text-gray-500 font-medium">
-                        <div className="p-2 bg-gray-50 rounded-xl">
-                          <GraduationCap className="h-4 w-4 text-gray-400" />
-                        </div>
-                        ID: {user.universityId}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left Column - Bio & Interests */}
-                <div className="lg:col-span-2 space-y-8">
-                  <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-gray-100">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="p-3 bg-amu-green/10 rounded-2xl">
-                        <User className="h-6 w-6 text-amu-green" />
-                      </div>
-                      <h2 className="text-2xl font-black text-gray-900">
-                        Biography
-                      </h2>
-                    </div>
-                    <p className="text-gray-600 font-medium leading-relaxed prose prose-lg">
-                      {user.biography}
-                    </p>
-                  </div>
-
-                  <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-gray-100">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="p-3 bg-amu-gold/10 rounded-2xl">
-                        <BookOpen className="h-6 w-6 text-amu-gold" />
-                      </div>
-                      <h2 className="text-2xl font-black text-gray-900">
-                        Research Interests
-                      </h2>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {user.researchInterests.map((interest, idx) => (
-                        <span
-                          key={idx}
-                          className="px-5 py-2.5 bg-gray-50 text-gray-600 font-bold text-sm rounded-xl border border-gray-100"
-                        >
-                          {interest}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Column - Status & Contact */}
-                <div className="space-y-8">
-                  <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-gray-100">
-                    <h2 className="text-2xl font-black text-gray-900 mb-8">
-                      Status & Contact
-                    </h2>
-
-                    <div className="space-y-8">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-blue-50 text-blue-500 rounded-2xl shrink-0">
-                          <Mail className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
-                            Email Address
-                          </p>
-                          <p className="font-bold text-gray-900 break-all">
-                            {user.email}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-amu-green/10 text-amu-green rounded-2xl shrink-0">
-                          <Clock className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
-                            Applied For Verification
-                          </p>
-                          <p className="font-bold text-gray-900">
-                            {user.appliedAt}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
-  );
-};
 
 const StatusBadge = ({ status }) => {
   const styles = {
@@ -281,10 +127,108 @@ const StatusBadge = ({ status }) => {
   );
 };
 
+const RejectionModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  isSubmitting,
+  initialFeedback,
+}) => {
+  const [feedback, setFeedback] = React.useState("");
+
+  React.useEffect(() => {
+    if (isOpen) setFeedback("");
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-gray-900/70 backdrop-blur-md"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          onClick={(e) => e.stopPropagation()}
+          className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden p-12 border border-gray-100"
+        >
+          <div className="flex flex-col items-center text-center mb-8">
+            <div className="p-4 bg-red-50 rounded-2xl mb-6">
+              <XCircle className="h-12 w-12 text-red-500" />
+            </div>
+            <h2 className="text-3xl font-black text-gray-900 mb-3">
+              Reject User
+            </h2>
+            <p className="text-gray-600 font-bold text-sm leading-relaxed max-w-xs">
+              Please provide reason for rejection to help the user udpatee their
+              profile for resubmission.
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            {initialFeedback && (
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+                  Previous Admin Feedback
+                </label>
+                <div className="p-5 bg-gray-50 border border-gray-100 rounded-2xl">
+                  <p className="text-sm font-bold text-gray-500 italic leading-relaxed">
+                    &quot;{initialFeedback}&quot;
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+                {initialFeedback
+                  ? "New Admin Feedback"
+                  : "Admin Feedback (Required)"}
+              </label>
+              <textarea
+                autoFocus
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                placeholder="e.g., Identity proof is still blurry, please use a scanner..."
+                className="w-full h-36 p-6 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-red-500 focus:bg-white focus:ring-0 transition-all text-gray-900 text-base font-bold resize-none placeholder:text-gray-300"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mt-10">
+            <button
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="px-6 py-4 bg-gray-100 text-gray-600 font-black rounded-xl hover:bg-gray-200 transition-all uppercase tracking-widest text-xs"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => onSubmit(feedback)}
+              disabled={isSubmitting || !feedback.trim()}
+              className="px-6 py-4 bg-red-600 text-white font-black rounded-xl hover:bg-red-700 transition-all uppercase tracking-widest text-xs shadow-lg shadow-red-600/30 disabled:opacity-50 disabled:shadow-none"
+            >
+              {isSubmitting ? "Processing..." : "Submit"}
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
 function VerificationsContent() {
   const searchParams = useSearchParams();
   const [requests, setRequests] = React.useState([]);
-  const [selectedUser, setSelectedUser] = React.useState(null);
+  const [profileUniversityID, setProfileUniversityID] = React.useState(null);
+  const [rejectionTarget, setRejectionTarget] = React.useState(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [mode, setMode] = React.useState(searchParams.get("mode") || "PENDING");
 
@@ -295,11 +239,7 @@ function VerificationsContent() {
 
   React.useEffect(() => {
     setLoading(true);
-    const url =
-      mode === "PENDING"
-        ? "/api/admin/users/pending"
-        : "/api/admin/users?accountStatus=APPROVED";
-    fetch(url)
+    fetch("/api/admin/users")
       .then((res) => res.json())
       .then((data) => {
         if (!data.error) {
@@ -311,11 +251,21 @@ function VerificationsContent() {
               email: u.email,
               role: u.role,
               accountStatus: u.accountStatus,
+              adminFeedback: u.adminFeedback,
               department: u.department,
-              appliedAt: new Date(
-                u.createdAt || Date.now(),
-              ).toLocaleDateString(),
-              avatar: "/default-avatar.svg",
+              rawDate: u.createdAt || Date.now(),
+              appliedAt: new Date(u.createdAt || Date.now()).toLocaleString(
+                "en-US",
+                {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                },
+              ),
+              avatar: u.profilePhoto || "/default-avatar.svg",
+              identityProof: u.identityProof,
               biography:
                 u.academicProfile?.biography || "No biography provided.",
               researchInterests: u.academicProfile?.researchInterests
@@ -329,10 +279,30 @@ function VerificationsContent() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [mode]);
+  }, []);
+
+  const filteredRequests = React.useMemo(() => {
+    return requests
+      .filter((r) => r.accountStatus === mode)
+      .sort((a, b) => new Date(b.rawDate || 0) - new Date(a.rawDate || 0));
+  }, [requests, mode]);
+
+  const counts = React.useMemo(() => {
+    return {
+      PENDING: requests.filter((r) => r.accountStatus === "PENDING").length,
+      APPROVED: requests.filter((r) => r.accountStatus === "APPROVED").length,
+      REJECTED: requests.filter((r) => r.accountStatus === "REJECTED").length,
+    };
+  }, [requests]);
 
   const handleAction = async (id, action) => {
     try {
+      if (action === "reject") {
+        const req = requests.find((r) => r.id === id);
+        setRejectionTarget(req);
+        return;
+      }
+
       const accountStatus = action === "approve" ? "APPROVED" : "REJECTED";
       const res = await fetch(`/api/admin/users/${id}/verify`, {
         method: "PATCH",
@@ -340,23 +310,51 @@ function VerificationsContent() {
         body: JSON.stringify({ accountStatus }),
       });
       if (res.ok) {
-        if (mode === "PENDING") {
-          setRequests((prev) => prev.filter((req) => req.id !== id));
-        } else {
-          setRequests((prev) =>
-            prev.map((req) =>
-              req.id === id ? { ...req, accountStatus } : req,
-            ),
-          );
-        }
-        if (selectedUser?.id === id) {
-          setSelectedUser(null);
+        setRequests((prev) =>
+          prev.map((req) => (req.id === id ? { ...req, accountStatus } : req)),
+        );
+        if (profileUniversityID === id) {
+          setProfileUniversityID(null);
         }
       } else {
         console.error("Action failed");
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleRejectionConfirm = async (comment) => {
+    if (!rejectionTarget || !comment.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/admin/users/${rejectionTarget.id}/verify`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accountStatus: "REJECTED",
+          adminFeedback: feedback,
+        }),
+      });
+
+      if (res.ok) {
+        setRequests((prev) =>
+          prev.map((req) =>
+            req.id === rejectionTarget.id
+              ? { ...req, accountStatus: "REJECTED", adminFeedback: comment }
+              : req,
+          ),
+        );
+        setRejectionTarget(null);
+        if (profileUniversityID === rejectionTarget.id) {
+          setProfileUniversityID(null);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -378,17 +376,27 @@ function VerificationsContent() {
           {[
             { label: "Pending", value: "PENDING" },
             { label: "Verified", value: "APPROVED" },
+            { label: "Rejected", value: "REJECTED" },
           ].map((tab) => (
             <button
               key={tab.value}
               onClick={() => setMode(tab.value)}
-              className={`px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${
+              className={`px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
                 mode === tab.value
                   ? "bg-amu-green text-white shadow-lg shadow-amu-green/20"
                   : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
               }`}
             >
               {tab.label}
+              <span
+                className={`px-2 py-0.5 rounded-full text-[10px] ${
+                  mode === tab.value
+                    ? "bg-white/20 text-white"
+                    : "bg-gray-100 text-gray-500"
+                }`}
+              >
+                {counts[tab.value]}
+              </span>
             </button>
           ))}
         </div>
@@ -397,19 +405,14 @@ function VerificationsContent() {
       <div className="space-y-6">
         {loading ? (
           <LoadingSpinner message="Loading records..." />
-        ) : requests.length > 0 ? (
-          requests.map((req) => (
+        ) : filteredRequests.length > 0 ? (
+          filteredRequests.map((req) => (
             <div key={req.id} className="relative">
               <VerificationCard
                 request={req}
-                onClick={setSelectedUser}
+                onClick={(user) => setProfileUniversityID(user.universityId)}
                 onAction={handleAction}
               />
-              {mode === "APPROVED" && (
-                <div className="absolute top-8 right-1/2 md:right-80">
-                  <StatusBadge status={req.accountStatus} />
-                </div>
-              )}
             </div>
           ))
         ) : (
@@ -418,24 +421,40 @@ function VerificationsContent() {
               <CheckCircle2 size={48} className="text-amu-green" />
             </div>
             <h3 className="text-2xl font-black text-gray-900 mb-2">
-              {mode === "PENDING" ? "Queue is Clear!" : "No Verified Users"}
+              {mode === "PENDING"
+                ? "Queue is Clear!"
+                : mode === "APPROVED"
+                  ? "No Verified Users"
+                  : "No Rejection History"}
             </h3>
             <p className="text-gray-500 font-medium">
               {mode === "PENDING"
                 ? "All academic profiles have been successfully verified."
-                : "The institutional registry currently has no verified members."}
+                : mode === "APPROVED"
+                  ? "The institutional registry currently has no verified members."
+                  : "There are no users currently in the rejected state."}
             </p>
           </div>
         )}
       </div>
 
-      {selectedUser && (
-        <UserModal
-          user={selectedUser}
-          onClose={() => setSelectedUser(null)}
-          onAction={handleAction}
-        />
-      )}
+      <UserProfileModal
+        isOpen={!!profileUniversityID}
+        onClose={() => setProfileUniversityID(null)}
+        universityID={profileUniversityID}
+        onAdminAction={handleAction}
+        initialAdminFeedback={
+          requests.find((r) => r.id === profileUniversityID)?.adminFeedback
+        }
+      />
+
+      <RejectionModal
+        isOpen={!!rejectionTarget}
+        onClose={() => setRejectionTarget(null)}
+        onSubmit={handleRejectionConfirm}
+        isSubmitting={isSubmitting}
+        initialFeedback={rejectionTarget?.adminFeedback}
+      />
     </div>
   );
 }

@@ -40,7 +40,7 @@ function ResetPasswordForm() {
     // Verify token validity on load
     const verifyToken = async () => {
       try {
-        const res = await fetch(`/api/reset_password?token=${token}`);
+        const res = await fetch(`/api/reset-password?token=${token}`);
         if (!res.ok) {
           const data = await res.json();
           setTokenError(data.error || "Invalid or expired token");
@@ -102,7 +102,7 @@ function ResetPasswordForm() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/reset_password", {
+      const res = await fetch("/api/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, newPassword }),

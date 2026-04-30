@@ -72,6 +72,7 @@ export async function PATCH(request) {
 
     const collabReq = await prisma.collaboration.findUnique({
       where: { requestID },
+      include: { project: true },
     });
     if (!collabReq || collabReq.receiverID !== session.universityID) {
       return NextResponse.json(
@@ -84,6 +85,21 @@ export async function PATCH(request) {
       where: { requestID },
       data: { requestStatus },
     });
+
+    // If accepted, add to team members
+    if (requestStatus === "ACCEPTED") {
+      const isInvite = collabReq.senderID === collabReq.project?.universityID;
+      const newMemberID = isInvite ? collabReq.receiverID : collabReq.senderID;
+
+      await prisma.researchProject.update({
+        where: { projectID: collabReq.projectID },
+        data: {
+          teamMembers: {
+            connect: { universityID: newMemberID },
+          },
+        },
+      });
+    }
 
     return NextResponse.json(updatedCollab);
   } catch (error) {

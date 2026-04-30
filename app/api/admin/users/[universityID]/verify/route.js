@@ -14,7 +14,7 @@ export async function PATCH(request, { params }) {
 
     const resolvedParams = await params;
     const { universityID } = resolvedParams;
-    const { accountStatus } = await request.json();
+    const { accountStatus, adminFeedback } = await request.json();
 
     if (!["APPROVED", "REJECTED"].includes(accountStatus)) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
@@ -22,12 +22,16 @@ export async function PATCH(request, { params }) {
 
     const updatedUser = await prisma.user.update({
       where: { universityID },
-      data: { accountStatus },
+      data: {
+        accountStatus,
+        ...(adminFeedback !== undefined && { adminFeedback }),
+      },
       select: {
         universityID: true,
         name: true,
         email: true,
         accountStatus: true,
+        adminFeedback: true,
       },
     });
 

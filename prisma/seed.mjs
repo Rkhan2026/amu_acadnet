@@ -194,25 +194,25 @@ async function main() {
     data: [
       {
         universityID: alice.universityID,
-        researchInterests: "Machine Learning, Computer Vision, NLP",
+        researchInterests: "machine learning, computer vision, nlp",
         biography:
           "Final year CS student passionate about AI applications in healthcare and education.",
       },
       {
         universityID: bob.universityID,
-        researchInterests: "IoT, Embedded Systems, Signal Processing",
+        researchInterests: "iot, embedded systems, signal processing",
         biography:
           "Faculty member with 10+ years of industry experience in smart grid technology.",
       },
       {
         universityID: carol.universityID,
-        researchInterests: "Genomics, Bioinformatics, CRISPR",
+        researchInterests: "genomics, bioinformatics, crispr",
         biography:
           "Postgraduate researcher exploring gene-editing techniques for disease prevention.",
       },
       {
         universityID: eve.universityID,
-        researchInterests: "Graph Theory, Cryptography, Quantum Algorithms",
+        researchInterests: "graph theory, cryptography, quantum algorithms",
         biography:
           "Associate Professor specializing in applied mathematics and theoretical computer science.",
       },
@@ -226,7 +226,7 @@ async function main() {
       title: "AI-Powered Diagnostic Tool for Early Disease Detection",
       description:
         "Developing a machine-learning pipeline that analyses medical imaging data to detect diseases at an early stage with high accuracy.",
-      researchDomain: "Artificial Intelligence & Healthcare",
+      projectDomain: "artificial intelligence & healthcare",
       moderationStatus: "APPROVED",
       projectStatus: "ACTIVE",
       externalLinks: [
@@ -244,7 +244,7 @@ async function main() {
       title: "Smart Campus Energy Management via IoT",
       description:
         "Designing an IoT-based framework to monitor, analyse, and optimise energy consumption across AMU campus buildings.",
-      researchDomain: "Internet of Things & Sustainability",
+      projectDomain: "internet of things & sustainability",
       moderationStatus: "APPROVED",
       projectStatus: "ON_HOLD",
       externalLinks: ["https://doi.org/example-iot"],
@@ -264,7 +264,7 @@ async function main() {
       title: "CRISPR-Based Therapeutics for Genetic Disorders",
       description:
         "Investigating gene-editing strategies using CRISPR-Cas9 frameworks to target inherited genetic disorders.",
-      researchDomain: "Biotechnology & Genomics",
+      projectDomain: "biotechnology & genomics",
       moderationStatus: "PENDING",
       projectStatus: "COMPLETED",
       externalLinks: [],
@@ -277,7 +277,7 @@ async function main() {
       title: "Post-Quantum Cryptographic Protocols",
       description:
         "Researching lattice-based cryptographic schemes resilient to quantum computing attacks.",
-      researchDomain: "Cryptography & Quantum Computing",
+      projectDomain: "cryptography & quantum computing",
       moderationStatus: "APPROVED",
       projectStatus: "ACTIVE",
       externalLinks: ["https://eprint.iacr.org/example"],
@@ -344,7 +344,7 @@ async function main() {
     additionalProjects.push({
       title: data.title,
       description: data.desc,
-      researchDomain: data.domain,
+      projectDomain: data.domain.toLowerCase(),
       moderationStatus: "PENDING",
       projectStatus: "ACTIVE",
       universityID:
@@ -409,7 +409,7 @@ async function main() {
     additionalProjects.push({
       title: data.title,
       description: data.desc,
-      researchDomain: data.domain,
+      projectDomain: data.domain.toLowerCase(),
       moderationStatus: "APPROVED",
       projectStatus: "ACTIVE",
       universityID:
@@ -479,7 +479,7 @@ async function main() {
       data: {
         title: proj.title,
         description: proj.desc,
-        researchDomain: proj.domain,
+        projectDomain: proj.domain.toLowerCase(),
         moderationStatus: "APPROVED",
         projectStatus: proj.status,
         universityID: proj.creator.universityID,

@@ -8,6 +8,8 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -24,7 +26,11 @@ export default function ProfilePage() {
         if (!profileData.error) {
           setUserData({
             ...profileData,
-            avatar: "/default-avatar.svg", // Placeholder
+            avatar:
+              profileData.profilePhoto &&
+              profileData.profilePhoto !== "/default-avatar.svg"
+                ? profileData.profilePhoto
+                : null,
             stats: {
               projects: profileData.createdProjects?.length || 0,
               citations: 0,
@@ -43,6 +49,7 @@ export default function ProfilePage() {
   }, []);
 
   const handleSave = async (updatedData) => {
+    setIsSaving(true);
     try {
       const res = await fetch(`/api/profile/${userData.universityID}`, {
         method: "PUT",
@@ -52,19 +59,39 @@ export default function ProfilePage() {
           department: updatedData.department,
           biography: updatedData.biography,
           researchInterests: updatedData.researchInterests,
+          profilePhoto: updatedData.profilePhoto,
         }),
       });
       if (res.ok) {
-        setUserData((prev) => ({ ...prev, ...updatedData }));
+        const freshUser = await res.json();
+        setUserData((prev) => ({
+          ...prev,
+          ...freshUser,
+          avatar:
+            freshUser.profilePhoto &&
+            freshUser.profilePhoto !== "/default-avatar.svg"
+              ? freshUser.profilePhoto
+              : null,
+        }));
+        window.dispatchEvent(new Event("user-updated"));
         setIsEditing(false);
+      } else {
+        const errorData = await res.json();
+        setSaveError(
+          errorData.error ||
+            "Failed to save profile. Please check file size (max 5MB).",
+        );
       }
     } catch (err) {
       console.error(err);
+      setSaveError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
   if (loading)
-    return <LoadingSpinner fullPage message="Loading researcher profile..." />;
+    return <LoadingSpinner fullPage message="Loading User Profile..." />;
   if (!userData)
     return (
       <div className="py-20 text-center text-red-400 font-medium font-black uppercase tracking-widest text-xs">
@@ -84,7 +111,12 @@ export default function ProfilePage() {
         <ProfileEditForm
           user={userData}
           onSave={handleSave}
-          onCancel={() => setIsEditing(false)}
+          onCancel={() => {
+            setIsEditing(false);
+            setSaveError("");
+          }}
+          isSaving={isSaving}
+          externalError={saveError}
         />
       ) : (
         <ProfileView user={userData} onEdit={() => setIsEditing(true)} />

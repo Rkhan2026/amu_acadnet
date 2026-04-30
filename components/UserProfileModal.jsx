@@ -15,12 +15,13 @@ import {
   UserPlus,
   Check,
   ChevronDown,
+  XCircle,
 } from "lucide-react";
 
 import Image from "next/image";
 import ProjectModal from "./ProjectModal";
 
-const UserProfileModal = ({ isOpen, onClose, universityID }) => {
+const UserProfileModal = ({ isOpen, onClose, universityID, onAdminAction }) => {
   const [user, setUser] = useState(null);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,10 +30,12 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [prevId, setPrevId] = useState(null);
   const [currentUserID, setCurrentUserID] = useState(null);
+  const [currentUserRole, setCurrentUserRole] = useState(null);
   const [myProjects, setMyProjects] = useState([]);
   const [showInviteMenu, setShowInviteMenu] = useState(false);
   const [inviteStatus, setInviteStatus] = useState({}); // projectID -> status
   const [networkData, setNetworkData] = useState(null);
+  const [modalImage, setModalImage] = useState(null);
   if (universityID !== prevId) {
     setPrevId(universityID);
     if (universityID) {
@@ -68,6 +71,7 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
             }
             if (netData.currentUser) {
               setCurrentUserID(netData.currentUser.universityID);
+              setCurrentUserRole(netData.currentUser.role);
               // Fetch current user's projects for invitation feature
               fetch(
                 `/api/projects?universityID=${netData.currentUser.universityID}`,
@@ -90,23 +94,32 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
 
   const handleFollowToggle = async () => {
     const isFollowing = !!followingStatus;
+    // Optimistic update
+    setFollowingStatus(isFollowing ? null : "PENDING");
+
     try {
       const res = await fetch("/api/network/follow", {
         method: isFollowing ? "DELETE" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ targetID: universityID }),
       });
-      if (res.ok) {
-        setFollowingStatus(isFollowing ? null : "PENDING");
+      if (!res.ok) {
+        // Revert on error
+        setFollowingStatus(isFollowing ? "ACCEPTED" : null);
+        const err = await res.json();
+        alert(err.error || "Action failed");
       }
     } catch (err) {
       console.error("Follow toggle error:", err);
+      setFollowingStatus(isFollowing ? "ACCEPTED" : null);
     }
   };
 
   const handleInvite = async (projectID) => {
+    // Optimistic update
+    setInviteStatus((prev) => ({ ...prev, [projectID]: "SENDING" }));
+
     try {
-      setInviteStatus((prev) => ({ ...prev, [projectID]: "SENDING" }));
       const res = await fetch("/api/network/collaboration", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -115,6 +128,13 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
 
       if (res.ok) {
         setInviteStatus((prev) => ({ ...prev, [projectID]: "SENT" }));
+        // Update network data locally to show pending invite
+        const newInvite = await res.json();
+        setNetworkData((prev) => ({
+          ...prev,
+          sentCollaborations: [...(prev.sentCollaborations || []), newInvite],
+        }));
+
         setTimeout(() => {
           setShowInviteMenu(false);
         }, 1500);
@@ -133,8 +153,17 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
   };
 
   const handleCancelInvite = async (requestID, projectID) => {
+    // Optimistic update
+    setInviteStatus((prev) => ({ ...prev, [projectID]: "CANCELING" }));
+    const originalNetworkData = { ...networkData };
+    setNetworkData((prev) => ({
+      ...prev,
+      sentCollaborations: prev.sentCollaborations.filter(
+        (c) => c.requestID !== requestID,
+      ),
+    }));
+
     try {
-      setInviteStatus((prev) => ({ ...prev, [projectID]: "CANCELING" }));
       const res = await fetch("/api/network/collaboration", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -143,25 +172,25 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
 
       if (res.ok) {
         setInviteStatus((prev) => ({ ...prev, [projectID]: null }));
-        // Refresh network data to reflect the change
-        const netRes = await fetch("/api/network");
-        const netData = await netRes.json();
-        if (!netData.error) setNetworkData(netData);
       } else {
         setInviteStatus((prev) => ({ ...prev, [projectID]: "ERROR" }));
+        setNetworkData(originalNetworkData); // Revert
       }
     } catch (err) {
       console.error("Cancel invite error:", err);
       setInviteStatus((prev) => ({ ...prev, [projectID]: "ERROR" }));
+      setNetworkData(originalNetworkData); // Revert
     }
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return "Not updated recently";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
+    return new Date(dateString).toLocaleString("en-US", {
+      month: "short",
       day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
     });
   };
 
@@ -171,7 +200,7 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
         {isOpen && (
           <div
             key="user-profile-modal-overlay"
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8"
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8"
           >
             {/* Backdrop */}
             <motion.div
@@ -203,7 +232,7 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
                 <div className="flex-1 flex flex-col items-center justify-center p-20">
                   <div className="w-16 h-16 border-4 border-amu-green/20 border-t-amu-green rounded-full animate-spin mb-4" />
                   <p className="text-gray-500 font-bold animate-pulse">
-                    Loading Researcher Profile...
+                    Loading User Profile...
                   </p>
                 </div>
               ) : user ? (
@@ -216,9 +245,9 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
                   <div className="px-8 md:px-12 -mt-20 pb-12">
                     <div className="flex flex-col md:flex-row gap-8 items-start relative z-10">
                       {/* Avatar */}
-                      <div className="relative w-40 h-40 rounded-4xl overflow-hidden border-8 border-white shadow-2xl bg-gray-50">
+                      <div className="relative w-40 h-40 rounded-full overflow-hidden border-8 border-white shadow-2xl bg-gray-50 flex-shrink-0">
                         <Image
-                          src={user.avatar || "/default-avatar.svg"}
+                          src={user.profilePhoto || "/default-avatar.svg"}
                           alt={user.name}
                           fill
                           className="object-cover"
@@ -239,192 +268,255 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
                             <Building2 className="h-3 w-3" />
                             {user.department || "General Academics"}
                           </span>
-                          <span className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-500 font-black rounded-xl text-xs uppercase tracking-widest border border-blue-100">
-                            <GraduationCap className="h-3 w-3" />
-                            {user.universityID}
+                          <span className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 font-black rounded-xl text-xs uppercase tracking-widest border border-gray-100">
+                            <GraduationCap className="h-3 w-3 text-gray-400" />
+                            ID: {user.universityID}
                           </span>
-                          {universityID !== currentUserID && (
-                            <div className="flex gap-2 relative">
-                              <button
-                                onClick={handleFollowToggle}
-                                className={`flex items-center gap-2 px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                                  followingStatus
-                                    ? "bg-amu-green text-white shadow-lg shadow-amu-green/20"
-                                    : "bg-white text-gray-400 border-2 border-gray-100 hover:border-amu-green hover:text-amu-green"
-                                }`}
-                              >
-                                {followingStatus ? (
-                                  <>
-                                    <Check className="h-3 w-3" />
-                                    {followingStatus === "ACCEPTED"
-                                      ? "Following"
-                                      : "Requested"}
-                                  </>
-                                ) : (
-                                  <>
-                                    <UserPlus className="h-3 w-3" />
-                                    Follow
-                                  </>
-                                )}
-                              </button>
+                          {universityID !== currentUserID &&
+                            currentUserRole &&
+                            currentUserRole.toUpperCase() !== "ADMIN" &&
+                            user.role?.toUpperCase() !== "ADMIN" && (
+                              <div className="flex gap-2 relative">
+                                <button
+                                  onClick={handleFollowToggle}
+                                  className={`flex items-center gap-2 px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                                    followingStatus
+                                      ? "bg-amu-green text-white shadow-lg shadow-amu-green/20"
+                                      : "bg-white text-gray-400 border-2 border-gray-100 hover:border-amu-green hover:text-amu-green"
+                                  }`}
+                                >
+                                  {followingStatus ? (
+                                    <>
+                                      <Check className="h-3 w-3" />
+                                      {followingStatus === "ACCEPTED"
+                                        ? "Following"
+                                        : "Requested"}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <UserPlus className="h-3 w-3" />
+                                      Follow
+                                    </>
+                                  )}
+                                </button>
 
-                              {myProjects.length > 0 && (
-                                <div className="relative">
-                                  <button
-                                    onClick={() =>
-                                      setShowInviteMenu(!showInviteMenu)
-                                    }
-                                    className="flex items-center gap-2 px-6 py-2 bg-[#004d26] text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-amu-green transition-all shadow-lg shadow-amu-green/10"
-                                  >
-                                    <Mail className="h-3 w-3" />
-                                    Invite to Project
-                                    <ChevronDown
-                                      className={`h-3 w-3 transition-transform ${showInviteMenu ? "rotate-180" : ""}`}
-                                    />
-                                  </button>
+                                {myProjects.length > 0 && (
+                                  <div className="relative">
+                                    <button
+                                      onClick={() =>
+                                        setShowInviteMenu(!showInviteMenu)
+                                      }
+                                      className="flex items-center gap-2 px-6 py-2 bg-[#004d26] text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-amu-green transition-all shadow-lg shadow-amu-green/10"
+                                    >
+                                      <Mail className="h-3 w-3" />
+                                      Invite to Project
+                                      <ChevronDown
+                                        className={`h-3 w-3 transition-transform ${showInviteMenu ? "rotate-180" : ""}`}
+                                      />
+                                    </button>
 
-                                  <AnimatePresence>
-                                    {showInviteMenu && (
-                                      <motion.div
-                                        initial={{
-                                          opacity: 0,
-                                          y: 10,
-                                          scale: 0.95,
-                                        }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{
-                                          opacity: 0,
-                                          y: 10,
-                                          scale: 0.95,
-                                        }}
-                                        className="absolute top-full left-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[60]"
-                                      >
-                                        <div className="p-3 border-b border-gray-50 bg-gray-50/50">
-                                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                            Select Project
-                                          </p>
-                                        </div>
-                                        <div className="max-h-60 overflow-y-auto custom-scrollbar">
-                                          {myProjects.map((project) => {
-                                            const existingCollab =
-                                              networkData?.sentCollaborations?.find(
-                                                (c) =>
-                                                  c.projectID ===
-                                                    project.projectID &&
-                                                  c.receiverID === universityID,
-                                              );
-                                            const isPending =
-                                              existingCollab?.requestStatus ===
-                                              "PENDING";
-                                            const isAccepted =
-                                              existingCollab?.requestStatus ===
-                                              "ACCEPTED";
-                                            const isProcessing =
-                                              inviteStatus[
-                                                project.projectID
-                                              ] === "SENDING" ||
-                                              inviteStatus[
-                                                project.projectID
-                                              ] === "CANCELING";
+                                    <AnimatePresence>
+                                      {showInviteMenu && (
+                                        <motion.div
+                                          initial={{
+                                            opacity: 0,
+                                            y: 10,
+                                            scale: 0.95,
+                                          }}
+                                          animate={{
+                                            opacity: 1,
+                                            y: 0,
+                                            scale: 1,
+                                          }}
+                                          exit={{
+                                            opacity: 0,
+                                            y: 10,
+                                            scale: 0.95,
+                                          }}
+                                          className="absolute top-full left-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[60]"
+                                        >
+                                          <div className="p-3 border-b border-gray-50 bg-gray-50/50">
+                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                              Select Project
+                                            </p>
+                                          </div>
+                                          <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                                            {myProjects.map((project) => {
+                                              const existingCollab =
+                                                networkData?.sentCollaborations?.find(
+                                                  (c) =>
+                                                    c.projectID ===
+                                                      project.projectID &&
+                                                    c.receiverID ===
+                                                      universityID,
+                                                );
+                                              const isPending =
+                                                existingCollab?.requestStatus ===
+                                                "PENDING";
+                                              const isAccepted =
+                                                existingCollab?.requestStatus ===
+                                                "ACCEPTED";
+                                              const isProcessing =
+                                                inviteStatus[
+                                                  project.projectID
+                                                ] === "SENDING" ||
+                                                inviteStatus[
+                                                  project.projectID
+                                                ] === "CANCELING";
 
-                                            return (
-                                              <div
-                                                key={project.projectID}
-                                                className={`w-full px-4 py-3 border-b border-gray-50 last:border-0 flex flex-col gap-2 transition-all ${
-                                                  isPending || isAccepted
-                                                    ? "bg-gray-50/50"
-                                                    : "hover:bg-gray-50"
-                                                }`}
-                                              >
-                                                <div className="flex justify-between items-start">
-                                                  <div className="flex flex-col gap-0.5">
-                                                    <span
-                                                      className={`text-sm font-bold transition-colors ${
-                                                        isPending || isAccepted
-                                                          ? "text-gray-400"
-                                                          : "text-gray-900"
-                                                      }`}
-                                                    >
-                                                      {project.title}
-                                                    </span>
-                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                                      {project.researchDomain}
-                                                    </span>
-                                                  </div>
-                                                  {isAccepted && (
-                                                    <span className="text-[10px] font-black text-amu-green uppercase tracking-widest bg-amu-green/10 px-2 py-0.5 rounded-md">
-                                                      Joined
-                                                    </span>
-                                                  )}
-                                                </div>
-
-                                                {!isAccepted && (
-                                                  <div className="flex items-center justify-between mt-1">
-                                                    {isPending ? (
-                                                      <button
-                                                        onClick={() =>
-                                                          handleCancelInvite(
-                                                            existingCollab.requestID,
-                                                            project.projectID,
-                                                          )
-                                                        }
-                                                        disabled={isProcessing}
-                                                        className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline disabled:opacity-50"
+                                              return (
+                                                <div
+                                                  key={project.projectID}
+                                                  className={`w-full px-4 py-3 border-b border-gray-50 last:border-0 flex flex-col gap-2 transition-all ${
+                                                    isPending || isAccepted
+                                                      ? "bg-gray-50/50"
+                                                      : "hover:bg-gray-50"
+                                                  }`}
+                                                >
+                                                  <div className="flex justify-between items-start">
+                                                    <div className="flex flex-col gap-0.5">
+                                                      <span
+                                                        className={`text-sm font-bold transition-colors ${
+                                                          isPending ||
+                                                          isAccepted
+                                                            ? "text-gray-400"
+                                                            : "text-gray-900"
+                                                        }`}
                                                       >
-                                                        {inviteStatus[
-                                                          project.projectID
-                                                        ] === "CANCELING"
-                                                          ? "Canceling..."
-                                                          : "Cancel Invitation"}
-                                                      </button>
-                                                    ) : (
-                                                      <button
-                                                        onClick={() =>
-                                                          handleInvite(
-                                                            project.projectID,
-                                                          )
-                                                        }
-                                                        disabled={isProcessing}
-                                                        className="text-[10px] font-black text-amu-green uppercase tracking-widest hover:underline disabled:opacity-50"
-                                                      >
-                                                        {inviteStatus[
-                                                          project.projectID
-                                                        ] === "SENDING"
-                                                          ? "Sending..."
-                                                          : "Send Invite"}
-                                                      </button>
+                                                        {project.title}
+                                                      </span>
+                                                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                        {project.projectDomain}
+                                                      </span>
+                                                    </div>
+                                                    {isAccepted && (
+                                                      <span className="text-[10px] font-black text-amu-green uppercase tracking-widest bg-amu-green/10 px-2 py-0.5 rounded-md">
+                                                        Joined
+                                                      </span>
                                                     )}
+                                                  </div>
 
-                                                    {inviteStatus[
-                                                      project.projectID
-                                                    ] &&
-                                                      !isProcessing && (
-                                                        <span className="text-[10px] font-black text-amu-gold uppercase tracking-widest">
+                                                  {!isAccepted && (
+                                                    <div className="flex items-center justify-between mt-1">
+                                                      {isPending ? (
+                                                        <button
+                                                          onClick={() =>
+                                                            handleCancelInvite(
+                                                              existingCollab.requestID,
+                                                              project.projectID,
+                                                            )
+                                                          }
+                                                          disabled={
+                                                            isProcessing
+                                                          }
+                                                          className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline disabled:opacity-50"
+                                                        >
                                                           {inviteStatus[
                                                             project.projectID
-                                                          ] === "SENT"
-                                                            ? "Sent"
-                                                            : inviteStatus[
-                                                                  project
-                                                                    .projectID
-                                                                ] === "ERROR"
-                                                              ? "Error"
-                                                              : ""}
-                                                        </span>
+                                                          ] === "CANCELING"
+                                                            ? "Canceling..."
+                                                            : "Cancel Invitation"}
+                                                        </button>
+                                                      ) : (
+                                                        <button
+                                                          onClick={() =>
+                                                            handleInvite(
+                                                              project.projectID,
+                                                            )
+                                                          }
+                                                          disabled={
+                                                            isProcessing
+                                                          }
+                                                          className="text-[10px] font-black text-amu-green uppercase tracking-widest hover:underline disabled:opacity-50"
+                                                        >
+                                                          {inviteStatus[
+                                                            project.projectID
+                                                          ] === "SENDING"
+                                                            ? "Sending..."
+                                                            : "Send Invite"}
+                                                        </button>
                                                       )}
-                                                  </div>
-                                                )}
-                                              </div>
-                                            );
-                                          })}
-                                        </div>
-                                      </motion.div>
-                                    )}
-                                  </AnimatePresence>
-                                </div>
-                              )}
-                            </div>
-                          )}
+
+                                                      {inviteStatus[
+                                                        project.projectID
+                                                      ] &&
+                                                        !isProcessing && (
+                                                          <span className="text-[10px] font-black text-amu-gold uppercase tracking-widest">
+                                                            {inviteStatus[
+                                                              project.projectID
+                                                            ] === "SENT"
+                                                              ? "Sent"
+                                                              : inviteStatus[
+                                                                    project
+                                                                      .projectID
+                                                                  ] === "ERROR"
+                                                                ? "Error"
+                                                                : ""}
+                                                          </span>
+                                                        )}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+                                        </motion.div>
+                                      )}
+                                    </AnimatePresence>
+                                  </div>
+                                )}
+
+                                {/* Admin Actions */}
+                                {currentUserRole?.toUpperCase() === "ADMIN" &&
+                                  onAdminAction &&
+                                  user.accountStatus === "PENDING" && (
+                                    <div className="flex gap-3">
+                                      <button
+                                        onClick={() =>
+                                          onAdminAction(
+                                            user.universityID,
+                                            "approve",
+                                          )
+                                        }
+                                        className="flex items-center gap-2 px-6 py-2 bg-amu-green text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-amu-green/90 transition-all shadow-lg shadow-amu-green/20"
+                                      >
+                                        <CheckCircle2 className="h-4 w-4" />
+                                        Verify User
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          onAdminAction(
+                                            user.universityID,
+                                            "reject",
+                                          )
+                                        }
+                                        className="flex items-center gap-2 px-6 py-2 bg-red-50 text-red-500 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-100 transition-all border border-red-100"
+                                      >
+                                        <XCircle className="h-4 w-4" />
+                                        Reject
+                                      </button>
+                                    </div>
+                                  )}
+
+                                {currentUserRole?.toUpperCase() === "ADMIN" &&
+                                  user.accountStatus !== "PENDING" && (
+                                    <div className="px-4 py-2 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-3">
+                                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                        Account Status:
+                                      </span>
+                                      <span
+                                        className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${
+                                          user.accountStatus === "APPROVED"
+                                            ? "bg-emerald-100 text-emerald-700"
+                                            : "bg-red-100 text-red-700"
+                                        }`}
+                                      >
+                                        {user.accountStatus}
+                                      </span>
+                                    </div>
+                                  )}
+                              </div>
+                            )}
                         </div>
                       </div>
                     </div>
@@ -470,7 +562,7 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
                                     <div>
                                       <div className="flex items-center gap-2 mb-2">
                                         <span className="px-2.5 py-1 bg-gray-50 text-gray-500 text-[10px] font-black uppercase tracking-widest rounded-lg border border-gray-100">
-                                          {project.researchDomain}
+                                          {project.projectDomain}
                                         </span>
                                         <span
                                           className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg ${
@@ -555,9 +647,7 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
                                   <div className="mt-4 pt-4 border-t border-gray-50 flex items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
                                     <span className="flex items-center gap-1.5">
                                       <Clock className="h-3 w-3" />
-                                      {new Date(
-                                        project.createdAt,
-                                      ).toLocaleDateString()}
+                                      {formatDate(project.createdAt)}
                                     </span>
                                   </div>
                                 </button>
@@ -659,7 +749,7 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
                                       <div>
                                         <div className="flex items-center gap-2 mb-2">
                                           <span className="px-2.5 py-1 bg-gray-50 text-gray-500 text-[10px] font-black uppercase tracking-widest rounded-lg border border-gray-100">
-                                            {collab.project.researchDomain}
+                                            {collab.project.projectDomain}
                                           </span>
                                           <span
                                             className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg ${
@@ -845,6 +935,31 @@ const UserProfileModal = ({ isOpen, onClose, universityID }) => {
         onClose={() => setIsProjectModalOpen(false)}
         projectID={selectedProjectID}
       />
+      {modalImage && (
+        <div
+          className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          onClick={() => setModalImage(null)}
+        >
+          <div
+            className="relative max-w-4xl max-h-[90vh] w-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setModalImage(null)}
+              className="absolute top-4 right-4 p-2 text-white/70 hover:text-white transition-colors bg-black/50 rounded-full z-10"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <Image
+              src={modalImage}
+              alt="Preview"
+              width={1200}
+              height={800}
+              className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl"
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };

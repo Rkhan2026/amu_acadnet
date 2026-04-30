@@ -15,7 +15,7 @@ export async function PATCH(request, { params }) {
     const resolvedParams = await params;
     const { projectID } = resolvedParams;
     const body = await request.json();
-    const { moderationStatus } = body; // 'APPROVED' | 'REJECTED'
+    const { moderationStatus, adminFeedback } = body; // 'APPROVED' | 'REJECTED'
 
     if (
       !moderationStatus ||
@@ -32,6 +32,7 @@ export async function PATCH(request, { params }) {
       data: {
         moderationStatus,
         projectStatus: moderationStatus === "APPROVED" ? "ACTIVE" : "ON_HOLD",
+        ...(adminFeedback !== undefined && { adminFeedback }),
       },
     });
 

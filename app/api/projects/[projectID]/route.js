@@ -94,7 +94,7 @@ export async function PUT(request, { params }) {
       data: {
         title: body.title,
         description: body.description,
-        researchDomain: body.domain,
+        projectDomain: body.domain ? body.domain.toLowerCase() : "",
         projectStatus:
           body.projectStatus === "Active"
             ? "ACTIVE"
@@ -106,6 +106,12 @@ export async function PUT(request, { params }) {
                   ? "ARCHIVED"
                   : "COMPLETED",
         externalLinks: body.externalLinks.map((l) => l.url || l),
+        ...(existing.moderationStatus === "REJECTED"
+          ? {
+              moderationStatus: "PENDING",
+              adminFeedback: "No feedback yet",
+            }
+          : {}),
       },
     });
 

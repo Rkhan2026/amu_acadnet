@@ -18,7 +18,7 @@ export function proxy(request) {
     script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://va.vercel-scripts.com${isDev ? " 'unsafe-eval'" : ""};
     ${styleSrc}
     style-src-attr 'unsafe-inline';
-    img-src 'self' blob: data: https://api.dicebear.com;
+    img-src 'self' blob: data: https://api.dicebear.com https://res.cloudinary.com;
     font-src 'self';
     connect-src 'self' https://vitals.vercel-insights.com;
     frame-src 'self' https://vercel.live;

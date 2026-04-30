@@ -76,7 +76,7 @@ export default function HomePage() {
           }
 
           setSuggested(
-            recsData.recommendations.map((rec) => ({
+            recsData.recommendations.slice(0, 5).map((rec) => ({
               name: rec.user.name,
               role: rec.user.role,
               avatar: "/default-avatar.svg",
@@ -131,7 +131,7 @@ export default function HomePage() {
                   className="flex items-center justify-between group/user cursor-pointer hover:bg-gray-50/50 p-2 -m-2 rounded-2xl transition-all"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="relative w-12 h-12 rounded-2xl overflow-hidden border-2 border-gray-50 group-hover/user:border-amu-green transition-all shadow-sm">
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-gray-100 group-hover/user:border-amu-green transition-all shadow-sm bg-gray-50 flex-shrink-0">
                       <Image
                         src={user.avatar}
                         alt={user.name}

@@ -15,6 +15,8 @@ import {
   Clock,
   CheckCircle2,
   UserMinus,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 
 import { motion } from "framer-motion";
@@ -33,8 +35,10 @@ const ProjectDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState(null);
+  const [showCustomDomain, setShowCustomDomain] = useState(false);
   const [requested, setRequested] = useState(false);
   const [requestLoading, setRequestLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [collaborationID, setCollaborationID] = useState(null);
 
   React.useEffect(() => {
@@ -49,7 +53,7 @@ const ProjectDetailPage = () => {
           const mapped = {
             id: projRes.projectID,
             title: projRes.title,
-            domain: projRes.researchDomain,
+            domain: projRes.projectDomain,
             department: projRes.creator?.department || "University",
             description: projRes.description,
             projectStatus:
@@ -62,9 +66,14 @@ const ProjectDetailPage = () => {
                     : projRes.projectStatus === "ARCHIVED"
                       ? "Archived"
                       : "Completed",
-            leadResearcher: projRes.creator?.name || "Unknown",
+            projectCreator: projRes.creator?.name || "Unknown",
+            moderationStatus: projRes.moderationStatus,
+            adminFeedback: projRes.adminFeedback,
             creatorID: projRes.universityID,
-            time: new Date(projRes.createdAt).toLocaleDateString(),
+            time: new Date(projRes.createdAt).toLocaleString("en-US", {
+              dateStyle: "full",
+              timeStyle: "short",
+            }),
             team:
               projRes.collaborations?.map((c) => ({
                 requestID: c.requestID,
@@ -104,6 +113,7 @@ const ProjectDetailPage = () => {
       currentUser.role === "ADMIN");
 
   const handleSave = async () => {
+    setIsSaving(true);
     try {
       const res = await fetch(`/api/projects/${projectId}`, {
         method: "PUT",
@@ -118,14 +128,21 @@ const ProjectDetailPage = () => {
         }),
       });
       if (res.ok) {
-        await res.json();
-        setProject((prev) => ({ ...prev, ...editForm }));
+        const data = await res.json();
+        setProject((prev) => ({
+          ...prev,
+          ...editForm,
+          moderationStatus: data.moderationStatus,
+          adminFeedback: data.adminFeedback,
+        }));
         setIsEditing(false);
       } else {
         console.error("Failed to save project.");
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -264,16 +281,84 @@ const ProjectDetailPage = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            <div className="flex flex-wrap items-center gap-4">
+            {project.moderationStatus === "REJECTED" && isOwner && (
+              <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-2xl shadow-sm mb-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-red-100 rounded-xl">
+                    <AlertCircle className="h-6 w-6 text-red-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-black text-red-800">
+                      Project Requires Updates
+                    </h2>
+                    <p className="text-red-600 mt-2 font-medium">
+                      Your project was rejected. Please review the feedback,
+                      edit your details, and resubmit.
+                    </p>
+                    <div className="mt-4 p-4 bg-white rounded-xl border border-red-100 text-red-900 font-medium">
+                      <span className="text-xs font-bold uppercase tracking-widest text-red-400 block mb-1">
+                        Admin Feedback:
+                      </span>
+                      {project.adminFeedback ||
+                        "No specific feedback provided."}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div
+              className={`flex flex-wrap items-start gap-4 ${isEditing ? "mb-6" : ""}`}
+            >
               {isEditing ? (
-                <input
-                  type="text"
-                  value={editForm.domain}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, domain: e.target.value })
-                  }
-                  className="px-6 py-2 bg-white text-amu-green text-sm font-black uppercase tracking-widest rounded-2xl border-2 border-amu-green focus:outline-none focus:ring-4 focus:ring-amu-green/20"
-                />
+                <div className="flex flex-col gap-3 min-w-[280px]">
+                  <select
+                    value={showCustomDomain ? "Other" : editForm.domain}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "Other") {
+                        setShowCustomDomain(true);
+                        setEditForm({ ...editForm, domain: "" });
+                      } else {
+                        setShowCustomDomain(false);
+                        setEditForm({ ...editForm, domain: val });
+                      }
+                    }}
+                    className="w-full px-6 py-2.5 bg-white text-amu-green text-sm font-black uppercase tracking-widest rounded-2xl border-2 border-amu-green focus:outline-none focus:ring-4 focus:ring-amu-green/20 appearance-none cursor-pointer"
+                  >
+                    <option value="">Select Project Domain</option>
+                    {[
+                      "Artificial Intelligence",
+                      "Social Sciences",
+                      "Physics",
+                      "Sustainable Development",
+                      "Medieval History",
+                      "Computer Science",
+                      "Law",
+                      "Biotechnology",
+                    ].map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                    <option value="Other">Other (Custom Domain)</option>
+                  </select>
+
+                  {showCustomDomain && (
+                    <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
+                      <input
+                        type="text"
+                        autoFocus
+                        value={editForm.domain}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, domain: e.target.value })
+                        }
+                        placeholder="Enter custom domain..."
+                        className="w-full px-6 py-2.5 bg-white text-gray-900 text-sm font-bold rounded-2xl border-2 border-amu-green/20 focus:outline-none focus:border-amu-green transition-all"
+                      />
+                    </div>
+                  )}
+                </div>
               ) : (
                 <span className="px-6 py-2.5 bg-amu-green/10 text-amu-green text-sm font-black uppercase tracking-widest rounded-2xl border border-amu-green/20 shadow-sm">
                   {project.domain}
@@ -339,10 +424,10 @@ const ProjectDetailPage = () => {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
-                    Lead Researcher
+                    Project Creator
                   </p>
                   <p className="font-bold text-gray-900">
-                    {project.leadResearcher}
+                    {project.projectCreator}
                   </p>
                 </div>
               </div>
@@ -486,9 +571,11 @@ const ProjectDetailPage = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 text-gray-500 font-bold">
                   <Calendar className="h-4 w-4" />
-                  <span>Created At</span>
+                  <span className="text-[10px] uppercase tracking-widest font-black text-gray-400">
+                    Created At
+                  </span>
                 </div>
-                <span className="font-black text-gray-900">
+                <span className="font-bold text-gray-900 text-xs text-right leading-tight max-w-[140px]">
                   {project.time || "2d ago"}
                 </span>
               </div>
@@ -509,10 +596,10 @@ const ProjectDetailPage = () => {
                       </div>
                       <div className="text-left">
                         <p className="font-bold text-gray-900 text-sm leading-tight">
-                          {project.leadResearcher}
+                          {project.projectCreator}
                         </p>
                         <p className="text-[10px] font-black uppercase tracking-widest text-amu-gold mt-0.5">
-                          Lead Researcher
+                          Project Creator
                         </p>
                       </div>
                     </div>
@@ -577,9 +664,19 @@ const ProjectDetailPage = () => {
                     <>
                       <button
                         onClick={handleSave}
-                        className="w-full py-4 bg-amu-green text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-amu-green/20 hover:shadow-amu-green/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
+                        disabled={isSaving}
+                        className={`w-full py-4 bg-amu-green text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-amu-green/20 hover:shadow-amu-green/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-2 ${isSaving ? "opacity-70 cursor-not-allowed" : ""}`}
                       >
-                        <Save className="w-4 h-4" /> Save Changes
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" /> Saving
+                            Changes...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4" /> Save Changes
+                          </>
+                        )}
                       </button>
                       <button
                         onClick={handleCancel}
@@ -591,7 +688,22 @@ const ProjectDetailPage = () => {
                   ) : (
                     <>
                       <button
-                        onClick={() => setIsEditing(true)}
+                        onClick={() => {
+                          const predefinedDomains = [
+                            "Artificial Intelligence",
+                            "Social Sciences",
+                            "Physics",
+                            "Sustainable Development",
+                            "Medieval History",
+                            "Computer Science",
+                            "Law",
+                            "Biotechnology",
+                          ];
+                          setShowCustomDomain(
+                            !predefinedDomains.includes(project.domain),
+                          );
+                          setIsEditing(true);
+                        }}
                         className="w-full py-4 bg-gray-900 text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-gray-900/20 hover:shadow-gray-900/40 hover:-translate-y-1 transition-all"
                       >
                         Edit Details

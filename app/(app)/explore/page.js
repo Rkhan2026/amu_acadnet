@@ -3,7 +3,6 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 import Image from "next/image";
-import Link from "next/link";
 import {
   Search,
   Filter,
@@ -20,13 +19,14 @@ import UserProfileModal from "@/components/UserProfileModal";
 import ProjectModal from "@/components/ProjectModal";
 
 const ExplorePage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [projectSearch, setProjectSearch] = useState("");
+  const [userSearch, setUserSearch] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
 
   const activeTab = useMemo(() => {
-    return tabParam === "researchers" ? "researchers" : "projects";
+    return tabParam === "users" ? "users" : "projects";
   }, [tabParam]);
 
   const setActiveTab = (tab) => {
@@ -35,11 +35,14 @@ const ExplorePage = () => {
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
-  const [selectedDept, setSelectedDept] = useState("");
+  const [projectDept, setProjectDept] = useState("");
+  const [userDept, setUserDept] = useState("");
   const [selectedDomain, setSelectedDomain] = useState("");
+  const [isCustomDomain, setIsCustomDomain] = useState(false);
+  const [selectedInterests, setSelectedInterests] = useState("");
 
   const [projectsData, setProjectsData] = useState([]);
-  const [researchersData, setResearchersData] = useState([]);
+  const [usersData, setUsersData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [followingStatuses, setFollowingStatuses] = useState({});
   const [selectedUserID, setSelectedUserID] = useState(null);
@@ -60,9 +63,12 @@ const ExplorePage = () => {
   };
 
   useEffect(() => {
+    let usersUrl = "/api/users?all=true";
+    // We handle interest filtering client-side for better UX with 'tag-like' behavior
+
     Promise.all([
       fetch("/api/projects").then((r) => r.json()),
-      fetch("/api/users?all=true").then((r) => r.json()),
+      fetch(usersUrl).then((r) => r.json()),
       fetch("/api/network").then((r) => r.json()),
     ])
       .then(([pData, rData, nData]) => {
@@ -74,18 +80,22 @@ const ExplorePage = () => {
                 ...p,
                 id: p.projectID,
                 department: p.creator?.department || "General",
-                leadResearcher: p.creator?.name || "Unknown",
+                projectCreator: p.creator?.name || "Unknown",
                 avatar: "/default-avatar.svg",
               })),
           );
         if (Array.isArray(rData))
-          setResearchersData(
+          setUsersData(
             rData.map((u) => ({
               id: u.universityID,
               name: u.name,
               role: u.role,
               department: u.department,
-              interests: [], // To be fetched or fallback
+              interests: u.academicProfile?.researchInterests
+                ? u.academicProfile.researchInterests
+                    .split(",")
+                    .map((s) => s.trim())
+                : [],
               domain: u.department,
               avatar: "/default-avatar.svg",
             })),
@@ -131,29 +141,45 @@ const ExplorePage = () => {
 
   const filteredProjects = useMemo(() => {
     return projectsData.filter((p) => {
-      const matchesSearch =
-        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesDept = !selectedDept || p.department === selectedDept;
+      const searchStr = projectSearch.trim().toLowerCase();
+      const matchesSearch = (p.title || "").toLowerCase().includes(searchStr);
+      const matchesDept = !projectDept || p.department === projectDept;
+      const domainSearchStr = selectedDomain.trim().toLowerCase();
       const matchesDomain =
-        !selectedDomain || p.researchDomain === selectedDomain;
+        !selectedDomain ||
+        (p.projectDomain || "").toLowerCase().includes(domainSearchStr);
       return matchesSearch && matchesDept && matchesDomain;
     });
-  }, [searchQuery, selectedDept, selectedDomain, projectsData]);
+  }, [projectSearch, projectDept, selectedDomain, projectsData]);
 
-  const filteredResearchers = useMemo(() => {
-    return researchersData.filter((r) => {
-      const matchesSearch = r.name
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
-      const matchesDept = !selectedDept || r.department === selectedDept;
-      const matchesDomain = !selectedDomain || r.domain === selectedDomain;
-      return matchesSearch && matchesDept && matchesDomain;
+  const filteredUsers = useMemo(() => {
+    return usersData.filter((u) => {
+      const searchStr = userSearch.trim().toLowerCase();
+      const matchesSearch = (u.name || "").toLowerCase().includes(searchStr);
+      const matchesDept = !userDept || u.department === userDept;
+
+      // Interest filtering logic (OR logic)
+      let matchesInterests = true;
+      if (selectedInterests) {
+        const searchTerms = selectedInterests
+          .toLowerCase()
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+        if (searchTerms.length > 0) {
+          matchesInterests = searchTerms.some((term) =>
+            u.interests.some((interest) =>
+              interest.toLowerCase().includes(term),
+            ),
+          );
+        }
+      }
+
+      return matchesSearch && matchesDept && matchesInterests;
     });
-  }, [searchQuery, selectedDept, selectedDomain, researchersData]);
+  }, [userSearch, userDept, selectedInterests, usersData]);
 
-  const results =
-    activeTab === "projects" ? filteredProjects : filteredResearchers;
+  const results = activeTab === "projects" ? filteredProjects : filteredUsers;
 
   return (
     <div className="max-w-7xl mx-auto py-4 px-6 space-y-8">
@@ -176,9 +202,17 @@ const ExplorePage = () => {
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-gray-400" />
             <input
               type="text"
-              placeholder="Search by researcher name, or project title..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={
+                activeTab === "projects"
+                  ? "Search by project title..."
+                  : "Search by person name..."
+              }
+              value={activeTab === "projects" ? projectSearch : userSearch}
+              onChange={(e) =>
+                activeTab === "projects"
+                  ? setProjectSearch(e.target.value)
+                  : setUserSearch(e.target.value)
+              }
               className="w-full pl-16 pr-8 py-5 bg-white rounded-3xl text-gray-900 font-bold text-lg focus:outline-none focus:ring-8 focus:ring-white/10 transition-all placeholder:text-gray-400 shadow-2xl shadow-black/10"
             />
           </div>
@@ -204,8 +238,12 @@ const ExplorePage = () => {
                   Department
                 </label>
                 <select
-                  value={selectedDept}
-                  onChange={(e) => setSelectedDept(e.target.value)}
+                  value={activeTab === "projects" ? projectDept : userDept}
+                  onChange={(e) =>
+                    activeTab === "projects"
+                      ? setProjectDept(e.target.value)
+                      : setUserDept(e.target.value)
+                  }
                   className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-amu-green focus:bg-white rounded-2xl text-sm font-bold text-gray-700 outline-none transition-all appearance-none cursor-pointer"
                 >
                   <option value="">All Departments</option>
@@ -217,31 +255,93 @@ const ExplorePage = () => {
                 </select>
               </div>
 
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
-                  Research Domain
-                </label>
-                <select
-                  value={selectedDomain}
-                  onChange={(e) => setSelectedDomain(e.target.value)}
-                  className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-amu-green focus:bg-white rounded-2xl text-sm font-bold text-gray-700 outline-none transition-all appearance-none cursor-pointer"
-                >
-                  <option value="">All Domains</option>
-                  <option value="Artificial Intelligence">AI</option>
-                  <option value="Quantum Physics">Quantum Computing</option>
-                  <option value="Sustainability">Sustainable Energy</option>
-                  <option value="Biology">Biotechnology</option>
-                  <option value="Psychology">Psychology</option>
-                  <option value="Civil Engineering">Civil Engineering</option>
-                </select>
-              </div>
+              {activeTab === "projects" && (
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                    Project Domain
+                  </label>
+                  <div className="space-y-3">
+                    <select
+                      value={isCustomDomain ? "Other" : selectedDomain}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "Other") {
+                          setIsCustomDomain(true);
+                          setSelectedDomain("");
+                        } else {
+                          setIsCustomDomain(false);
+                          setSelectedDomain(val);
+                        }
+                      }}
+                      className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-amu-green focus:bg-white rounded-2xl text-sm font-bold text-gray-700 outline-none transition-all appearance-none cursor-pointer shadow-inner"
+                    >
+                      <option value="">Select Project Domain</option>
+                      {[
+                        "Artificial Intelligence",
+                        "Social Sciences",
+                        "Physics",
+                        "Sustainable Development",
+                        "Medieval History",
+                        "Computer Science",
+                        "Law",
+                        "Biotechnology",
+                      ].map((d) => (
+                        <option key={d} value={d}>
+                          {d}
+                        </option>
+                      ))}
+                      <option value="Other">Other (Custom Domain)</option>
+                    </select>
+
+                    {isCustomDomain && (
+                      <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
+                        <input
+                          type="text"
+                          placeholder="Search...."
+                          value={selectedDomain}
+                          onChange={(e) => setSelectedDomain(e.target.value)}
+                          className="w-full pl-5 pr-[120px] py-4 bg-white border-2 border-amu-green/20 rounded-2xl text-sm font-bold text-gray-700 outline-none transition-all placeholder:text-gray-400"
+                        />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-amu-green uppercase tracking-widest bg-amu-green/5 px-2 py-1 rounded-md pointer-events-none">
+                          Search
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "users" && (
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                    Interests
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. ML, Physics, History"
+                    value={selectedInterests}
+                    onChange={(e) => setSelectedInterests(e.target.value)}
+                    className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-amu-green focus:bg-white rounded-2xl text-sm font-bold text-gray-700 outline-none transition-all placeholder:text-gray-400"
+                  />
+                  <p className="text-[10px] text-gray-400 italic px-1">
+                    Separate with commas
+                  </p>
+                </div>
+              )}
             </div>
 
             <button
               onClick={() => {
-                setSelectedDept("");
-                setSelectedDomain("");
-                setSearchQuery("");
+                if (activeTab === "projects") {
+                  setProjectDept("");
+                  setProjectSearch("");
+                  setSelectedDomain("");
+                  setIsCustomDomain(false);
+                } else {
+                  setUserDept("");
+                  setUserSearch("");
+                  setSelectedInterests("");
+                }
               }}
               className="w-full py-4 text-gray-400 hover:text-gray-600 font-bold text-xs uppercase tracking-widest transition-colors"
             >
@@ -273,17 +373,17 @@ const ExplorePage = () => {
                   </span>
                 </button>
                 <button
-                  onClick={() => setActiveTab("researchers")}
+                  onClick={() => setActiveTab("users")}
                   className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black text-sm transition-all ${
-                    activeTab === "researchers"
+                    activeTab === "users"
                       ? "bg-white text-amu-green shadow-md"
                       : "text-gray-400 hover:text-gray-600"
                   }`}
                 >
                   <Users className="h-4 w-4" />
-                  Researchers
+                  Users
                   <span className="ml-2 px-2 py-0.5 bg-gray-100 text-[10px] rounded-md">
-                    {filteredResearchers.length}
+                    {filteredUsers.length}
                   </span>
                 </button>
               </div>
@@ -296,14 +396,19 @@ const ExplorePage = () => {
                       .filter((item) => item && item.id)
                       .map((item, idx) => (
                         <motion.div
-                          key={activeTab === "projects" ? item.id : item.id}
+                          key={
+                            activeTab === "projects"
+                              ? `p-${item.id}`
+                              : `u-${item.id}`
+                          }
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ delay: idx * 0.05 }}
                           onClick={() =>
-                            activeTab === "projects" &&
-                            openProject(item.projectID)
+                            activeTab === "projects"
+                              ? openProject(item.projectID)
+                              : openProfile(item.id)
                           }
                           className="group bg-white p-6 rounded-3xl border border-gray-100 hover:border-amu-green/30 transition-all hover:shadow-2xl hover:shadow-gray-200/50 flex flex-col justify-between cursor-pointer"
                         >
@@ -334,7 +439,9 @@ const ExplorePage = () => {
                             <p className="text-gray-500 text-sm font-medium leading-relaxed line-clamp-2 mb-6 text-balance">
                               {activeTab === "projects"
                                 ? item.description
-                                : `Expertise in ${item.interests.join(", ")}`}
+                                : item.interests?.length > 0
+                                  ? `Interests: ${item.interests.join(", ")}`
+                                  : "No research interests listed"}
                             </p>
 
                             <div className="space-y-3">
@@ -344,7 +451,7 @@ const ExplorePage = () => {
                                   {item.department}
                                 </span>
                               </div>
-                              {activeTab === "researchers" && (
+                              {activeTab === "users" && (
                                 <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-tighter">
                                   <Sparkles className="h-4 w-4 shrink-0" />
                                   <span>{item.role}</span>
@@ -364,65 +471,59 @@ const ExplorePage = () => {
                               />
                               <span className="text-xs font-black text-gray-700">
                                 {activeTab === "projects"
-                                  ? item.leadResearcher
+                                  ? item.projectCreator
                                   : item.domain}
                               </span>
                             </div>
                             <div className="flex items-center gap-2">
-                              {activeTab === "researchers" &&
+                              {activeTab === "users" &&
                                 !followingStatuses[item.id] && (
                                   <button
-                                    onClick={() => handleFollow(item.id)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleFollow(item.id);
+                                    }}
                                     className="px-4 py-2 bg-amu-green/10 text-amu-green text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-amu-green hover:text-white transition-all shadow-sm"
                                   >
                                     Follow
                                   </button>
                                 )}
-                              {followingStatuses[item.id] && (
-                                <button
-                                  onClick={() => handleFollow(item.id)}
-                                  className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border transition-all relative group/btn ${
-                                    followingStatuses[item.id] === "ACCEPTED"
-                                      ? "bg-amu-green/10 text-amu-green border-amu-green/20"
-                                      : "bg-gray-100 text-gray-400 border-gray-200"
-                                  }`}
-                                >
-                                  <span
-                                    className={
-                                      followingStatuses[item.id] === "PENDING"
-                                        ? "group-hover/btn:opacity-0 transition-opacity"
-                                        : ""
-                                    }
+                              {activeTab === "users" &&
+                                followingStatuses[item.id] && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleFollow(item.id);
+                                    }}
+                                    className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border transition-all relative group/btn ${
+                                      followingStatuses[item.id] === "ACCEPTED"
+                                        ? "bg-amu-green/10 text-amu-green border-amu-green/20"
+                                        : "bg-gray-100 text-gray-400 border-gray-200"
+                                    }`}
                                   >
-                                    {followingStatuses[item.id] === "ACCEPTED"
-                                      ? "Following"
-                                      : "Requested"}
-                                  </span>
-                                  {followingStatuses[item.id] === "PENDING" && (
-                                    <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/btn:opacity-100 transition-opacity text-red-500">
-                                      Cancel
+                                    <span
+                                      className={
+                                        followingStatuses[item.id] === "PENDING"
+                                          ? "group-hover/btn:opacity-0 transition-opacity"
+                                          : ""
+                                      }
+                                    >
+                                      {followingStatuses[item.id] === "ACCEPTED"
+                                        ? "Following"
+                                        : "Requested"}
                                     </span>
-                                  )}
-                                </button>
-                              )}
+                                    {followingStatuses[item.id] ===
+                                      "PENDING" && (
+                                      <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/btn:opacity-100 transition-opacity text-red-500">
+                                        Cancel
+                                      </span>
+                                    )}
+                                  </button>
+                                )}
 
-                              {activeTab === "researchers" ? (
-                                <button
-                                  onClick={() => openProfile(item.id)}
-                                  className="p-2 bg-gray-50 text-gray-400 group-hover:bg-amu-green group-hover:text-white rounded-xl transition-all"
-                                >
-                                  <ArrowRight className="h-5 w-5" />
-                                </button>
-                              ) : (
-                                <Link
-                                  href={`/projects/${item.projectID}`}
-                                  target="_blank"
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="p-2 bg-gray-50 text-gray-400 group-hover:bg-amu-green group-hover:text-white rounded-xl transition-all"
-                                >
-                                  <ArrowRight className="h-5 w-5" />
-                                </Link>
-                              )}
+                              <div className="p-2 bg-gray-50 text-gray-400 group-hover:bg-amu-green group-hover:text-white rounded-xl transition-all">
+                                <ArrowRight className="h-5 w-5" />
+                              </div>
                             </div>
                           </div>
                         </motion.div>
@@ -455,6 +556,7 @@ const ExplorePage = () => {
         isOpen={isProjectModalOpen}
         onClose={() => setIsProjectModalOpen(false)}
         projectID={selectedProjectID}
+        onProfileClick={openProfile}
       />
     </div>
   );

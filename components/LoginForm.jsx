@@ -43,6 +43,8 @@ export default function LoginForm() {
         setCurrentUser(data.user);
         if (data.user.role === "ADMIN") {
           window.location.href = "/admin/dashboard";
+        } else if (data.user.accountStatus === "REJECTED") {
+          window.location.href = "/resubmit-profile";
         } else {
           window.location.href = "/home";
         }
@@ -164,7 +166,7 @@ export default function LoginForm() {
 
           <div className="text-sm">
             <Link
-              href="/forget_password"
+              href="/forget-password"
               className="font-medium text-amu-green hover:text-green-800 hover:underline transition-colors"
             >
               Forgot password?

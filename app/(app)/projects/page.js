@@ -2,13 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import {
-  Plus,
-  Briefcase,
-  Clock,
-  CheckCircle2,
-  MoreVertical,
-} from "lucide-react";
+import { Plus, Briefcase, Clock, CheckCircle2 } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ProjectModal from "@/components/ProjectModal";
 export default function MyProjectsPage() {
@@ -36,7 +30,7 @@ export default function MyProjectsPage() {
             mine.map((p) => ({
               id: p.projectID,
               title: p.title,
-              domain: p.researchDomain,
+              domain: p.projectDomain,
               projectStatus:
                 p.projectStatus === "ACTIVE"
                   ? "Active"
@@ -142,7 +136,7 @@ function MyProjectCard({ project, onOpen }) {
               <span
                 className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-amu-green/10 text-amu-green`}
               >
-                {project.domain}
+                Project Domain: {project.domain}
               </span>
               <span
                 className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
@@ -178,9 +172,6 @@ function MyProjectCard({ project, onOpen }) {
             </h3>
           </div>
         </div>
-        <button className="p-2 text-gray-400 hover:bg-gray-50 rounded-xl transition-all">
-          <MoreVertical className="h-5 w-5" />
-        </button>
       </div>
 
       <p className="text-gray-600 font-medium mb-8 line-clamp-2">
@@ -190,7 +181,7 @@ function MyProjectCard({ project, onOpen }) {
       <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-gray-50">
         <div className="flex items-center gap-2 text-gray-400 font-medium text-sm">
           <Clock className="h-4 w-4" />
-          <span>Created {project.time}</span>
+          <span>{project.time}</span>
         </div>
         <div className="flex gap-3">
           <button

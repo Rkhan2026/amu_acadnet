@@ -18,16 +18,28 @@ export async function GET() {
       select: {
         title: true,
         projectID: true,
-        researchDomain: true,
+        projectDomain: true,
         description: true,
         moderationStatus: true,
         projectStatus: true,
         createdAt: true,
         creator: {
-          select: { name: true, email: true, role: true, department: true },
+          select: {
+            name: true,
+            email: true,
+            role: true,
+            department: true,
+            universityID: true,
+          },
         },
         teamMembers: {
-          select: { name: true, email: true, role: true, department: true },
+          select: {
+            name: true,
+            email: true,
+            role: true,
+            department: true,
+            universityID: true,
+          },
         },
       },
       orderBy: {

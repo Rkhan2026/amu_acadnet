@@ -22,7 +22,7 @@ const features = [
     icon: BrainCircuit,
     title: "AI-Powered Collaboration",
     description:
-      "Leverage AI to find the perfect collaborators based on shared research interests and publication history.",
+      "Leverage AI to find the perfect collaborators based on shared interests and publication history.",
     color: "bg-amu-gold/20 text-amu-gold/90",
   },
   {

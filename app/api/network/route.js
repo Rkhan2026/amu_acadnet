@@ -5,11 +5,11 @@ import { getSession } from "@/lib/session";
 export async function GET(_request) {
   try {
     const session = await getSession();
-    if (!session || !session.universityID) {
+    if (!session || (!session.universityID && !session.adminID)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { universityID } = session;
+    const { universityID, adminID } = session;
 
     const sentCollaborations = await prisma.collaboration.findMany({
       where: { senderID: universityID },
@@ -73,10 +73,20 @@ export async function GET(_request) {
       },
     });
 
-    const currentUser = await prisma.user.findUnique({
-      where: { universityID },
-      select: { name: true, universityID: true },
-    });
+    let currentUser = null;
+
+    if (universityID) {
+      currentUser = await prisma.user.findUnique({
+        where: { universityID },
+        select: { name: true, universityID: true, role: true },
+      });
+    } else if (adminID) {
+      currentUser = {
+        name: session.name,
+        universityID: adminID,
+        role: "ADMIN",
+      };
+    }
 
     return NextResponse.json({
       currentUser,

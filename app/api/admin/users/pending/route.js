@@ -21,8 +21,18 @@ export async function GET() {
         department: true,
         role: true,
         accountStatus: true,
+        adminFeedback: true,
+        identityProof: true,
+        profilePhoto: true,
+        academicProfile: {
+          select: {
+            biography: true,
+            researchInterests: true,
+          },
+        },
+        createdAt: true,
       },
-      orderBy: { universityID: "asc" },
+      orderBy: { createdAt: "desc" },
     });
 
     return NextResponse.json(pendingUsers);
