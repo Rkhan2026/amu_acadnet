@@ -17,6 +17,7 @@ import {
   UserMinus,
   AlertCircle,
   Loader2,
+  ListChecks,
 } from "lucide-react";
 
 import { motion } from "framer-motion";
@@ -83,6 +84,7 @@ const ProjectDetailPage = () => {
               })) || [],
 
             externalLinks: projRes.externalLinks?.map((url) => ({ url })) || [],
+            requirements: projRes.requirements || [],
           };
           setProject(mapped);
           setEditForm(mapped);
@@ -477,6 +479,36 @@ const ProjectDetailPage = () => {
               )}
             </div>
           </motion.div>
+
+          {/* Technical Requirements Section */}
+          {project.requirements && project.requirements.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="bg-white rounded-[3rem] p-10 lg:p-14 shadow-2xl shadow-gray-200/50 border border-gray-100"
+            >
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-10 h-10 bg-amu-gold/10 rounded-xl flex items-center justify-center">
+                  <ListChecks className="h-5 w-5 text-amu-gold" />
+                </div>
+                <h2 className="text-2xl font-black text-gray-900">
+                  Technical Requirements
+                </h2>
+              </div>
+
+              <div className="flex flex-wrap gap-4">
+                {project.requirements.map((req, i) => (
+                  <span
+                    key={i}
+                    className="px-6 py-3 bg-gray-50 text-gray-700 font-bold rounded-2xl border border-gray-100 hover:border-amu-gold/30 hover:bg-white hover:shadow-md transition-all cursor-default lowercase"
+                  >
+                    {req}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          )}
 
           {/* External Links Section */}
           <motion.div

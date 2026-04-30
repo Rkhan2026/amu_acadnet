@@ -14,6 +14,7 @@ import {
   UserMinus,
   ChevronRight,
   ArrowLeft,
+  ListChecks,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -339,6 +340,31 @@ const ProjectModal = ({
                           {project.description || "No description provided."}
                         </p>
                       </div>
+
+                      {/* Technical Requirements */}
+                      {project.requirements &&
+                        project.requirements.length > 0 && (
+                          <div className="bg-white rounded-[3rem] p-10 lg:p-14 shadow-sm border border-gray-100">
+                            <div className="flex items-center gap-3 mb-8">
+                              <div className="w-10 h-10 bg-amu-gold/10 rounded-xl flex items-center justify-center">
+                                <ListChecks className="h-5 w-5 text-amu-gold" />
+                              </div>
+                              <h2 className="text-2xl font-black text-gray-900">
+                                Technical Requirements
+                              </h2>
+                            </div>
+                            <div className="flex flex-wrap gap-3">
+                              {project.requirements.map((req, i) => (
+                                <span
+                                  key={i}
+                                  className="px-5 py-2.5 bg-gray-50 text-gray-600 text-sm font-bold rounded-xl border border-gray-100 hover:border-amu-gold/30 hover:bg-white hover:shadow-sm transition-all cursor-default lowercase"
+                                >
+                                  {req}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                       {/* External Links */}
                       <div className="bg-gray-50 rounded-[3rem] p-10 border border-gray-100">

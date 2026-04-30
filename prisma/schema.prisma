@@ -26,8 +26,8 @@ model User {
   sentCollaborations     Collaboration[]   @relation("CollaborationInitiator")
   following              Follows[]         @relation("FollowerRelation")
   followers              Follows[]         @relation("FollowingRelation")
-  createdProjects        ResearchProject[] @relation("UserCreatesProject")
-  workingProjects        ResearchProject[] @relation("UserWorksOnProject")
+  createdProjects        AcademicProject[] @relation("UserCreatesProject")
+  workingProjects        AcademicProject[] @relation("UserWorksOnProject")
   identityProof          String?
   profilePhoto           String?           @default("/default-avatar.svg")
   adminFeedback          String?           @default("No feedback yet")
@@ -43,10 +43,11 @@ model AcademicProfile {
   user              User     @relation(fields: [universityID], references: [universityID], onDelete: Cascade)
 }
 
-model ResearchProject {
+model AcademicProject {
   projectID        String           @id @default(uuid())
   title            String
   description      String
+  requirements     String[]
   projectDomain   String
   moderationStatus ModerationStatus @default(PENDING)
   projectStatus    ProjectStatus    @default(PROPOSED)
@@ -57,6 +58,8 @@ model ResearchProject {
   creator          User             @relation("UserCreatesProject", fields: [universityID], references: [universityID])
   teamMembers      User[]           @relation("UserWorksOnProject")
   adminFeedback     String?          @default("No feedback yet")
+
+  @@map("ResearchProject")
 }
 
 model Collaboration {
@@ -66,7 +69,7 @@ model Collaboration {
   receiverID    String
   requestStatus RequestStatus   @default(PENDING)
   createdAt     DateTime        @default(now())
-  project       ResearchProject @relation(fields: [projectID], references: [projectID], onDelete: Cascade)
+  project       AcademicProject @relation(fields: [projectID], references: [projectID], onDelete: Cascade)
   receiver      User            @relation("CollaborationInvitee", fields: [receiverID], references: [universityID], onDelete: Cascade)
   sender        User            @relation("CollaborationInitiator", fields: [senderID], references: [universityID], onDelete: Cascade)
 }
