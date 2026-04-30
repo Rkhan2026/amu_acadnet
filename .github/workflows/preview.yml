@@ -1,4 +1,4 @@
-name: Preview Workflow
+name: Preview Workflows
 
 on:
   push:
