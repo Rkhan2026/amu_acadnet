@@ -149,3 +149,52 @@ export function useVerificationData(initialMode) {
     counts,
   };
 }
+
+export function useAdminStats() {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/stats")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && !data.error) setStats(data);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  return { stats, loading };
+}
+
+export function useAdminCollaborations() {
+  const [collaborations, setCollaborations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedTeamProject, setSelectedTeamProject] = useState(null);
+  const [selectedProjectDetails, setSelectedProjectDetails] = useState(null);
+  const [profileUniversityID, setProfileUniversityID] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/admin/collaborations")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.error) setError(data.error);
+        else setCollaborations(data);
+      })
+      .catch(() => setError("Failed to fetch collaborations"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return {
+    collaborations,
+    loading,
+    error,
+    selectedTeamProject,
+    setSelectedTeamProject,
+    selectedProjectDetails,
+    setSelectedProjectDetails,
+    profileUniversityID,
+    setProfileUniversityID,
+  };
+}

@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useResubmitProfile } from "@/hooks/useResubmitProfile";
 
 import ResubmitProfileLayout from "@/components/profile/ResubmitProfileLayout";

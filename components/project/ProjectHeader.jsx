@@ -1,10 +1,11 @@
 import React from "react";
 import { User, Building2, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import DomainSelect from "@/components/ui/DomainSelect";
 
 const ProjectHeader = React.memo(
-  ({ project, isEditing, editForm, setEditForm, isOwner }) => {
+  ({ project, isEditing, editForm, setEditForm, isOwner, onProfileClick }) => {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -106,19 +107,36 @@ const ProjectHeader = React.memo(
         )}
 
         <div className="flex flex-wrap items-center gap-8 py-4 border-y border-gray-50">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center">
-              <User className="h-6 w-6 text-gray-400" />
+          <button
+            onClick={() => {
+              const creatorID =
+                project.universityID || project.creator?.universityID;
+              if (creatorID) onProfileClick?.(creatorID);
+            }}
+            className="flex items-center gap-3 hover:bg-gray-50 p-2 -m-2 rounded-2xl transition-all text-left"
+          >
+            <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden">
+              {project.creator?.profilePhoto ? (
+                <Image
+                  src={project.creator.profilePhoto}
+                  alt={project.creator.name}
+                  width={48}
+                  height={48}
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <User className="h-6 w-6 text-gray-400" />
+              )}
             </div>
             <div>
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
                 Project Creator
               </p>
-              <p className="font-bold text-gray-900">
-                {project.projectCreator}
+              <p className="font-bold text-gray-900 group-hover:text-amu-green transition-colors">
+                {project.creator?.name || project.author}
               </p>
             </div>
-          </div>
+          </button>
 
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center">

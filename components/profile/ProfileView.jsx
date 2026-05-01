@@ -3,11 +3,11 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
 
-import ProfileHeader from "./profile/ProfileHeader";
-import BiographySection from "./profile/BiographySection";
-import ProjectsSection from "./profile/ProjectsSection";
-import ContactSidebar from "./profile/ContactSidebar";
-import ProjectModal from "./ProjectModal";
+import ProfileHeader from "./ProfileHeader";
+import BiographySection from "./BiographySection";
+import ProjectsSection from "./ProjectsSection";
+import ContactSidebar from "./ContactSidebar";
+import ProjectModal from "@/components/project/ProjectModal";
 import UserProfileModal from "./UserProfileModal";
 
 const ProfileView = ({ user, onEdit }) => {

@@ -13,6 +13,13 @@ export async function GET(request, { params }) {
       where: { universityID },
       include: {
         academicProfile: true,
+        _count: {
+          select: {
+            followers: { where: { requestStatus: "ACCEPTED" } },
+            createdProjects: true,
+            workingProjects: true,
+          },
+        },
         followers: {
           include: { follower: { select: { name: true, role: true } } },
         },
@@ -111,6 +118,24 @@ export async function GET(request, { params }) {
             },
           },
         },
+        workingProjects: {
+          select: {
+            projectID: true,
+            universityID: true,
+            title: true,
+            description: true,
+            projectDomain: true,
+            projectStatus: true,
+            createdAt: true,
+            moderationStatus: true,
+            creator: {
+              select: {
+                name: true,
+                universityID: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -126,6 +151,28 @@ export async function GET(request, { params }) {
     const { password: _password, ...userData } = user;
     if (!isOwner && !isAdmin) {
       delete userData.identityProof;
+
+      // Filter projects to only show APPROVED ones for outsiders
+      userData.createdProjects = (userData.createdProjects || []).filter(
+        (p) => p.moderationStatus === "APPROVED",
+      );
+      userData.workingProjects = (userData.workingProjects || []).filter(
+        (p) => p.moderationStatus === "APPROVED",
+      );
+
+      // Update counts to match filtered lists for outsiders
+      if (userData._count) {
+        userData._count.createdProjects = userData.createdProjects.length;
+        userData._count.workingProjects = userData.workingProjects.length;
+      }
+
+      // Also filter collaboration lists for outsiders
+      userData.sentCollaborations = (userData.sentCollaborations || []).filter(
+        (c) => c.project.moderationStatus === "APPROVED",
+      );
+      userData.receivedCollaborations = (
+        userData.receivedCollaborations || []
+      ).filter((c) => c.project.moderationStatus === "APPROVED");
     }
     return NextResponse.json(userData);
   } catch (error) {

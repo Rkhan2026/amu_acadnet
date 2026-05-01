@@ -1,9 +1,9 @@
 "use client";
 import React from "react";
-import { PlusCircle, ArrowRight, Loader2 } from "lucide-react";
-import Link from "next/link";
 import ProjectIdentity from "@/components/project/ProjectIdentity";
 import ProjectSpecifics from "@/components/project/ProjectSpecifics";
+import CreateProjectHeader from "@/components/project/CreateProjectHeader";
+import CreateProjectActions from "@/components/project/CreateProjectActions";
 import ActionSuccess from "@/components/ui/ActionSuccess";
 import { useCreateProject } from "@/hooks/useCreateProject";
 
@@ -41,20 +41,7 @@ const CreateProjectPage = () => {
         redirectingText="Redirecting to Home..."
       />
 
-      <div className="mb-12">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-amu-green/10 rounded-xl">
-            <PlusCircle className="h-6 w-6 text-amu-green" />
-          </div>
-          <h1 className="text-4xl font-black text-gray-900 tracking-tight">
-            Create New Project
-          </h1>
-        </div>
-        <p className="text-gray-500 font-medium text-lg">
-          Initialize your research project with institutional metadata defined
-          in the project schema.
-        </p>
-      </div>
+      <CreateProjectHeader />
 
       <form onSubmit={handleSubmit} className="space-y-8">
         <ProjectIdentity
@@ -71,37 +58,15 @@ const CreateProjectPage = () => {
           setFormData={setFormData}
         />
 
-        <div className="flex items-center gap-4 pt-4">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex-1 bg-amu-green text-white py-5 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-amu-green/20 flex items-center justify-center gap-3 hover:bg-amu-green/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" /> Initializing
-                Project...
-              </>
-            ) : (
-              <>
-                <PlusCircle className="h-5 w-5" /> Register Research Project{" "}
-                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </>
-            )}
-          </button>
-          <Link
-            href="/projects"
-            onClick={(e) => {
-              if (typeof window !== "undefined" && window.history.length > 1) {
-                e.preventDefault();
-                router.back();
-              }
-            }}
-            className="px-10 bg-gray-100 text-gray-400 py-5 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-gray-200 hover:text-gray-600 transition-all flex items-center justify-center"
-          >
-            Cancel
-          </Link>
-        </div>
+        <CreateProjectActions
+          isSubmitting={isSubmitting}
+          onCancel={(e) => {
+            if (typeof window !== "undefined" && window.history.length > 1) {
+              e.preventDefault();
+              router.back();
+            }
+          }}
+        />
       </form>
     </div>
   );

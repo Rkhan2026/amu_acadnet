@@ -1,30 +1,26 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Handshake, AlertCircle } from "lucide-react";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import UserProfileModal from "@/components/UserProfileModal";
-import ProjectModal from "@/components/ProjectModal";
-import TeamModal from "@/components/TeamModal";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import UserProfileModal from "@/components/profile/UserProfileModal";
+import ProjectModal from "@/components/project/ProjectModal";
+import TeamModal from "@/components/project/TeamModal";
 import CollaborationTable from "@/components/admin/CollaborationTable";
 
-export default function AdminCollaborationsPage() {
-  const [collaborations, setCollaborations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedTeamProject, setSelectedTeamProject] = useState(null);
-  const [selectedProjectDetails, setSelectedProjectDetails] = useState(null);
-  const [profileUniversityID, setProfileUniversityID] = useState(null);
+import { useAdminCollaborations } from "@/hooks/useAdminData";
 
-  useEffect(() => {
-    fetch("/api/admin/collaborations")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.error) setError(data.error);
-        else setCollaborations(data);
-      })
-      .catch(() => setError("Failed to fetch collaborations"))
-      .finally(() => setLoading(false));
-  }, []);
+export default function AdminCollaborationsPage() {
+  const {
+    collaborations,
+    loading,
+    error,
+    selectedTeamProject,
+    setSelectedTeamProject,
+    selectedProjectDetails,
+    setSelectedProjectDetails,
+    profileUniversityID,
+    setProfileUniversityID,
+  } = useAdminCollaborations();
 
   if (loading)
     return <LoadingSpinner fullPage message="Loading collaborations list..." />;

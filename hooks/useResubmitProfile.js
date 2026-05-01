@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { clearCurrentUser, notifyUserChange } from "@/lib/utils/auth";
 
 export function useResubmitProfile() {
   const router = useRouter();
@@ -105,6 +106,8 @@ export function useResubmitProfile() {
   const handleModalClose = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
+      clearCurrentUser();
+      notifyUserChange();
     } catch (err) {
       console.error("Logout failed", err);
     }

@@ -1,10 +1,8 @@
 "use client";
 import React, { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import UserProfileModal from "@/components/UserProfileModal";
-import ProjectModal from "@/components/ProjectModal";
-import AdminRejectionModal from "@/components/ui/AdminRejectionModal";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import ModerationModals from "@/components/admin/ModerationModals";
 import AdminHeader from "@/components/admin/AdminHeader";
 import { ModerationList } from "@/components/admin/AdminLists";
 import { useModerationData } from "@/hooks/useAdminData";
@@ -68,30 +66,15 @@ function ModerationContent() {
         submittingId={submittingId}
       />
 
-      {selectedProject && (
-        <ProjectModal
-          project={selectedProject}
-          isOpen={!!selectedProject}
-          onClose={() => setSelectedProject(null)}
-          onProfileClick={setProfileUniversityID}
-          isAdmin={true}
-        />
-      )}
-
-      <UserProfileModal
-        isOpen={!!profileUniversityID}
-        onClose={() => setProfileUniversityID(null)}
-        universityID={profileUniversityID}
-      />
-
-      <AdminRejectionModal
-        isOpen={!!rejectionTarget}
-        onClose={() => setRejectionTarget(null)}
-        onSubmit={handleRejectionConfirm}
+      <ModerationModals
+        selectedProject={selectedProject}
+        setSelectedProject={setSelectedProject}
+        profileUniversityID={profileUniversityID}
+        setProfileUniversityID={setProfileUniversityID}
+        rejectionTarget={rejectionTarget}
+        setRejectionTarget={setRejectionTarget}
+        handleRejectionConfirm={handleRejectionConfirm}
         isSubmitting={isSubmitting}
-        initialFeedback={rejectionTarget?.adminFeedback}
-        title="Reject Project"
-        description="Please provide reason for rejection to help the creator update their project for resubmission."
       />
     </div>
   );

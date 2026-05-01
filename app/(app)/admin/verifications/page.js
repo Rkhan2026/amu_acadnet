@@ -1,8 +1,8 @@
 "use client";
 import React, { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import UserProfileModal from "@/components/UserProfileModal";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import UserProfileModal from "@/components/profile/UserProfileModal";
 import AdminRejectionModal from "@/components/ui/AdminRejectionModal";
 import AdminHeader from "@/components/admin/AdminHeader";
 import { VerificationList } from "@/components/admin/AdminLists";

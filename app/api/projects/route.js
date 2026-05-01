@@ -10,10 +10,32 @@ export async function GET(request) {
     const moderationStatus = searchParams.get("moderationStatus");
     const projectDomain = searchParams.get("projectDomain");
 
+    const session = await getSession();
+    const isOwner = universityID && session?.universityID === universityID;
+    const isAdmin = session?.role?.toUpperCase() === "ADMIN";
+
     const whereClause = {};
     if (universityID) whereClause.universityID = universityID;
-    if (moderationStatus) whereClause.moderationStatus = moderationStatus;
     if (projectDomain) whereClause.projectDomain = projectDomain;
+
+    // Visibility logic: Outsiders only see APPROVED projects
+    if (!isOwner && !isAdmin) {
+      if (universityID) {
+        // Specifically viewing another user's projects
+        whereClause.moderationStatus = "APPROVED";
+      } else {
+        // General fetch - show APPROVED projects OR requester's own projects
+        whereClause.OR = [
+          { moderationStatus: "APPROVED" },
+          ...(session?.universityID
+            ? [{ universityID: session.universityID }]
+            : []),
+        ];
+      }
+    } else if (moderationStatus) {
+      // Owners and Admins can filter by status if they want
+      whereClause.moderationStatus = moderationStatus;
+    }
 
     const projects = await prisma.academicProject.findMany({
       where: whereClause,
@@ -55,7 +77,6 @@ export async function GET(request) {
     });
 
     // Add match scores if a session exists
-    const session = await getSession();
     if (session && session.universityID) {
       const projectsWithScores = await getProjectRecommendations(
         session.universityID,

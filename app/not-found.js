@@ -4,47 +4,45 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Construction, ArrowLeft } from "lucide-react";
 
-const NotFound = () => {
-  return (
-    <div className="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 py-24 min-h-[80vh]">
-      <div className="text-center">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="flex justify-center mb-6"
-        >
-          <div className="p-6 bg-amu-green/10 rounded-full">
-            <Construction className="h-20 w-20 text-amu-green" />
-          </div>
-        </motion.div>
+const NotFound = () => (
+  <div className="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 py-24 min-h-[80vh]">
+    <div className="text-center">
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="flex justify-center mb-6"
+      >
+        <div className="p-6 bg-amu-green/10 rounded-full">
+          <Construction className="h-20 w-20 text-amu-green" />
+        </div>
+      </motion.div>
 
-        <motion.h1
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="text-4xl font-extrabold text-gray-900 sm:text-5xl mb-4"
-        >
-          Development Still Ongoing Here
-        </motion.h1>
+      <motion.h1
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+        className="text-4xl font-extrabold text-gray-900 sm:text-5xl mb-4"
+      >
+        Development Still Ongoing Here
+      </motion.h1>
 
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="mt-8"
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4, duration: 0.5 }}
+        className="mt-8"
+      >
+        <Link
+          href="/"
+          className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-2xl text-white bg-amu-green hover:bg-[#004d26] transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amu-green gap-2 hover:-translate-y-1"
         >
-          <Link
-            href="/"
-            className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-2xl text-white bg-amu-green hover:bg-[#004d26] transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amu-green gap-2 hover:-translate-y-1"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            Return Home
-          </Link>
-        </motion.div>
-      </div>
+          <ArrowLeft className="h-5 w-5" />
+          Return Home
+        </Link>
+      </motion.div>
     </div>
-  );
-};
+  </div>
+);
 
 export default NotFound;

@@ -63,7 +63,7 @@ const ContactSidebar = memo(({ user, setModalImage }) => {
         {user.identityProof ? (
           <>
             <div
-              className="relative aspect-video rounded-2xl overflow-hidden border-2 border-dashed border-gray-200 cursor-pointer hover:border-amu-green/50 transition-all group bg-gray-50 flex items-center justify-center"
+              className="relative aspect-[4/3] rounded-2xl overflow-hidden border-2 border-dashed border-gray-200 cursor-pointer hover:border-amu-green/50 transition-all group bg-white flex items-center justify-center"
               onClick={() => setModalImage(user.identityProof)}
             >
               <Image
@@ -74,7 +74,7 @@ const ContactSidebar = memo(({ user, setModalImage }) => {
                 }
                 alt="Identity Proof"
                 fill
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                 <ExternalLink className="h-6 w-6 text-white" />

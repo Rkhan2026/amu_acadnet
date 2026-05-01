@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import Feed from "@/components/Feed";
-import UserProfileModal from "@/components/UserProfileModal";
+import Feed from "@/components/feed/Feed";
+import UserProfileModal from "@/components/profile/UserProfileModal";
 import SuggestedCollaborators from "@/components/home/SuggestedCollaborators";
 
 import { useHomeData } from "@/hooks/useHomeData";
@@ -41,6 +41,8 @@ export default function HomePage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         universityID={selectedUserID}
+        onProfileClick={openProfile}
+        zIndex="z-[600]"
       />
     </div>
   );

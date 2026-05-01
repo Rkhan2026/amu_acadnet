@@ -1,13 +1,25 @@
 import React, { memo } from "react";
+import Image from "next/image";
 import { Briefcase, Check, X, Clock } from "lucide-react";
 
 const CollabRequestCard = memo(
   ({ request, type, onAction, onViewProfile, onViewProject }) => {
     return (
-      <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 group">
+      <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 group hover:border-amu-green/30 transition-all flex flex-col h-full">
         <div className="flex items-start gap-4 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-amu-gold/5 border border-amu-gold/10 flex items-center justify-center flex-shrink-0">
-            <Briefcase className="h-6 w-6 text-amu-gold" />
+          <div className="relative w-14 h-14 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
+            {request.avatar ? (
+              <Image
+                src={request.avatar}
+                alt={request.name}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-amu-gold/5 text-amu-gold">
+                <Briefcase className="h-6 w-6" />
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <h3
@@ -16,13 +28,13 @@ const CollabRequestCard = memo(
             >
               {request.name}
             </h3>
-            <p className="text-xs font-bold text-gray-400">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
               {type === "received" ? (
                 <>
                   From:{" "}
                   <span
                     onClick={() => onViewProfile(request.senderID)}
-                    className="text-gray-600 hover:text-amu-green cursor-pointer hover:underline transition-colors"
+                    className="text-gray-600 hover:text-amu-green cursor-pointer transition-colors"
                   >
                     {request.from}
                   </span>
@@ -32,7 +44,7 @@ const CollabRequestCard = memo(
                   To:{" "}
                   <span
                     onClick={() => onViewProfile(request.receiverID)}
-                    className="text-gray-600 hover:text-amu-green cursor-pointer hover:underline transition-colors"
+                    className="text-gray-600 hover:text-amu-green cursor-pointer transition-colors"
                   >
                     {request.to}
                   </span>

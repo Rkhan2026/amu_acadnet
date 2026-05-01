@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   Users,
   ShieldCheck,
@@ -7,23 +7,14 @@ import {
   BookOpen,
   Handshake,
 } from "lucide-react";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import StatsCard from "@/components/admin/StatsCard";
 import DistributionGrid from "@/components/admin/DistributionGrid";
 
-export default function AdminDashboard() {
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+import { useAdminStats } from "@/hooks/useAdminData";
 
-  useEffect(() => {
-    fetch("/api/admin/stats")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data && !data.error) setStats(data);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+export default function AdminDashboard() {
+  const { stats, loading } = useAdminStats();
 
   if (loading)
     return (

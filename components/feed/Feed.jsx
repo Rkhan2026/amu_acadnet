@@ -2,9 +2,9 @@
 import React, { useState } from "react";
 import FeedItem from "./FeedItem";
 import { Sparkles, Users } from "lucide-react";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import UserProfileModal from "./UserProfileModal";
-import ProjectModal from "./ProjectModal";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import UserProfileModal from "@/components/profile/UserProfileModal";
+import ProjectModal from "@/components/project/ProjectModal";
 import { useFeedData } from "@/hooks/useFeedData";
 
 const Feed = () => {
@@ -100,11 +100,15 @@ const Feed = () => {
         isOpen={isUserModalOpen}
         onClose={() => setIsUserModalOpen(false)}
         universityID={selectedUserID}
+        onProfileClick={openProfile}
+        zIndex="z-[600]"
       />
       <ProjectModal
         isOpen={isProjectModalOpen}
         onClose={() => setIsProjectModalOpen(false)}
         projectID={selectedProjectID}
+        onProfileClick={openProfile}
+        zIndex="z-[400]"
       />
     </div>
   );

@@ -35,8 +35,21 @@ const ProjectCard = ({
             <Badge
               variant={project.projectStatus === "ACTIVE" ? "success" : "gold"}
             >
-              {project.projectStatus}
+              {project.projectStatus?.replace(/_/g, " ")}
             </Badge>
+            {project.moderationStatus && (
+              <Badge
+                variant={
+                  project.moderationStatus === "APPROVED"
+                    ? "success"
+                    : project.moderationStatus === "PENDING"
+                      ? "gold"
+                      : "error"
+                }
+              >
+                {project.moderationStatus}
+              </Badge>
+            )}
           </div>
 
           <h4

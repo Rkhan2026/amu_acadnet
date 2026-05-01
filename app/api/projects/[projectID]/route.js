@@ -7,6 +7,9 @@ export async function GET(request, { params }) {
     const resolvedParams = await params;
     const { projectID } = resolvedParams;
 
+    const session = await getSession();
+    const universityID = session?.universityID;
+
     const project = await prisma.academicProject.findUnique({
       where: { projectID: projectID },
       include: {
@@ -40,7 +43,23 @@ export async function GET(request, { params }) {
 
     if (!project)
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    return NextResponse.json(project);
+
+    // Include current user's collaboration status if logged in
+    let userCollaboration = null;
+    if (universityID) {
+      userCollaboration = await prisma.collaboration.findFirst({
+        where: {
+          projectID: projectID,
+          OR: [{ senderID: universityID }, { receiverID: universityID }],
+        },
+        select: {
+          requestID: true,
+          requestStatus: true,
+        },
+      });
+    }
+
+    return NextResponse.json({ ...project, userCollaboration });
   } catch (error) {
     console.error("Project GET Error:", error);
     return NextResponse.json(

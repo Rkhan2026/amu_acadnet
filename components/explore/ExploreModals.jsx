@@ -1,6 +1,6 @@
 import React from "react";
-import ProjectModal from "@/components/ProjectModal";
-import UserProfileModal from "@/components/UserProfileModal";
+import ProjectModal from "@/components/project/ProjectModal";
+import UserProfileModal from "@/components/profile/UserProfileModal";
 
 const ExploreModals = ({
   isProjectModalOpen,
@@ -17,13 +17,14 @@ const ExploreModals = ({
       onClose={() => setIsProjectModalOpen(false)}
       projectID={selectedProjectID}
       onProfileClick={onProfileClick}
-      zIndex="z-[300]"
+      zIndex="z-[400]"
     />
     <UserProfileModal
       isOpen={isUserModalOpen}
       onClose={() => setIsUserModalOpen(false)}
       universityID={selectedUserID}
-      zIndex="z-[400]"
+      onProfileClick={onProfileClick}
+      zIndex="z-[600]"
     />
   </>
 );

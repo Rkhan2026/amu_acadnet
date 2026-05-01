@@ -22,8 +22,21 @@ const ProjectItem = ({ project, user, isCollaboration, onProjectClick }) => {
             <span
               className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg ${project.projectStatus === "ACTIVE" ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : "bg-amu-gold/5 text-amu-gold border border-amu-gold/10"}`}
             >
-              {project.projectStatus}
+              {project.projectStatus?.replace(/_/g, " ")}
             </span>
+            {project.moderationStatus && (
+              <span
+                className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg border ${
+                  project.moderationStatus === "APPROVED"
+                    ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+                    : project.moderationStatus === "PENDING"
+                      ? "bg-amu-gold/5 text-amu-gold border-amu-gold/10"
+                      : "bg-red-50 text-red-600 border-red-100"
+                }`}
+              >
+                {project.moderationStatus}
+              </span>
+            )}
           </div>
 
           <div className="text-left">

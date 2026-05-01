@@ -2,9 +2,11 @@ import React from "react";
 import NetworkTabs from "./NetworkTabs";
 import NetworkSubTabs from "./NetworkSubTabs";
 import NetworkContent from "./NetworkContent";
-import ConfirmationModal from "@/components/ConfirmationModal";
-import UserProfileModal from "@/components/UserProfileModal";
-import ProjectModal from "@/components/ProjectModal";
+import ConfirmationModal from "@/components/ui/ConfirmationModal";
+import UserProfileModal from "@/components/profile/UserProfileModal";
+import ProjectModal from "@/components/project/ProjectModal";
+
+import { RefreshCw } from "lucide-react";
 
 const NetworkLayout = ({
   activeTab,
@@ -13,19 +15,38 @@ const NetworkLayout = ({
   setSubTab,
   tabs,
   loading,
+  onReload,
   data,
   handlers,
   modals,
 }) => (
   <div className="py-8 px-4 md:px-8 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
-    <div className="mb-10">
-      <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-2">
-        My Network
-      </h1>
-      <p className="text-gray-500 font-medium">
-        Manage your academic connections, follow requests, and research
-        collaborations.
-      </p>
+    <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div>
+        <div className="flex items-center gap-4 mb-2">
+          <h1 className="text-4xl font-black text-gray-900 tracking-tight">
+            My Network
+          </h1>
+          <button
+            onClick={onReload}
+            disabled={loading}
+            className={`p-2 rounded-xl bg-gray-100 text-gray-500 hover:bg-amu-gold/10 hover:text-amu-gold transition-all duration-300 group ${
+              loading ? "cursor-not-allowed opacity-50" : ""
+            }`}
+            title="Refresh Network"
+          >
+            <RefreshCw
+              className={`w-4 h-4 transition-transform duration-500 ${
+                loading ? "animate-spin" : "group-hover:rotate-180"
+              }`}
+            />
+          </button>
+        </div>
+        <p className="text-gray-500 font-medium">
+          Manage your academic connections, follow requests, and research
+          collaborations.
+        </p>
+      </div>
     </div>
 
     <NetworkTabs

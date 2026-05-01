@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Briefcase } from "lucide-react";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import MyProjectCard from "./MyProjectCard";
 
 const MyProjectGrid = ({ loading, projects, onOpen }) => {

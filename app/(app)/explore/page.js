@@ -1,9 +1,7 @@
 "use client";
 import React from "react";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import SearchHero from "@/components/explore/SearchHero";
-import ExploreModals from "@/components/explore/ExploreModals";
-import ExploreLayout from "@/components/explore/ExploreLayout";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import ExplorePageContent from "@/components/explore/ExplorePageContent";
 import { useDiscoveryFilters } from "@/hooks/useDiscoveryFilters";
 
 const ExplorePage = () => {
@@ -52,64 +50,45 @@ const ExplorePage = () => {
     return <LoadingSpinner fullPage message="Searching discovery results..." />;
 
   return (
-    <div className="max-w-7xl mx-auto py-4 px-6 space-y-8">
-      <SearchHero
-        activeTab={activeTab}
-        searchValue={activeTab === "projects" ? projectSearch : userSearch}
-        onSearchChange={handleSearchChange}
-        isFiltering={
-          activeTab === "projects" ? isFilteringProjects : isFilteringUsers
-        }
-      />
-
-      <ExploreLayout
-        activeTab={activeTab}
-        filters={{
-          projectDept,
-          userDept,
-          selectedDomain,
-          selectedStatus,
-          selectedSkills,
-          skillInput,
-          selectedInterests,
-          interestInput,
-          currentUser,
-          myProjects,
-          matchingProjectID,
-        }}
-        results={{
-          projectCount: filteredProjects.length,
-          userCount: filteredUsers.length,
-          isFilteringProjects,
-          isFilteringUsers,
-          filtered: activeTab === "projects" ? filteredProjects : filteredUsers,
-        }}
-        handlers={{
-          onTabChange: setActiveTab,
-          onDeptChange: handleDeptChange,
-          onDomainChange: handleDomainChange,
-          onStatusChange: handleStatusChange,
-          onSkillsChange: handleSkillsChange,
-          onSkillInputChange: setSkillInput,
-          onInterestsChange: handleInterestsChange,
-          onInterestInputChange: setInterestInput,
-          onMatchingProjectChange: handleMatchingProjectChange,
-          onClearFilters: clearFilters,
-          onProjectClick: openProject,
-          onUserClick: openProfile,
-        }}
-      />
-
-      <ExploreModals
-        isProjectModalOpen={isProjectModalOpen}
-        setIsProjectModalOpen={setIsProjectModalOpen}
-        selectedProjectID={selectedProjectID}
-        isUserModalOpen={isUserModalOpen}
-        setIsUserModalOpen={setIsUserModalOpen}
-        selectedUserID={selectedUserID}
-        onProfileClick={openProfile}
-      />
-    </div>
+    <ExplorePageContent
+      activeTab={activeTab}
+      projectSearch={projectSearch}
+      userSearch={userSearch}
+      handleSearchChange={handleSearchChange}
+      isFilteringProjects={isFilteringProjects}
+      isFilteringUsers={isFilteringUsers}
+      projectDept={projectDept}
+      userDept={userDept}
+      selectedDomain={selectedDomain}
+      selectedStatus={selectedStatus}
+      selectedSkills={selectedSkills}
+      skillInput={skillInput}
+      setSkillInput={setSkillInput}
+      selectedInterests={selectedInterests}
+      interestInput={interestInput}
+      setInterestInput={setInterestInput}
+      currentUser={currentUser}
+      myProjects={myProjects}
+      matchingProjectID={matchingProjectID}
+      filteredProjects={filteredProjects}
+      filteredUsers={filteredUsers}
+      setActiveTab={setActiveTab}
+      handleDeptChange={handleDeptChange}
+      handleDomainChange={handleDomainChange}
+      handleStatusChange={handleStatusChange}
+      handleSkillsChange={handleSkillsChange}
+      handleInterestsChange={handleInterestsChange}
+      handleMatchingProjectChange={handleMatchingProjectChange}
+      clearFilters={clearFilters}
+      openProject={openProject}
+      openProfile={openProfile}
+      isProjectModalOpen={isProjectModalOpen}
+      setIsProjectModalOpen={setIsProjectModalOpen}
+      selectedProjectID={selectedProjectID}
+      isUserModalOpen={isUserModalOpen}
+      setIsUserModalOpen={setIsUserModalOpen}
+      selectedUserID={selectedUserID}
+    />
   );
 };
 

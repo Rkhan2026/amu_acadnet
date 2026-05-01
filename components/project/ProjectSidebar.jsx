@@ -16,8 +16,6 @@ const ProjectSidebar = memo(
   ({
     project,
     isEditing,
-    editForm,
-    setEditForm,
     isOwner,
     isSaving,
     onSave,
@@ -27,6 +25,7 @@ const ProjectSidebar = memo(
     requestLoading,
     onSendRequest,
     onLeaveCollaboration,
+    onProfileClick,
   }) => {
     return (
       <div className="space-y-8">
@@ -60,73 +59,125 @@ const ProjectSidebar = memo(
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 text-center">
                   Project Creator
                 </p>
-                <div className="flex items-center justify-between group bg-amu-gold/5 p-4 rounded-3xl border border-amu-gold/10">
+                <button
+                  onClick={() => {
+                    const creatorID =
+                      project.universityID || project.creator?.universityID;
+                    if (creatorID) onProfileClick?.(creatorID);
+                  }}
+                  className="w-full flex items-center justify-between group bg-amu-gold/5 p-4 rounded-3xl border border-amu-gold/10 hover:bg-amu-gold/10 transition-all text-left"
+                >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amu-gold/10 border border-amu-gold/20 flex items-center justify-center">
-                      <User className="h-5 w-5 text-amu-gold" />
+                    <div className="w-10 h-10 rounded-xl bg-amu-gold/10 border border-amu-gold/20 flex items-center justify-center overflow-hidden">
+                      {project.creator?.profilePhoto ? (
+                        <Image
+                          src={project.creator.profilePhoto}
+                          alt={project.creator.name}
+                          width={40}
+                          height={40}
+                          className="object-cover w-full h-full"
+                        />
+                      ) : (
+                        <User className="h-5 w-5 text-amu-gold" />
+                      )}
                     </div>
                     <div className="text-left">
-                      <p className="font-bold text-gray-900 text-sm leading-tight">
-                        {project.projectCreator}
+                      <p className="font-bold text-gray-900 text-sm leading-tight group-hover:text-amu-gold transition-colors">
+                        {project.creator?.name || project.author}
                       </p>
                       <p className="text-[10px] font-black uppercase tracking-widest text-amu-gold mt-0.5">
                         Project Creator
                       </p>
                     </div>
                   </div>
-                </div>
+                </button>
               </div>
 
               {/* Collaborators Section */}
-              {(isEditing ? editForm.team : project.team)?.length > 0 && (
-                <div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 text-center">
-                    Collaborators
-                  </p>
-                  <div className="space-y-4">
-                    {(isEditing ? editForm.team : project.team).map(
-                      (member, i) => (
-                        <div
+              <div>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 text-center">
+                  Team Members
+                </p>
+                <div className="space-y-4">
+                  {(() => {
+                    const collaborators =
+                      project.collaborations
+                        ?.filter((c) => c.requestStatus === "ACCEPTED")
+                        .map((c) => c.sender) || [];
+
+                    const directMembers = project.teamMembers || [];
+
+                    const allMembers = [
+                      ...collaborators,
+                      ...directMembers,
+                    ].filter((m, index, self) => {
+                      const mID = m.universityID || m.id;
+                      const projectOwnerID =
+                        project.universityID || project.creator?.universityID;
+                      if (!mID) return false;
+                      if (mID === projectOwnerID) return false;
+                      return (
+                        self.findIndex(
+                          (t) => (t.universityID || t.id) === mID,
+                        ) === index
+                      );
+                    });
+
+                    if (allMembers.length > 0) {
+                      return allMembers.map((member, i) => (
+                        <button
                           key={i}
-                          className="flex items-center justify-between group p-3 hover:bg-gray-50 rounded-2xl transition-colors"
+                          onClick={() => {
+                            const mID = member.universityID || member.id;
+                            if (mID) onProfileClick?.(mID);
+                          }}
+                          className="w-full flex items-center justify-between group p-3 hover:bg-gray-50 rounded-2xl transition-all text-left"
                         >
                           <div className="flex items-center gap-3">
-                            <Image
-                              src={member.avatar}
-                              alt={member.name}
-                              width={36}
-                              height={36}
-                              className="rounded-xl border border-gray-100 shadow-sm"
-                            />
+                            <div className="relative w-9 h-9 rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-gray-50 flex-shrink-0">
+                              <Image
+                                src={
+                                  member.profilePhoto ||
+                                  member.avatar ||
+                                  "/default-avatar.svg"
+                                }
+                                alt={member.name}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
                             <div className="text-left">
-                              <p className="font-bold text-gray-900 text-sm leading-tight">
+                              <p className="font-bold text-gray-900 text-sm leading-tight group-hover:text-amu-green transition-colors">
                                 {member.name}
                               </p>
                               <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-0.5">
-                                {member.role}
+                                {member.role || "Researcher"}
                               </p>
                             </div>
                           </div>
                           {isEditing && (
-                            <button
-                              onClick={() => {
-                                const newTeam = editForm.team.filter(
-                                  (_, idx) => idx !== i,
-                                );
-                                setEditForm({ ...editForm, team: newTeam });
-                              }}
+                            <div
+                              onClick={(e) => e.stopPropagation()}
                               className="p-2 bg-red-50 text-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white"
                               title="Remove Team Member"
                             >
                               <Trash2 className="h-4 w-4" />
-                            </button>
+                            </div>
                           )}
-                        </div>
-                      ),
-                    )}
-                  </div>
+                        </button>
+                      ));
+                    }
+
+                    return (
+                      <div className="p-6 text-center bg-gray-50/50 border border-dashed border-gray-200 rounded-3xl">
+                        <p className="text-[10px] text-gray-400 font-bold italic uppercase tracking-widest">
+                          No additional team members
+                        </p>
+                      </div>
+                    );
+                  })()}
                 </div>
-              )}
+              </div>
             </div>
 
             <div className="mt-10 space-y-3">

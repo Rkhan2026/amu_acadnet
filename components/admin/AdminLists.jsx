@@ -1,9 +1,9 @@
 import React from "react";
 import { BookOpen, CheckCircle2 } from "lucide-react";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import EmptyState from "@/components/ui/EmptyState";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import ProjectCard from "./ProjectCard";
 import VerificationCard from "./VerificationCard";
+import EmptyState from "@/components/ui/EmptyState";
 
 export const ModerationList = ({
   loading,

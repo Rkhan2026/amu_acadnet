@@ -301,6 +301,7 @@ export function useNetworkData() {
   return {
     networkData,
     loading,
+    fetchNetworkData,
     executeCollabAction,
     executeFollowAction,
     executeUnfollow,

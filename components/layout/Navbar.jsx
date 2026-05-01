@@ -4,7 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, GraduationCap, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { getCurrentUser } from "@/lib/utils/auth";
+import {
+  getCurrentUser,
+  setCurrentUser,
+  clearCurrentUser,
+} from "@/lib/utils/auth";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,19 +16,33 @@ const Navbar = () => {
   const [user, setUser] = React.useState(null);
 
   React.useEffect(() => {
-    // Initial check from localStorage for speed
-    const localUser = getCurrentUser();
-    if (localUser) setUser(localUser);
+    const fetchUser = () => {
+      // Initial check from localStorage for speed
+      const localUser = getCurrentUser();
+      if (localUser) setUser(localUser);
 
-    // Verify with API to ensure session is still valid
-    fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.user) setUser(d.user);
-        else setUser(null);
-      })
-      .catch(() => setUser(null));
-  }, []);
+      // Verify with API to ensure session is still valid
+      fetch("/api/auth/me")
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.user) {
+            setUser(d.user);
+            setCurrentUser(d.user); // Sync local storage
+          } else {
+            setUser(null);
+            clearCurrentUser();
+          }
+        })
+        .catch(() => {
+          setUser(null);
+          clearCurrentUser();
+        });
+    };
+
+    fetchUser();
+    window.addEventListener("user-updated", fetchUser);
+    return () => window.removeEventListener("user-updated", fetchUser);
+  }, [pathname]);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 

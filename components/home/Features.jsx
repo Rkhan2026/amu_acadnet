@@ -22,7 +22,7 @@ const features = [
     icon: BrainCircuit,
     title: "AI-Powered Collaboration",
     description:
-      "Leverage AI to find the perfect collaborators based on shared interests and publication history.",
+      "Leverage AI to find the perfect collaborators based on shared interests and academic projects.",
     color: "bg-amu-gold/20 text-amu-gold/90",
   },
   {
@@ -36,14 +36,14 @@ const features = [
     icon: Search,
     title: "Advanced Researcher Discovery",
     description:
-      "Easily find faculty and scholars across departments. Filter by domain, expertise, and interests to foster interdisciplinary work.",
+      "Easily find faculty and scholars across departments. Filter by domain and interests to foster interdisciplinary work.",
     color: "bg-amber-100 text-amber-600",
   },
   {
     icon: FileText,
-    title: "Research Record Management",
+    title: "Academic Projects Management",
     description:
-      "Centralized repository for your publications, projects, and thesis. Keep your academic record organized and officially validated.",
+      "Centralized repository for all your academic records, including publications, projects, and thesis. Keep your work organized and officially validated.",
     color: "bg-rose-100 text-rose-600",
   },
   {
@@ -89,7 +89,7 @@ const Features = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-xl text-gray-600 font-medium"
+            className="text-xl text-gray-600 font-medium text-justify"
           >
             A comprehensive suite of tools designed exclusively for the unique
             needs of Aligarh Muslim University&apos;s research community.
@@ -114,7 +114,7 @@ const Features = () => {
               <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-amu-green transition-colors">
                 {feature.title}
               </h3>
-              <p className="text-gray-600 leading-relaxed font-medium">
+              <p className="text-gray-600 leading-relaxed font-medium text-justify">
                 {feature.description}
               </p>
 

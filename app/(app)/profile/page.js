@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
-import ProfileView from "@/components/ProfileView";
-import ProfileEditForm from "@/components/ProfileEditForm";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import ProfileView from "@/components/profile/ProfileView";
+import ProfileEditForm from "@/components/profile/ProfileEditForm";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 import { useProfileData } from "@/hooks/useProfileData";
 

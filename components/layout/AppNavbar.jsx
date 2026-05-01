@@ -23,7 +23,7 @@ const AppNavbar = () => {
     fetchUser();
     window.addEventListener("user-updated", fetchUser);
     return () => window.removeEventListener("user-updated", fetchUser);
-  }, []);
+  }, [pathname]);
 
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 z-100 flex items-center justify-between px-6 shadow-sm">

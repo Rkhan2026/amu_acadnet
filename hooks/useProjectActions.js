@@ -19,12 +19,12 @@ export function useProjectActions(projectId) {
     Promise.all([
       fetch("/api/auth/me").then((r) => r.json()),
       fetch(`/api/projects/${projectId}`).then((r) => r.json()),
-      fetch("/api/network").then((r) => r.json()),
     ])
-      .then(([authRes, projRes, netRes]) => {
+      .then(([authRes, projRes]) => {
         if (!authRes.error) setCurrentUser(authRes.user);
         if (!projRes.error) {
           const mapped = {
+            ...projRes,
             id: projRes.projectID,
             title: projRes.title,
             domain: projRes.projectDomain,
@@ -60,15 +60,11 @@ export function useProjectActions(projectId) {
           };
           setProject(mapped);
           setEditForm(mapped);
-        }
-        if (!netRes.error) {
-          const collab = [
-            ...(netRes.sentCollaborations || []),
-            ...(netRes.receivedCollaborations || []),
-          ].find((c) => c.projectID === projectId);
-          if (collab) {
-            setRequested(collab.requestStatus);
-            setCollaborationID(collab.requestID);
+
+          // Use the optimized collaboration status from the API
+          if (projRes.userCollaboration) {
+            setRequested(projRes.userCollaboration.requestStatus);
+            setCollaborationID(projRes.userCollaboration.requestID);
           } else {
             setRequested(null);
             setCollaborationID(null);
@@ -170,6 +166,49 @@ export function useProjectActions(projectId) {
     }
   };
 
+  const handleGoBack = (e) => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      if (e) e.preventDefault();
+      router.back();
+    }
+  };
+
+  const [newRequirement, setNewRequirement] = useState("");
+
+  const addRequirement = (skill) => {
+    setEditForm({
+      ...editForm,
+      requirements: [...editForm.requirements, skill.toLowerCase()],
+    });
+  };
+
+  const removeRequirement = (idx) => {
+    setEditForm({
+      ...editForm,
+      requirements: editForm.requirements.filter((_, i) => i !== idx),
+    });
+  };
+
+  const addExternalLink = () => {
+    setEditForm({
+      ...editForm,
+      externalLinks: [...editForm.externalLinks, { url: "" }],
+    });
+  };
+
+  const removeExternalLink = (idx) => {
+    setEditForm({
+      ...editForm,
+      externalLinks: editForm.externalLinks.filter((_, i) => i !== idx),
+    });
+  };
+
+  const updateExternalLink = (idx, val) => {
+    const next = [...editForm.externalLinks];
+    next[idx] = { url: val };
+    setEditForm({ ...editForm, externalLinks: next });
+  };
+
   return {
     project,
     currentUser,
@@ -186,5 +225,13 @@ export function useProjectActions(projectId) {
     requestLoading,
     handleSendRequest,
     handleLeaveCollaboration,
+    handleGoBack,
+    newRequirement,
+    setNewRequirement,
+    addRequirement,
+    removeRequirement,
+    addExternalLink,
+    removeExternalLink,
+    updateExternalLink,
   };
 }
