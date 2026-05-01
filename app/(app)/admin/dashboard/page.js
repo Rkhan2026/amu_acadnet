@@ -1,61 +1,25 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Users,
   ShieldCheck,
   FileCheck,
   BookOpen,
-  TrendingUp,
-  PieChart,
   Handshake,
 } from "lucide-react";
-import Link from "next/link";
-import { motion } from "framer-motion";
 import LoadingSpinner from "@/components/LoadingSpinner";
-
-const StatsCard = ({ title, value, icon: Icon, trend, color, href }) => {
-  const CardContent = (
-    <div className="bg-white p-5 lg:p-6 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 flex items-start justify-between gap-3 h-full hover:border-amu-green/30 transition-all cursor-pointer group overflow-hidden">
-      <div className="min-w-0 flex-1">
-        <p className="text-[10px] lg:text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 group-hover:text-amu-green/60 transition-colors leading-tight break-words">
-          {title}
-        </p>
-        <h3 className="text-3xl font-black text-gray-900">{value}</h3>
-        {trend && (
-          <div className="flex items-center gap-1 mt-2 text-amu-green bg-amu-green/10 w-fit px-2 py-1 rounded-lg">
-            <TrendingUp className="h-3 w-3" />
-            <span className="text-xs font-black">{trend}</span>
-          </div>
-        )}
-      </div>
-      <div
-        className={`p-3 lg:p-4 rounded-2xl ${color} group-hover:scale-110 transition-transform shrink-0`}
-      >
-        <Icon className="h-5 w-5 lg:h-6 lg:w-6" />
-      </div>
-    </div>
-  );
-
-  return href ? (
-    <Link href={href} className="block h-full">
-      {CardContent}
-    </Link>
-  ) : (
-    CardContent
-  );
-};
+import StatsCard from "@/components/admin/StatsCard";
+import DistributionGrid from "@/components/admin/DistributionGrid";
 
 export default function AdminDashboard() {
-  const [stats, setStats] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetch("/api/admin/stats")
       .then((r) => r.json())
       .then((data) => {
-        if (data && !data.error) {
-          setStats(data);
-        }
+        if (data && !data.error) setStats(data);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -121,52 +85,10 @@ export default function AdminDashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-8">
-        <div className="bg-white p-8 rounded-4xl shadow-xl shadow-gray-200/50 border border-gray-100">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-black text-gray-900 flex items-center gap-3">
-              <div className="p-2 bg-amu-green/10 rounded-xl">
-                <PieChart className="h-5 w-5 text-amu-green" />
-              </div>
-              Academic Profile Distribution
-            </h3>
-            <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">
-              Institutional Composition
-            </span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {stats.profileDistribution.map((item, idx) => (
-              <div
-                key={idx}
-                className="p-6 bg-gray-50 rounded-3xl border border-gray-100 hover:border-amu-green/20 transition-all"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-3 h-3 rounded-full ${item.color}`} />
-                  <span className="text-sm font-semibold text-gray-600 uppercase tracking-widest">
-                    {item.label}
-                  </span>
-                </div>
-                <div className="text-2xl font-black text-gray-900">
-                  {item.value}
-                </div>
-                <div className="mt-2 w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{
-                      width:
-                        stats.totalUsers > 0
-                          ? `${(item.value / stats.totalUsers) * 100}%`
-                          : "0%",
-                    }}
-                    transition={{ duration: 1, delay: idx * 0.1 }}
-                    className={`h-full ${item.color}`}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <DistributionGrid
+        items={stats.profileDistribution}
+        totalUsers={stats.totalUsers}
+      />
     </div>
   );
 }

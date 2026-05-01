@@ -27,7 +27,13 @@ import Button from "./ui/Button";
 import ProjectCard from "./ui/ProjectCard";
 import LoadingSpinner from "./LoadingSpinner";
 
-const UserProfileModal = ({ isOpen, onClose, universityID, onAdminAction }) => {
+const UserProfileModal = ({
+  isOpen,
+  onClose,
+  universityID,
+  onAdminAction,
+  zIndex,
+}) => {
   const [user, setUser] = useState(null);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,11 +50,9 @@ const UserProfileModal = ({ isOpen, onClose, universityID, onAdminAction }) => {
   const [modalImage, setModalImage] = useState(null);
   if (universityID !== prevId) {
     setPrevId(universityID);
-    if (universityID) {
-      setLoading(true);
-      setUser(null);
-      setProjects([]);
-    }
+    setLoading(true);
+    setUser(null);
+    setProjects([]);
   }
 
   useEffect(() => {
@@ -202,13 +206,23 @@ const UserProfileModal = ({ isOpen, onClose, universityID, onAdminAction }) => {
 
   return (
     <>
-      <BaseModal isOpen={isOpen} onClose={onClose} maxWidth="max-w-5xl">
+      <BaseModal
+        isOpen={isOpen}
+        onClose={onClose}
+        maxWidth="max-w-5xl"
+        zIndex={zIndex}
+      >
         {loading ? (
           <div className="flex-1 flex flex-col items-center justify-center p-20">
             <LoadingSpinner message="Loading User Profile..." />
           </div>
         ) : user ? (
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="flex-1 overflow-y-auto custom-scrollbar"
+          >
             {/* Profile Header Banner */}
             <div className="relative h-48 bg-gradient-to-r from-amu-green to-[#004d26]">
               <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
@@ -679,7 +693,7 @@ const UserProfileModal = ({ isOpen, onClose, universityID, onAdminAction }) => {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         ) : (
           <div className="p-20 text-center">
             <p className="text-red-500 font-bold">
@@ -692,6 +706,7 @@ const UserProfileModal = ({ isOpen, onClose, universityID, onAdminAction }) => {
         isOpen={isProjectModalOpen}
         onClose={() => setIsProjectModalOpen(false)}
         projectID={selectedProjectID}
+        zIndex="z-[500]"
       />
       {modalImage && (
         <div

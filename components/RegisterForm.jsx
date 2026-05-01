@@ -10,6 +10,7 @@ import {
   BookOpen,
   User,
   Loader2,
+  X,
 } from "lucide-react";
 import { cn, AMU_DEPARTMENTS } from "@/lib/utils";
 import Link from "next/link";
@@ -39,6 +40,8 @@ export default function RegisterForm() {
 
   const [profilePhotoName, setProfilePhotoName] = useState("");
   const [identityProofName, setIdentityProofName] = useState("");
+  const [interests, setInterests] = useState([]);
+  const [interestInput, setInterestInput] = useState("");
 
   const roles = [
     {
@@ -125,11 +128,8 @@ export default function RegisterForm() {
         newErrors.biography = "Biography should be at least 20 characters.";
         isValid = false;
       }
-      if (!formData.domain.trim()) {
-        newErrors.domain = "Domain is required.";
-        isValid = false;
-      } else if (formData.domain.includes(",")) {
-        newErrors.domain = "Please enter only one primary domain.";
+      if (interests.length === 0) {
+        newErrors.domain = "At least one research interest is required.";
         isValid = false;
       }
     }
@@ -167,7 +167,7 @@ export default function RegisterForm() {
             role: formData.role.toUpperCase(),
             department: formData.department,
             biography: formData.biography,
-            domain: formData.domain,
+            domain: interests.join(", "),
             identityProof: formData.identityProof,
             profilePhoto: formData.profilePhoto,
           }),
@@ -644,26 +644,76 @@ export default function RegisterForm() {
                   }}
                   className="space-y-4"
                 >
-                  <div>
+                  <div className="space-y-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Interests
+                      Research Interests
                     </label>
-                    <input
-                      type="text"
-                      name="domain"
-                      value={formData.domain}
-                      onChange={handleInputChange}
-                      className={cn(
-                        "w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amu-green focus:border-amu-green outline-none transition-all",
-                        errors.domain ? "border-red-500" : "border-gray-300",
-                      )}
-                      placeholder="e.g. Artificial Intelligence"
-                    />
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {interests.map((interest, index) => (
+                        <span
+                          key={index}
+                          className="flex items-center gap-1.5 px-3 py-1 bg-amu-green/10 text-amu-green rounded-full text-xs font-bold border border-amu-green/20 animate-in zoom-in duration-300"
+                        >
+                          {interest}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setInterests((prev) =>
+                                prev.filter((_, i) => i !== index),
+                              )
+                            }
+                            className="hover:text-amu-green/70 transition-colors"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={interestInput}
+                        onChange={(e) => setInterestInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === ",") {
+                            e.preventDefault();
+                            const val = interestInput.trim().replace(/,/g, "");
+                            if (val && !interests.includes(val)) {
+                              setInterests((prev) => [...prev, val]);
+                              setInterestInput("");
+                              setErrors((prev) => ({ ...prev, domain: "" }));
+                            }
+                          }
+                        }}
+                        className={cn(
+                          "w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amu-green focus:border-amu-green outline-none transition-all pr-20",
+                          errors.domain ? "border-red-500" : "border-gray-300",
+                        )}
+                        placeholder="Type and press Enter..."
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const val = interestInput.trim();
+                          if (val && !interests.includes(val)) {
+                            setInterests((prev) => [...prev, val]);
+                            setInterestInput("");
+                            setErrors((prev) => ({ ...prev, domain: "" }));
+                          }
+                        }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-gray-100 text-gray-500 text-[10px] font-black uppercase tracking-widest rounded-md hover:bg-amu-green hover:text-white transition-all"
+                      >
+                        Add
+                      </button>
+                    </div>
                     {errors.domain && (
                       <p className="text-red-500 text-sm mt-1">
                         {errors.domain}
                       </p>
                     )}
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                      Add as many interests as you want
+                    </p>
                   </div>
 
                   <div>

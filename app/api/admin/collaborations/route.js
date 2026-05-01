@@ -30,6 +30,7 @@ export async function GET() {
             role: true,
             department: true,
             universityID: true,
+            profilePhoto: true,
           },
         },
         teamMembers: {
@@ -39,6 +40,7 @@ export async function GET() {
             role: true,
             department: true,
             universityID: true,
+            profilePhoto: true,
           },
         },
       },

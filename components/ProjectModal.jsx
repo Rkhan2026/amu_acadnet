@@ -14,6 +14,7 @@ import {
   ArrowLeft,
   ListChecks,
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 import Link from "next/link";
 import LoadingSpinner from "./LoadingSpinner";
@@ -30,6 +31,7 @@ const ProjectModal = ({
   project: initialProject,
   onProfileClick,
   isAdmin: isAdminProp,
+  zIndex,
 }) => {
   const [project, setProject] = useState(initialProject || null);
   const [loading, setLoading] = useState(!initialProject);
@@ -40,11 +42,12 @@ const ProjectModal = ({
   const [prevID, setPrevID] = useState(null);
 
   // Synchronize state with props
-  const currentProjectID = projectID || initialProject?.projectID;
+  const currentProjectID =
+    projectID || initialProject?.projectID || initialProject?.id;
   if (currentProjectID !== prevID) {
     setPrevID(currentProjectID);
     setProject(initialProject || null);
-    setLoading(!initialProject && !!projectID);
+    setLoading(!initialProject && !!currentProjectID);
     setRequested(null);
     setCollaborationID(null);
   }
@@ -52,45 +55,57 @@ const ProjectModal = ({
   useEffect(() => {
     if (isOpen && currentProjectID) {
       const fetchData = async () => {
-        // Only show loading if we don't have data yet
-        const hasData = project || initialProject;
-        if (!hasData) setLoading(true);
+        // If we don't have project data yet, show loading
+        if (!project && !initialProject) setLoading(true);
 
         try {
-          const [authRes, netRes] = await Promise.all([
-            fetch("/api/auth/me").then((r) => r.json()),
-            fetch("/api/network").then((r) => r.json()),
-          ]);
-
-          if (authRes && authRes.user) setCurrentUser(authRes.user);
+          // Fetch current user separately so it doesn't block project data
+          fetch("/api/auth/me")
+            .then((r) => r.json())
+            .then((res) => {
+              if (res && res.user) setCurrentUser(res.user);
+            })
+            .catch(() => {});
 
           let activeProject = project || initialProject;
-          if (!activeProject && projectID) {
-            const projRes = await fetch(`/api/projects/${projectID}`).then(
-              (r) => r.json(),
-            );
+
+          // Always fetch full details if we only have a partial project object
+          // or if we were passed a projectID string.
+          if (
+            !activeProject ||
+            (!activeProject.requirements && currentProjectID)
+          ) {
+            const projRes = await fetch(
+              `/api/projects/${currentProjectID}`,
+            ).then((r) => r.json());
             if (!projRes.error) {
               setProject(projRes);
               activeProject = projRes;
             }
           }
 
-          if (activeProject && !netRes.error) {
-            const pid = activeProject.projectID;
-            const sent = netRes.sentCollaborations?.find(
-              (c) => c.projectID === pid,
-            );
-            const received = netRes.receivedCollaborations?.find(
-              (c) => c.projectID === pid,
-            );
-            const collab = sent || received;
-            if (collab) {
-              setRequested(collab.requestStatus);
-              setCollaborationID(collab.requestID);
-            } else {
-              setRequested(null);
-              setCollaborationID(null);
-            }
+          // Fetch collaboration status only if not an admin and we have a project
+          const isAdmin = isAdminProp || currentUser?.role === "ADMIN";
+          if (activeProject && !isAdmin) {
+            fetch("/api/network")
+              .then((r) => r.json())
+              .then((netRes) => {
+                if (!netRes.error) {
+                  const pid = activeProject.projectID;
+                  const sent = netRes.sentCollaborations?.find(
+                    (c) => c.projectID === pid,
+                  );
+                  const received = netRes.receivedCollaborations?.find(
+                    (c) => c.projectID === pid,
+                  );
+                  const collab = sent || received;
+                  if (collab) {
+                    setRequested(collab.requestStatus);
+                    setCollaborationID(collab.requestID);
+                  }
+                }
+              })
+              .catch(() => {});
           }
         } catch (err) {
           console.error("Error fetching project data:", err);
@@ -161,13 +176,18 @@ const ProjectModal = ({
   const formatStatus = (s) => s?.replace(/_/g, " ");
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose}>
+    <BaseModal isOpen={isOpen} onClose={onClose} zIndex={zIndex}>
       {loading ? (
         <div className="flex-1 flex flex-col items-center justify-center p-20">
           <LoadingSpinner message="Loading Project Details..." />
         </div>
       ) : project ? (
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="flex-1 overflow-y-auto custom-scrollbar"
+        >
           <div className="p-8 md:p-12">
             {/* Admin Back Button */}
             {isAdmin && (
@@ -383,13 +403,15 @@ const ProjectModal = ({
                           Project Creator
                         </p>
                         <button
-                          onClick={() =>
-                            onProfileClick?.(
+                          onClick={() => {
+                            const creatorID =
                               project.universityID ||
-                                project.creator?.universityID,
-                            )
-                          }
-                          className="w-full flex items-center justify-between group bg-amu-gold/5 p-4 rounded-3xl border border-amu-gold/10 hover:bg-amu-gold/10 transition-all text-left"
+                              project.creator?.universityID;
+                            if (creatorID !== currentUser?.universityID) {
+                              onProfileClick?.(creatorID);
+                            }
+                          }}
+                          className={`w-full flex items-center justify-between group bg-amu-gold/5 p-4 rounded-3xl border border-amu-gold/10 transition-all text-left ${project.universityID !== currentUser?.universityID || (project.creator?.universityID && project.creator.universityID !== currentUser?.universityID) ? "hover:bg-amu-gold/10 cursor-pointer" : "cursor-default opacity-80"}`}
                         >
                           <div className="flex items-center gap-3">
                             <Avatar
@@ -427,26 +449,36 @@ const ProjectModal = ({
 
                             const directMembers = project.teamMembers || [];
 
-                            // Filter out the creator if they happen to be in the team list
+                            // Filter out the creator and duplicates
                             const allMembers = [
                               ...collaborators,
                               ...directMembers,
-                            ].filter(
-                              (m, index, self) =>
-                                m.universityID !== project.universityID &&
+                            ].filter((m, index, self) => {
+                              const mID = m.universityID || m.id;
+                              const projectOwnerID =
+                                project.universityID ||
+                                project.creator?.universityID;
+                              if (!mID) return false;
+                              if (mID === projectOwnerID) return false;
+                              return (
                                 self.findIndex(
-                                  (t) => t.universityID === m.universityID,
-                                ) === index,
-                            );
+                                  (t) => (t.universityID || t.id) === mID,
+                                ) === index
+                              );
+                            });
 
                             if (allMembers.length > 0) {
                               return allMembers.map((member, i) => (
                                 <button
                                   key={i}
-                                  onClick={() =>
-                                    onProfileClick?.(member.universityID)
-                                  }
-                                  className="w-full flex items-center justify-between group hover:bg-gray-50 p-2 rounded-2xl transition-all text-left"
+                                  onClick={() => {
+                                    const mID =
+                                      member.universityID || member.id;
+                                    if (mID !== currentUser?.universityID) {
+                                      onProfileClick?.(mID);
+                                    }
+                                  }}
+                                  className={`w-full flex items-center justify-between group p-2 rounded-2xl transition-all text-left ${(member.universityID || member.id) !== currentUser?.universityID ? "hover:bg-gray-50 cursor-pointer" : "cursor-default opacity-60"}`}
                                 >
                                   <div className="flex items-center gap-3">
                                     <Avatar
@@ -464,7 +496,9 @@ const ProjectModal = ({
                                       </p>
                                     </div>
                                   </div>
-                                  <ChevronRight className="w-4 h-4 text-gray-300 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1" />
+                                  <ChevronRight
+                                    className={`w-4 h-4 text-gray-300 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1 ${(member.universityID || member.id) === currentUser?.universityID ? "hidden" : ""}`}
+                                  />
                                 </button>
                               ));
                             }
@@ -550,7 +584,7 @@ const ProjectModal = ({
                       )}
                     </div>
                   )}
-                  {!currentUser && (
+                  {!currentUser && !isAdmin && (
                     <div className="mt-10 pt-8 border-t border-gray-50">
                       <Button
                         as={Link}
@@ -566,7 +600,7 @@ const ProjectModal = ({
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       ) : (
         <div className="p-20 text-center">
           <p className="text-red-500 font-bold">

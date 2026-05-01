@@ -10,11 +10,20 @@ export async function GET(request, { params }) {
     const project = await prisma.academicProject.findUnique({
       where: { projectID: projectID },
       include: {
-        creator: { select: { name: true, department: true } },
+        creator: {
+          select: { name: true, department: true, profilePhoto: true },
+        },
         collaborations: {
           where: { requestStatus: "ACCEPTED" },
           include: {
-            sender: { select: { name: true, role: true, department: true } },
+            sender: {
+              select: {
+                name: true,
+                role: true,
+                department: true,
+                profilePhoto: true,
+              },
+            },
           },
         },
         teamMembers: {
@@ -23,6 +32,7 @@ export async function GET(request, { params }) {
             name: true,
             role: true,
             department: true,
+            profilePhoto: true,
           },
         },
       },

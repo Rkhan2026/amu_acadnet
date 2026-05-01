@@ -28,6 +28,7 @@ export async function GET(request) {
             email: true,
             role: true,
             department: true,
+            profilePhoto: true,
           },
         },
         collaborations: {
@@ -37,12 +38,14 @@ export async function GET(request) {
               select: {
                 name: true,
                 universityID: true,
+                profilePhoto: true,
               },
             },
             receiver: {
               select: {
                 name: true,
                 universityID: true,
+                profilePhoto: true,
               },
             },
           },

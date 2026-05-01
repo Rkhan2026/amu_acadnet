@@ -23,11 +23,13 @@ export async function GET(_request) {
         project: {
           include: {
             creator: {
-              select: { name: true },
+              select: { name: true, profilePhoto: true },
             },
           },
         },
-        receiver: { select: { name: true, department: true } },
+        receiver: {
+          select: { name: true, department: true, profilePhoto: true },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -38,11 +40,13 @@ export async function GET(_request) {
         project: {
           include: {
             creator: {
-              select: { name: true },
+              select: { name: true, profilePhoto: true },
             },
           },
         },
-        sender: { select: { name: true, department: true } },
+        sender: {
+          select: { name: true, department: true, profilePhoto: true },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -54,6 +58,7 @@ export async function GET(_request) {
           select: {
             name: true,
             department: true,
+            profilePhoto: true,
             followers: {
               where: { requestStatus: "ACCEPTED" },
               select: { followerID: true },
@@ -70,6 +75,7 @@ export async function GET(_request) {
           select: {
             name: true,
             department: true,
+            profilePhoto: true,
             followers: {
               where: { requestStatus: "ACCEPTED" },
               select: { followerID: true },
