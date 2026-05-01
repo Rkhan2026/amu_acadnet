@@ -59,7 +59,7 @@ model AcademicProject {
   teamMembers      User[]           @relation("UserWorksOnProject")
   adminFeedback     String?          @default("No feedback yet")
 
-  @@map("ResearchProject")
+  @@map("AcademicProject")
 }
 
 model Collaboration {

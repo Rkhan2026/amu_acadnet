@@ -7,7 +7,7 @@ export async function GET(request, { params }) {
     const resolvedParams = await params;
     const { projectID } = resolvedParams;
 
-    const project = await prisma.researchProject.findUnique({
+    const project = await prisma.academicProject.findUnique({
       where: { projectID: projectID },
       include: {
         creator: { select: { name: true, department: true } },
@@ -15,6 +15,14 @@ export async function GET(request, { params }) {
           where: { requestStatus: "ACCEPTED" },
           include: {
             sender: { select: { name: true, role: true, department: true } },
+          },
+        },
+        teamMembers: {
+          select: {
+            universityID: true,
+            name: true,
+            role: true,
+            department: true,
           },
         },
       },
@@ -42,7 +50,7 @@ export async function DELETE(request, { params }) {
     const { projectID } = resolvedParams;
 
     // Verify ownership
-    const existing = await prisma.researchProject.findUnique({
+    const existing = await prisma.academicProject.findUnique({
       where: { projectID },
     });
     if (
@@ -53,7 +61,7 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    await prisma.researchProject.delete({
+    await prisma.academicProject.delete({
       where: { projectID },
     });
 
@@ -78,7 +86,7 @@ export async function PUT(request, { params }) {
     const body = await request.json();
 
     // Verify ownership
-    const existing = await prisma.researchProject.findUnique({
+    const existing = await prisma.academicProject.findUnique({
       where: { projectID: projectID },
     });
     if (
@@ -89,7 +97,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const updated = await prisma.researchProject.update({
+    const updated = await prisma.academicProject.update({
       where: { projectID: projectID },
       data: {
         title: body.title,
@@ -105,6 +113,9 @@ export async function PUT(request, { params }) {
                 : body.projectStatus === "Archived"
                   ? "ARCHIVED"
                   : "COMPLETED",
+        requirements: Array.isArray(body.requirements)
+          ? body.requirements.map((r) => r.toLowerCase())
+          : [],
         externalLinks: body.externalLinks.map((l) => l.url || l),
         ...(existing.moderationStatus === "REJECTED"
           ? {

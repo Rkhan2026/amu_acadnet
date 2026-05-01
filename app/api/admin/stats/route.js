@@ -14,10 +14,10 @@ export async function GET() {
       prisma.user.findMany({
         select: { role: true, accountStatus: true },
       }),
-      prisma.researchProject.findMany({
+      prisma.academicProject.findMany({
         select: { moderationStatus: true },
       }),
-      prisma.researchProject.count({
+      prisma.academicProject.count({
         where: {
           teamMembers: {
             some: {},

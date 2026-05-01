@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import AppNavbar from "@/components/AppNavbar";
 import { PanelLeftOpen, AlertCircle, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useCallback } from "react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
@@ -12,26 +12,46 @@ export default function AppLayout({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   const fetchUser = useCallback(() => {
     fetch("/api/auth/me")
       .then((res) => res.json())
       .then((data) => {
         if (!data.user) {
-          router.push("/login");
+          // Instead of redirecting to login, we set user to null and stop loading
+          setUser(null);
+          setLoading(false);
         } else {
           setUser(data.user);
           setLoading(false);
         }
       })
-      .catch(() => router.push("/login"));
-  }, [router]);
+      .catch(() => {
+        setUser(null);
+        setLoading(false);
+      });
+  }, []);
 
   useEffect(() => {
     fetchUser();
     window.addEventListener("user-updated", fetchUser);
     return () => window.removeEventListener("user-updated", fetchUser);
   }, [fetchUser]);
+
+  // Route protection for guests
+  useEffect(() => {
+    if (!loading && !user) {
+      const isPublicPath =
+        pathname === "/home" ||
+        pathname === "/explore" ||
+        (pathname.startsWith("/projects/") && pathname !== "/projects/create");
+
+      if (!isPublicPath) {
+        router.push("/login");
+      }
+    }
+  }, [user, loading, pathname, router]);
 
   if (loading) return <LoadingSpinner fullPage message="Verifying access..." />;
 
@@ -96,6 +116,7 @@ export default function AppLayout({ children }) {
         <Sidebar
           isOpen={isSidebarOpen}
           onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+          user={user}
         />
 
         <main

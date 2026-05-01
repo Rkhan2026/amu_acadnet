@@ -15,10 +15,12 @@ export async function GET(request) {
     if (moderationStatus) whereClause.moderationStatus = moderationStatus;
     if (projectDomain) whereClause.projectDomain = projectDomain;
 
-    const projects = await prisma.researchProject.findMany({
+    const projects = await prisma.academicProject.findMany({
       where: whereClause,
       include: {
-        creator: { select: { name: true, department: true } },
+        creator: {
+          select: { name: true, department: true, profilePhoto: true },
+        },
         teamMembers: {
           select: {
             name: true,
@@ -102,12 +104,15 @@ export async function POST(request) {
       );
     }
 
-    const newProject = await prisma.researchProject.create({
+    const newProject = await prisma.academicProject.create({
       data: {
         title,
         description,
         projectDomain,
         externalLinks: Array.isArray(externalLinks) ? externalLinks : [],
+        requirements: Array.isArray(data.requirements)
+          ? data.requirements.map((r) => r.toLowerCase())
+          : [],
         universityID: session.universityID,
         moderationStatus: "PENDING",
         projectStatus:

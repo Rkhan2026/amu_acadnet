@@ -9,6 +9,7 @@ import {
   Sparkles,
   UploadCloud,
   ExternalLink,
+  Plus,
 } from "lucide-react";
 
 import { AMU_DEPARTMENTS } from "@/lib/utils";
@@ -23,18 +24,39 @@ const ProfileEditForm = ({
   const [formData, setFormData] = useState({
     name: user.name,
     department: user.department,
-    biography: user.biography,
-    researchInterests: user.researchInterests,
+    biography: user.academicProfile?.biography || "",
+    researchInterests: user.academicProfile?.researchInterests || "",
     profilePhoto: "",
   });
+  const [tagInput, setTagInput] = useState("");
   const [fileName, setFileName] = useState("");
 
   const handleChange = (e) => {
-    let { name, value } = e.target;
-    if (name === "researchInterests") {
-      value = value.replace(/,/g, "");
-    }
+    const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddTag = (e) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      const tag = tagInput.trim().toLowerCase();
+      if (tag && !formData.researchInterests.split(",").includes(tag)) {
+        const newInterests = formData.researchInterests
+          ? `${formData.researchInterests},${tag}`
+          : tag;
+        setFormData((prev) => ({ ...prev, researchInterests: newInterests }));
+        setTagInput("");
+      } else {
+        setTagInput("");
+      }
+    }
+  };
+
+  const removeTag = (tagToRemove) => {
+    const tags = formData.researchInterests
+      .split(",")
+      .filter((t) => t !== tagToRemove);
+    setFormData((prev) => ({ ...prev, researchInterests: tags.join(",") }));
   };
 
   const handleFileChange = (e) => {
@@ -129,21 +151,68 @@ const ProfileEditForm = ({
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-4">
             <label className="text-sm font-black text-gray-700 uppercase tracking-widest flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-amu-green" />
-              Interests
+              Research Interests
             </label>
-            <input
-              type="text"
-              name="researchInterests"
-              value={formData.researchInterests}
-              onChange={handleChange}
-              className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-amu-green focus:bg-white rounded-2xl outline-none transition-all font-bold text-gray-900 shadow-inner"
-              placeholder="e.g. Artificial Intelligence"
-            />
-            <p className="text-xs text-gray-400 font-medium">
-              Enter your primary project domain
+            <div className="flex flex-wrap gap-2 mb-3 min-h-[40px] p-4 bg-gray-50/50 rounded-2xl border-2 border-dashed border-gray-200">
+              {formData.researchInterests ? (
+                formData.researchInterests.split(",").map((interest, idx) => (
+                  <span
+                    key={idx}
+                    className="flex items-center gap-2 px-4 py-2 bg-white text-amu-green font-bold text-xs rounded-xl border border-amu-green/20 shadow-sm group hover:border-amu-green/40 transition-all"
+                  >
+                    {interest}
+                    <button
+                      type="button"
+                      onClick={() => removeTag(interest)}
+                      className="p-1 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))
+              ) : (
+                <p className="text-gray-400 text-xs italic p-1">
+                  No interests added yet...
+                </p>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleAddTag}
+                className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-amu-green focus:bg-white rounded-2xl outline-none transition-all font-bold text-gray-900 shadow-inner"
+                placeholder="Type and press Enter to add interests"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const tag = tagInput.trim().toLowerCase();
+                  if (
+                    tag &&
+                    !formData.researchInterests.split(",").includes(tag)
+                  ) {
+                    const newInterests = formData.researchInterests
+                      ? `${formData.researchInterests},${tag}`
+                      : tag;
+                    setFormData((prev) => ({
+                      ...prev,
+                      researchInterests: newInterests,
+                    }));
+                    setTagInput("");
+                  }
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-amu-green text-white rounded-xl hover:bg-[#004d26] transition-colors shadow-lg shadow-amu-green/20"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest ml-1">
+              Press Enter or Comma to add a tag
             </p>
           </div>
         </div>

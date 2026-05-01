@@ -6,7 +6,6 @@ import {
   Users,
   X,
   Check,
-  MoreVertical,
   Briefcase,
   UserCheck,
   UserMinus,
@@ -120,11 +119,9 @@ export default function NetworkPage() {
         }),
       });
       if (res.ok) {
-        fetchNetworkData();
+        setTimeout(fetchNetworkData, 500);
       } else {
         const err = await res.json();
-        // If it failed, we might want to revert but usually for delete/cancel it's fine
-        // since we refresh the data anyway.
         alert(err.error || "Action failed");
         fetchNetworkData(); // Revert by fetching fresh data
       }
@@ -175,7 +172,10 @@ export default function NetworkPage() {
         }),
       });
       if (res.ok) {
-        fetchNetworkData();
+        // We already updated optimistically, so we don't necessarily need an immediate fetch
+        // but we'll do one with a tiny delay to ensure the DB has settled if needed.
+        // Actually, just trusting the optimistic update is better for UX.
+        setTimeout(fetchNetworkData, 500);
       } else {
         const err = await res.json();
         alert(err.error || "Action failed");
@@ -748,9 +748,6 @@ function NetworkCard({ user, type, onAction, onViewProfile }) {
             className="object-cover"
           />
         </div>
-        <button className="p-2 text-gray-400 hover:bg-gray-50 rounded-xl transition-all">
-          <MoreVertical className="h-5 w-5" />
-        </button>
       </div>
 
       <div className="mb-6">

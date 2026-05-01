@@ -9,7 +9,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const collaborativeProjects = await prisma.researchProject.findMany({
+    const collaborativeProjects = await prisma.academicProject.findMany({
       where: {
         teamMembers: {
           some: {},

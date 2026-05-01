@@ -5,8 +5,14 @@ import { getSession } from "@/lib/session";
 export async function GET(_request) {
   try {
     const session = await getSession();
-    if (!session || (!session.universityID && !session.adminID)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session) {
+      return NextResponse.json({
+        currentUser: null,
+        sentCollaborations: [],
+        receivedCollaborations: [],
+        following: [],
+        followers: [],
+      });
     }
 
     const { universityID, adminID } = session;

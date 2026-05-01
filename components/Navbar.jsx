@@ -93,6 +93,12 @@ const Navbar = () => {
             ) : (
               <>
                 <Link
+                  href="/home"
+                  className="px-5 py-2 text-gray-600 font-medium hover:text-amu-green transition-colors"
+                >
+                  Explore as Guest
+                </Link>
+                <Link
                   href="/login"
                   className="px-5 py-2 text-gray-700 font-medium hover:text-amu-green transition-colors"
                 >
@@ -172,6 +178,13 @@ const Navbar = () => {
               )
             ) : (
               <>
+                <Link
+                  href="/home"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-amu-green hover:bg-amu-green/10"
+                  onClick={toggleMenu}
+                >
+                  Explore as Guest
+                </Link>
                 <Link
                   href="/login"
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-amu-green hover:bg-amu-green/10"

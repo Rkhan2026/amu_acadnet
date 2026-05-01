@@ -145,12 +145,7 @@ async function main() {
   console.log("Fetching all academic projects...");
 
   let projects;
-  try {
-    projects = await prisma.academicProject.findMany();
-  } catch (_err) {
-    console.log("academicProject model not found, trying researchProject...");
-    projects = await prisma.researchProject.findMany();
-  }
+  projects = await prisma.academicProject.findMany();
 
   console.log(`Found ${projects.length} projects.`);
 
@@ -189,8 +184,7 @@ async function main() {
       `Updating project [${project.title}] with skills: [${skillsArray.join(", ")}]`,
     );
 
-    const model = prisma.academicProject || prisma.researchProject;
-    await model.update({
+    await prisma.academicProject.update({
       where: { projectID: project.projectID },
       data: {
         requirements: skillsArray,

@@ -91,7 +91,7 @@ export async function PATCH(request) {
       const isInvite = collabReq.senderID === collabReq.project?.universityID;
       const newMemberID = isInvite ? collabReq.receiverID : collabReq.senderID;
 
-      await prisma.researchProject.update({
+      await prisma.academicProject.update({
         where: { projectID: collabReq.projectID },
         data: {
           teamMembers: {

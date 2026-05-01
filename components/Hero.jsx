@@ -23,15 +23,6 @@ const Hero = () => {
       .catch(() => setUser(null));
   }, []);
 
-  const scrollToFeatures = (e) => {
-    e.preventDefault();
-    const featuresSection = document.getElementById("features");
-    if (featuresSection) {
-      featuresSection.scrollIntoView({ behavior: "smooth", block: "start" });
-      window.history.pushState(null, "", "#features");
-    }
-  };
-
   return (
     <div
       id="about"
@@ -132,13 +123,14 @@ const Hero = () => {
                 }}
               />
             </Link>
-            <Link
-              href="#features"
-              onClick={scrollToFeatures}
-              className="w-full sm:w-auto px-10 py-5 bg-white text-gray-900 border-2 border-gray-100 hover:border-amu-green/30 hover:bg-amu-green/5 rounded-full font-black text-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center"
-            >
-              Explore Features
-            </Link>
+            {!user && (
+              <Link
+                href="/home"
+                className="w-full sm:w-auto px-10 py-5 bg-white text-gray-900 border-2 border-gray-100 hover:border-amu-green/30 hover:bg-amu-green/5 rounded-full font-black text-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center"
+              >
+                Explore as Guest
+              </Link>
+            )}
           </motion.div>
         </div>
       </div>

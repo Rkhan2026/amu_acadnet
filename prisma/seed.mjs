@@ -15,7 +15,7 @@ async function main() {
   // ─── Clean up existing data (in dependency order) ────────────────────────
   await prisma.collaboration.deleteMany();
   await prisma.follows.deleteMany();
-  await prisma.researchProject.deleteMany();
+  await prisma.academicProject.deleteMany();
   await prisma.academicProfile.deleteMany();
   await prisma.user.deleteMany();
   await prisma.admin.deleteMany();
@@ -221,7 +221,7 @@ async function main() {
   console.log("✅ Academic profiles created.");
 
   // ─── Research Projects ───────────────────────────────────────────────────
-  const project1 = await prisma.researchProject.create({
+  const project1 = await prisma.academicProject.create({
     data: {
       title: "AI-Powered Diagnostic Tool for Early Disease Detection",
       description:
@@ -239,7 +239,7 @@ async function main() {
     },
   });
 
-  const project2 = await prisma.researchProject.create({
+  const project2 = await prisma.academicProject.create({
     data: {
       title: "Smart Campus Energy Management via IoT",
       description:
@@ -259,7 +259,7 @@ async function main() {
     },
   });
 
-  const project3 = await prisma.researchProject.create({
+  const project3 = await prisma.academicProject.create({
     data: {
       title: "CRISPR-Based Therapeutics for Genetic Disorders",
       description:
@@ -272,7 +272,7 @@ async function main() {
     },
   });
 
-  const project4 = await prisma.researchProject.create({
+  const project4 = await prisma.academicProject.create({
     data: {
       title: "Post-Quantum Cryptographic Protocols",
       description:
@@ -417,7 +417,7 @@ async function main() {
     });
   });
 
-  await prisma.researchProject.createMany({ data: additionalProjects });
+  await prisma.academicProject.createMany({ data: additionalProjects });
   console.log(
     `✅ Generated ${additionalProjects.length} additional projects (9 Pending, 10 Approved).`,
   );
@@ -475,7 +475,7 @@ async function main() {
   ];
 
   for (const proj of collaborationProjects) {
-    await prisma.researchProject.create({
+    await prisma.academicProject.create({
       data: {
         title: proj.title,
         description: proj.desc,
@@ -515,7 +515,7 @@ async function main() {
     },
   });
   // Connect Alice to project4 team
-  await prisma.researchProject.update({
+  await prisma.academicProject.update({
     where: { projectID: project4.projectID },
     data: { teamMembers: { connect: { universityID: alice.universityID } } },
   });
@@ -530,7 +530,7 @@ async function main() {
     },
   });
   // Connect Bob to project3 team
-  await prisma.researchProject.update({
+  await prisma.academicProject.update({
     where: { projectID: project3.projectID },
     data: { teamMembers: { connect: { universityID: bob.universityID } } },
   });
@@ -554,7 +554,7 @@ async function main() {
       },
     });
     if (c.st === "ACCEPTED") {
-      await prisma.researchProject.update({
+      await prisma.academicProject.update({
         where: { projectID: c.p.projectID },
         data: { teamMembers: { connect: { universityID: c.s.universityID } } },
       });

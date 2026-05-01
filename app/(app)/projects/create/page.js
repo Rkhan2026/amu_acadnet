@@ -9,6 +9,7 @@ import {
   Loader2,
   Plus,
   Trash2,
+  X,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -24,7 +25,9 @@ const CreateProjectPage = () => {
     projectStatus: "Proposed",
     description: "",
     externalLinks: [""],
+    requirements: [],
   });
+  const [newRequirement, setNewRequirement] = useState("");
   const [showCustomDomain, setShowCustomDomain] = useState(false);
 
   const domains = [
@@ -51,6 +54,7 @@ const CreateProjectPage = () => {
         projectDomain: formData.projectDomain,
         projectStatus: formData.projectStatus,
         externalLinks: formData.externalLinks.filter((l) => l.trim() !== ""),
+        requirements: formData.requirements,
       };
 
       const res = await fetch("/api/projects", {
@@ -278,7 +282,93 @@ const CreateProjectPage = () => {
               />
             </div>
 
+            {/* Technical Requirements */}
             <div className="space-y-4">
+              <div className="flex items-center justify-between ml-1">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                  Technical Requirements
+                </label>
+                <span className="text-[10px] text-gray-300 font-bold italic">
+                  Press Enter to add
+                </span>
+              </div>
+
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="e.g. Python, Deep Learning, Pytorch"
+                  value={newRequirement}
+                  onChange={(e) => setNewRequirement(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (newRequirement.trim()) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          requirements: [
+                            ...prev.requirements,
+                            newRequirement.trim().toLowerCase(),
+                          ],
+                        }));
+                        setNewRequirement("");
+                      }
+                    }
+                  }}
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amu-green/20 focus:border-amu-green transition-all font-bold text-gray-900 placeholder:text-gray-300"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (newRequirement.trim()) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        requirements: [
+                          ...prev.requirements,
+                          newRequirement.trim().toLowerCase(),
+                        ],
+                      }));
+                      setNewRequirement("");
+                    }
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-amu-green/10 text-amu-green rounded-xl hover:bg-amu-green/20 transition-all"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {formData.requirements.map((req, i) => (
+                  <div
+                    key={i}
+                    className="group flex items-center gap-2 px-4 py-2 bg-amu-green/5 text-amu-green border border-amu-green/10 rounded-xl text-xs font-bold transition-all hover:border-amu-green/30 lowercase"
+                  >
+                    {req}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          requirements: prev.requirements.filter(
+                            (_, idx) => idx !== i,
+                          ),
+                        }));
+                      }}
+                      className="p-1 hover:bg-red-50 hover:text-red-500 rounded-md transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+                {formData.requirements.length === 0 && (
+                  <p className="text-[10px] text-gray-300 italic ml-1">
+                    No requirements added yet.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* External Links */}
+            <div className="space-y-4 pt-4 border-t border-gray-50">
               <div className="mb-2 ml-1">
                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">
                   External Links

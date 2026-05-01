@@ -27,7 +27,7 @@ export async function PATCH(request, { params }) {
       );
     }
 
-    const updatedProject = await prisma.researchProject.update({
+    const updatedProject = await prisma.academicProject.update({
       where: { projectID },
       data: {
         moderationStatus,

@@ -41,6 +41,7 @@ const ProjectDetailPage = () => {
   const [requestLoading, setRequestLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [collaborationID, setCollaborationID] = useState(null);
+  const [newRequirement, setNewRequirement] = useState("");
 
   React.useEffect(() => {
     Promise.all([
@@ -481,14 +482,14 @@ const ProjectDetailPage = () => {
           </motion.div>
 
           {/* Technical Requirements Section */}
-          {project.requirements && project.requirements.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="bg-white rounded-[3rem] p-10 lg:p-14 shadow-2xl shadow-gray-200/50 border border-gray-100"
-            >
-              <div className="flex items-center gap-3 mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="bg-white rounded-[3rem] p-10 lg:p-14 shadow-2xl shadow-gray-200/50 border border-gray-100"
+          >
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-amu-gold/10 rounded-xl flex items-center justify-center">
                   <ListChecks className="h-5 w-5 text-amu-gold" />
                 </div>
@@ -497,18 +498,93 @@ const ProjectDetailPage = () => {
                 </h2>
               </div>
 
-              <div className="flex flex-wrap gap-4">
-                {project.requirements.map((req, i) => (
-                  <span
+              {isEditing && (
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Add skill (e.g. Python)"
+                      value={newRequirement}
+                      onChange={(e) => setNewRequirement(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          if (newRequirement.trim()) {
+                            setEditForm({
+                              ...editForm,
+                              requirements: [
+                                ...editForm.requirements,
+                                newRequirement.trim().toLowerCase(),
+                              ],
+                            });
+                            setNewRequirement("");
+                          }
+                        }
+                      }}
+                      className="px-6 py-2.5 bg-gray-50 border-2 border-gray-100 rounded-2xl text-sm font-bold focus:outline-none focus:border-amu-gold transition-all w-64"
+                    />
+                    <button
+                      onClick={() => {
+                        if (newRequirement.trim()) {
+                          setEditForm({
+                            ...editForm,
+                            requirements: [
+                              ...editForm.requirements,
+                              newRequirement.trim().toLowerCase(),
+                            ],
+                          });
+                          setNewRequirement("");
+                        }
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-amu-gold text-white rounded-lg hover:bg-amu-gold-dark transition-colors"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-4">
+              {(isEditing ? editForm.requirements : project.requirements).map(
+                (req, i) => (
+                  <div
                     key={i}
-                    className="px-6 py-3 bg-gray-50 text-gray-700 font-bold rounded-2xl border border-gray-100 hover:border-amu-gold/30 hover:bg-white hover:shadow-md transition-all cursor-default lowercase"
+                    className={`group relative flex items-center gap-2 px-6 py-3 font-bold rounded-2xl border transition-all lowercase ${
+                      isEditing
+                        ? "bg-amu-gold/5 border-amu-gold/20 text-amu-gold pr-10"
+                        : "bg-gray-50 text-gray-700 border-gray-100 hover:border-amu-gold/30 hover:bg-white hover:shadow-md cursor-default"
+                    }`}
                   >
                     {req}
-                  </span>
-                ))}
-              </div>
-            </motion.div>
-          )}
+                    {isEditing && (
+                      <button
+                        onClick={() => {
+                          const newReqs = editForm.requirements.filter(
+                            (_, idx) => idx !== i,
+                          );
+                          setEditForm({ ...editForm, requirements: newReqs });
+                        }}
+                        className="absolute right-3 p-1 bg-white text-amu-gold rounded-md hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                ),
+              )}
+              {isEditing && editForm.requirements.length === 0 && (
+                <p className="text-gray-400 font-medium italic">
+                  No requirements added. Start by typing above.
+                </p>
+              )}
+              {!isEditing && project.requirements?.length === 0 && (
+                <p className="text-gray-400 font-medium italic">
+                  No technical requirements specified.
+                </p>
+              )}
+            </div>
+          </motion.div>
 
           {/* External Links Section */}
           <motion.div

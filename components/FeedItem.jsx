@@ -116,7 +116,7 @@ const FeedItem = ({ post, currentUser, onProfileClick, onProjectClick }) => {
           <BookOpen className="h-4 w-4" />
           Full Project
         </Link>
-        {!isOwner && (
+        {currentUser && !isOwner && (
           <button
             onClick={handleAcceptCollab}
             disabled={requested || loading}
