@@ -1,5 +1,6 @@
 import React from "react";
 import { X } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 const TagInput = ({
   tags,
@@ -15,6 +16,10 @@ const TagInput = ({
       e.preventDefault();
       const val = inputValue.trim();
       if (val) {
+        if (tags.some((t) => t.toLowerCase() === val.toLowerCase())) {
+          toast.error(`${val} is already added`);
+          return;
+        }
         onAdd(val);
         onInputChange("");
       }

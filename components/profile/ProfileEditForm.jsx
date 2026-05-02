@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Plus,
 } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 import { AMU_DEPARTMENTS } from "@/lib/utils";
 
@@ -39,14 +40,20 @@ const ProfileEditForm = ({
   const handleAddTag = (e) => {
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
-      const tag = tagInput.trim().toLowerCase();
-      if (tag && !formData.researchInterests.split(",").includes(tag)) {
+      const tag = tagInput.trim();
+      const existingTags = formData.researchInterests
+        .split(",")
+        .map((t) => t.trim().toLowerCase());
+      if (tag) {
+        if (existingTags.includes(tag.toLowerCase())) {
+          toast.error(`${tag} is already added`);
+          setTagInput("");
+          return;
+        }
         const newInterests = formData.researchInterests
           ? `${formData.researchInterests},${tag}`
           : tag;
         setFormData((prev) => ({ ...prev, researchInterests: newInterests }));
-        setTagInput("");
-      } else {
         setTagInput("");
       }
     }
@@ -63,7 +70,7 @@ const ProfileEditForm = ({
     const file = e.target.files[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert("File size must be less than 5MB");
+        toast.error("File size must be less than 5MB");
         return;
       }
       setFileName(file.name);
@@ -191,11 +198,16 @@ const ProfileEditForm = ({
               <button
                 type="button"
                 onClick={() => {
-                  const tag = tagInput.trim().toLowerCase();
-                  if (
-                    tag &&
-                    !formData.researchInterests.split(",").includes(tag)
-                  ) {
+                  const tag = tagInput.trim();
+                  const existingTags = formData.researchInterests
+                    .split(",")
+                    .map((t) => t.trim().toLowerCase());
+                  if (tag) {
+                    if (existingTags.includes(tag.toLowerCase())) {
+                      toast.error(`${tag} is already added`);
+                      setTagInput("");
+                      return;
+                    }
                     const newInterests = formData.researchInterests
                       ? `${formData.researchInterests},${tag}`
                       : tag;

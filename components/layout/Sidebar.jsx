@@ -50,7 +50,9 @@ const Sidebar = ({ isOpen, onToggle, user }) => {
     >
       <div className="p-4 border-b border-gray-50 flex items-center justify-between gap-3">
         <Link
-          href={user ? "/home" : "/"}
+          href={
+            user?.role === "ADMIN" ? "/admin/dashboard" : user ? "/home" : "/"
+          }
           className="flex items-center gap-2 overflow-hidden group cursor-pointer"
         >
           <div className="p-1.5 bg-amu-green/10 rounded-xl border border-amu-green/20 shrink-0 group-hover:bg-amu-green/20 transition-all">

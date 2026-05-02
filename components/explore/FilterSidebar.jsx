@@ -1,5 +1,6 @@
 import React from "react";
 import { Filter, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { AMU_DEPARTMENTS } from "@/lib/utils";
 import DomainSelect from "@/components/ui/DomainSelect";
 import TagInput from "@/components/ui/TagInput";
@@ -25,8 +26,8 @@ export default function FilterSidebar({
   matchingProjectID,
   onMatchingProjectChange,
   onClearFilters,
-  router,
 }) {
+  const router = useRouter();
   const PROJECT_STATUSES = ["PROPOSED", "ACTIVE", "ON_HOLD", "COMPLETED"];
 
   return (

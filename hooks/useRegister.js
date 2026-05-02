@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { toast } from "react-hot-toast";
 
 export function useRegister() {
   const [step, setStep] = useState(0);
@@ -182,7 +183,12 @@ export function useRegister() {
 
   const addInterest = () => {
     const val = interestInput.trim().replace(/,/g, "");
-    if (val && !interests.includes(val)) {
+    if (val) {
+      if (interests.some((i) => i.toLowerCase() === val.toLowerCase())) {
+        toast.error(`${val} is already added`);
+        setInterestInput("");
+        return;
+      }
       setInterests((prev) => [...prev, val]);
       setInterestInput("");
       setErrors((prev) => ({ ...prev, domain: "" }));

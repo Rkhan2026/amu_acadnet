@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { GraduationCap, LogOut, User as UserIcon } from "lucide-react";
 import { clearCurrentUser } from "@/lib/utils/auth";
@@ -27,14 +28,19 @@ const AppNavbar = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-100 z-100 flex items-center justify-between px-6 shadow-sm">
-      <div className="flex items-center gap-3">
-        <div className="p-1.5 bg-amu-green/10 rounded-xl border border-amu-green/20">
+      <Link
+        href={
+          user?.role === "ADMIN" ? "/admin/dashboard" : user ? "/home" : "/"
+        }
+        className="flex items-center gap-3 group cursor-pointer hover:opacity-80 transition-opacity"
+      >
+        <div className="p-1.5 bg-amu-green/10 rounded-xl border border-amu-green/20 group-hover:bg-amu-green/20 transition-all">
           <GraduationCap className="h-6 w-6 text-amu-green" />
         </div>
         <span className="font-extrabold text-xl tracking-tighter text-gray-900">
           AMU <span className="text-amu-green">AcadNet</span>
         </span>
-      </div>
+      </Link>
 
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-4 border-r border-gray-100 pr-6">
