@@ -27,6 +27,11 @@ jobs:
       - name: Run Lint
         run: npm run lint
 
+      - name: Apply Prisma Migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
       - name: Build Project
         run: npm run build
         env:
