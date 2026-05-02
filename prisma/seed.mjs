@@ -38,7 +38,7 @@ async function main() {
 
   const alice = await prisma.user.create({
     data: {
-      universityID: "AU-2024-001",
+      universityID: "GL1001",
       name: "Ahmed Khan",
       email: "ahmed.khan@sharklasers.com",
       password: userPassword,
@@ -50,7 +50,7 @@ async function main() {
 
   const bob = await prisma.user.create({
     data: {
-      universityID: "AU-2024-002",
+      universityID: "GL1002",
       name: "Fatima Zahra",
       email: "fatima.zahra@sharklasers.com",
       password: userPassword,
@@ -62,7 +62,7 @@ async function main() {
 
   const carol = await prisma.user.create({
     data: {
-      universityID: "AU-2024-003",
+      universityID: "GL1003",
       name: "Omar Farooq",
       email: "omar.farooq@sharklasers.com",
       password: userPassword,
@@ -74,7 +74,7 @@ async function main() {
 
   const dave = await prisma.user.create({
     data: {
-      universityID: "AU-2024-004",
+      universityID: "GL1004",
       name: "Zainab Ali",
       email: "zainab.ali@sharklasers.com",
       password: userPassword,
@@ -86,7 +86,7 @@ async function main() {
 
   const eve = await prisma.user.create({
     data: {
-      universityID: "AU-2024-005",
+      universityID: "GL1005",
       name: "Ibrahim Hassan",
       email: "ibrahim.hassan@sharklasers.com",
       password: userPassword,
@@ -98,7 +98,7 @@ async function main() {
 
   const mohd = await prisma.user.create({
     data: {
-      universityID: "AU-2024-006",
+      universityID: "GL1006",
       name: "Maryam Siddiqui",
       email: "maryam.s@sharklasers.com",
       password: userPassword,
@@ -124,7 +124,7 @@ async function main() {
 
   studentData.forEach((student, index) => {
     additionalUsers.push({
-      universityID: `AU-2024-10${index + 1}`,
+      universityID: `GL2${String(index + 1).padStart(3, "0")}`,
       name: student.name,
       email: student.email,
       password: userPassword,
@@ -149,7 +149,7 @@ async function main() {
 
   facultyData.forEach((faculty, index) => {
     additionalUsers.push({
-      universityID: `AU-2024-20${index + 1}`,
+      universityID: `GL3${String(index + 1).padStart(3, "0")}`,
       name: faculty.name,
       email: faculty.email,
       password: userPassword,
@@ -174,7 +174,7 @@ async function main() {
 
   scholarData.forEach((scholar, index) => {
     additionalUsers.push({
-      universityID: `AU-2024-30${index + 1}`,
+      universityID: `GL4${String(index + 1).padStart(3, "0")}`,
       name: scholar.name,
       email: scholar.email,
       password: userPassword,

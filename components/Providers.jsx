@@ -5,13 +5,14 @@ export default function Providers({ children }) {
   return (
     <>
       <Toaster
-        position="top-right"
+        position="top-center"
         toastOptions={{
           style: {
             background: "#fff",
             color: "#1a1a1a",
             borderRadius: "16px",
-            fontSize: "14px",
+            fontSize: "16px",
+            padding: "16px 24px",
             fontWeight: "bold",
             border: "1px solid #f0f0f0",
             boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
