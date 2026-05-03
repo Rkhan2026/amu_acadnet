@@ -59,7 +59,7 @@ const UserGridCard = memo(({ user, onClick }) => {
                 </>
               ) : (
                 <span className="text-[10px] italic text-gray-300">
-                  No interests listed
+                  No interests or skills listed
                 </span>
               )}
             </div>

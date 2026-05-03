@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight,
   ChevronLeft,
-  Check,
   GraduationCap,
   BookOpen,
   User,
@@ -32,7 +31,6 @@ export default function RegisterForm() {
     interests,
     interestInput,
     setInterestInput,
-    successMessage,
     handleInputChange,
     handleNext,
     handleBack,
@@ -96,193 +94,170 @@ export default function RegisterForm() {
         </p>
       </div>
 
-      {successMessage ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center animate-in fade-in zoom-in duration-500">
-          <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-6 border-4 border-green-100">
-            <Check className="h-10 w-10 text-amu-green" />
-          </div>
-          <h2 className="text-2xl font-black text-gray-900 mb-2">
-            Registration Successful!
-          </h2>
-          <p className="text-gray-500 font-medium max-w-sm mb-8">
-            {successMessage}
-          </p>
-          <Link
-            href="/login"
-            className="w-full py-4 bg-amu-green text-white font-black rounded-2xl hover:bg-amu-green/90 transition-all shadow-xl shadow-amu-green/20 uppercase tracking-widest text-sm flex items-center justify-center gap-2"
-          >
-            Proceed to Login
-            <ChevronRight className="h-4 w-4" />
-          </Link>
+      {errors.submit && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-center font-medium animate-in shake">
+          {errors.submit}
         </div>
-      ) : (
-        <>
-          {errors.submit && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-center font-medium animate-in shake">
-              {errors.submit}
-            </div>
+      )}
+
+      {/* Progress Bar */}
+      <div className="mb-8 flex justify-center gap-2">
+        {[0, 1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className={cn(
+              "h-2 w-16 rounded-full transition-colors duration-300",
+              step >= i ? "bg-amu-green" : "bg-gray-200",
+            )}
+          />
+        ))}
+      </div>
+
+      <form
+        onSubmit={handleSubmit}
+        className="relative overflow-hidden min-h-[300px]"
+      >
+        <AnimatePresence initial={false} mode="wait" custom={step}>
+          {step === 0 && (
+            <motion.div
+              key="step0"
+              custom={step}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 },
+              }}
+            >
+              <RoleSelection
+                roles={roles}
+                formData={formData}
+                setFormData={setFormData}
+                errors={errors}
+              />
+            </motion.div>
           )}
 
-          {/* Progress Bar */}
-          <div className="mb-8 flex justify-center gap-2">
-            {[0, 1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className={cn(
-                  "h-2 w-16 rounded-full transition-colors duration-300",
-                  step >= i ? "bg-amu-green" : "bg-gray-200",
-                )}
+          {step === 1 && (
+            <motion.div
+              key="step1"
+              custom={step}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 },
+              }}
+            >
+              <PersonalInfo
+                formData={formData}
+                handleInputChange={handleInputChange}
+                errors={errors}
               />
-            ))}
-          </div>
+            </motion.div>
+          )}
 
-          <form
-            onSubmit={handleSubmit}
-            className="relative overflow-hidden min-h-[300px]"
-          >
-            <AnimatePresence initial={false} mode="wait" custom={step}>
-              {step === 0 && (
-                <motion.div
-                  key="step0"
-                  custom={step}
-                  variants={variants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{
-                    x: { type: "spring", stiffness: 300, damping: 30 },
-                    opacity: { duration: 0.2 },
-                  }}
-                >
-                  <RoleSelection
-                    roles={roles}
-                    formData={formData}
-                    setFormData={setFormData}
-                    errors={errors}
-                  />
-                </motion.div>
-              )}
+          {step === 2 && (
+            <motion.div
+              key="step2"
+              custom={step}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 },
+              }}
+            >
+              <AcademicDetails
+                formData={formData}
+                handleInputChange={handleInputChange}
+                handleFileChange={handleFileChange}
+                errors={errors}
+                identityProofName={identityProofName}
+                profilePhotoName={profilePhotoName}
+              />
+            </motion.div>
+          )}
 
-              {step === 1 && (
-                <motion.div
-                  key="step1"
-                  custom={step}
-                  variants={variants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{
-                    x: { type: "spring", stiffness: 300, damping: 30 },
-                    opacity: { duration: 0.2 },
-                  }}
-                >
-                  <PersonalInfo
-                    formData={formData}
-                    handleInputChange={handleInputChange}
-                    errors={errors}
-                  />
-                </motion.div>
-              )}
+          {step === 3 && (
+            <motion.div
+              key="step3"
+              custom={step}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 },
+              }}
+            >
+              <ResearchProfile
+                formData={formData}
+                handleInputChange={handleInputChange}
+                interests={interests}
+                interestInput={interestInput}
+                setInterestInput={setInterestInput}
+                addInterest={addInterest}
+                removeInterest={removeInterest}
+                errors={errors}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-              {step === 2 && (
-                <motion.div
-                  key="step2"
-                  custom={step}
-                  variants={variants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{
-                    x: { type: "spring", stiffness: 300, damping: 30 },
-                    opacity: { duration: 0.2 },
-                  }}
-                >
-                  <AcademicDetails
-                    formData={formData}
-                    handleInputChange={handleInputChange}
-                    handleFileChange={handleFileChange}
-                    errors={errors}
-                    identityProofName={identityProofName}
-                    profilePhotoName={profilePhotoName}
-                  />
-                </motion.div>
-              )}
-
-              {step === 3 && (
-                <motion.div
-                  key="step3"
-                  custom={step}
-                  variants={variants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{
-                    x: { type: "spring", stiffness: 300, damping: 30 },
-                    opacity: { duration: 0.2 },
-                  }}
-                >
-                  <ResearchProfile
-                    formData={formData}
-                    handleInputChange={handleInputChange}
-                    interests={interests}
-                    interestInput={interestInput}
-                    setInterestInput={setInterestInput}
-                    addInterest={addInterest}
-                    removeInterest={removeInterest}
-                    errors={errors}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Navigation Buttons */}
-            <div className="mt-8 flex justify-between gap-4">
-              {step > 0 && (
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 text-gray-600 font-semibold rounded-xl hover:bg-gray-100 transition-all"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                  Back
-                </button>
-              )}
-              {step < 3 ? (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="flex-[2] flex items-center justify-center gap-2 px-4 py-3 bg-amu-green text-white font-bold rounded-xl hover:bg-amu-green/90 transition-all shadow-lg shadow-amu-green/10"
-                >
-                  Next
-                  <ChevronRight className="h-5 w-5" />
-                </button>
+        {/* Navigation Buttons */}
+        <div className="mt-8 flex justify-between gap-4">
+          {step > 0 && (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 text-gray-600 font-semibold rounded-xl hover:bg-gray-100 transition-all"
+            >
+              <ChevronLeft className="h-5 w-5" />
+              Back
+            </button>
+          )}
+          {step < 3 ? (
+            <button
+              type="button"
+              onClick={handleNext}
+              className="flex-[2] flex items-center justify-center gap-2 px-4 py-3 bg-amu-green text-white font-bold rounded-xl hover:bg-amu-green/90 transition-all shadow-lg shadow-amu-green/10"
+            >
+              Next
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex-[2] flex items-center justify-center gap-2 px-4 py-3 bg-amu-green text-white font-bold rounded-xl hover:bg-amu-green/90 transition-all shadow-lg shadow-amu-green/10 disabled:opacity-70"
+            >
+              {isLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="flex-[2] flex items-center justify-center gap-2 px-4 py-3 bg-amu-green text-white font-bold rounded-xl hover:bg-amu-green/90 transition-all shadow-lg shadow-amu-green/10 disabled:opacity-70"
-                >
-                  {isLoading ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    "Complete Registration"
-                  )}
-                </button>
+                "Complete Registration"
               )}
-            </div>
+            </button>
+          )}
+        </div>
 
-            <div className="mt-6 text-center text-sm text-gray-500">
-              Already have an account?{" "}
-              <Link
-                href="/login"
-                className="text-amu-green font-semibold hover:underline"
-              >
-                Log in
-              </Link>
-            </div>
-          </form>
-        </>
-      )}
+        <div className="mt-6 text-center text-sm text-gray-500">
+          Already have an account?{" "}
+          <Link
+            href="/login"
+            className="text-amu-green font-semibold hover:underline"
+          >
+            Log in
+          </Link>
+        </div>
+      </form>
     </motion.div>
   );
 }

@@ -25,7 +25,7 @@ const BiographySection = memo(({ user }) => {
           <div className="p-2 bg-amu-gold/10 rounded-xl">
             <BookOpen className="h-5 w-5 text-amu-gold" />
           </div>
-          Interests
+          Interests & Skills
         </h3>
         <div className="flex flex-wrap gap-2">
           {interests.map((interest, idx) => (
@@ -38,7 +38,7 @@ const BiographySection = memo(({ user }) => {
           ))}
           {interests.length === 0 && (
             <span className="text-gray-400 text-sm italic">
-              No specific interests listed.
+              No specific interests or skills listed.
             </span>
           )}
         </div>

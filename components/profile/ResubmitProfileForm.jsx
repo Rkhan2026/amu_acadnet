@@ -150,10 +150,10 @@ const ResubmitProfileForm = ({
         />
       </div>
 
-      {/* Interests */}
+      {/* Interests & Skills */}
       <div className="space-y-2">
         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-          Interests
+          Interests & Skills
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

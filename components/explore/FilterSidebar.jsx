@@ -114,7 +114,7 @@ export default function FilterSidebar({
           {activeTab === "users" && (
             <div className="space-y-3">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
-                Interests
+                Interests & Skills
               </label>
               <TagInput
                 tags={interests}

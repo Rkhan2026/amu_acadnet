@@ -162,7 +162,7 @@ const ProfileEditForm = ({
           <div className="space-y-4">
             <label className="text-sm font-black text-gray-700 uppercase tracking-widest flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-amu-green" />
-              Research Interests
+              Interests & Skills
             </label>
             <div className="flex flex-wrap gap-2 mb-3 min-h-[40px] p-4 bg-gray-50/50 rounded-2xl border-2 border-dashed border-gray-200">
               {formData.interestsSkills.length > 0 ? (
@@ -183,7 +183,7 @@ const ProfileEditForm = ({
                 ))
               ) : (
                 <p className="text-gray-400 text-xs italic p-1">
-                  No interests added yet...
+                  No interests or skills added yet...
                 </p>
               )}
             </div>
@@ -194,7 +194,7 @@ const ProfileEditForm = ({
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleAddTag}
                 className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent focus:border-amu-green focus:bg-white rounded-2xl outline-none transition-all font-bold text-gray-900 shadow-inner"
-                placeholder="Type and press Enter to add interests"
+                placeholder="Type and press Enter to add interests & skills"
               />
               <button
                 type="button"

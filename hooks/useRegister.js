@@ -1,8 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 
 export function useRegister() {
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,7 +25,6 @@ export function useRegister() {
   const [identityProofName, setIdentityProofName] = useState("");
   const [interests, setInterests] = useState([]);
   const [interestInput, setInterestInput] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     setErrors({});
@@ -94,7 +95,7 @@ export function useRegister() {
         isValid = false;
       }
       if (interests.length === 0) {
-        newErrors.domain = "At least one research interest is required.";
+        newErrors.domain = "At least one interest or skill is required.";
         isValid = false;
       }
     }
@@ -139,7 +140,13 @@ export function useRegister() {
         const data = await response.json();
 
         if (response.ok) {
-          setSuccessMessage(data.message || "Registration Successful!");
+          toast.success("Registration Successful! Redirecting to login...", {
+            duration: 2000,
+            icon: "✅",
+          });
+          setTimeout(() => {
+            router.push("/login");
+          }, 1500);
         } else {
           setErrors({ submit: data.error || "Registration failed" });
         }
@@ -213,7 +220,6 @@ export function useRegister() {
     setInterests,
     interestInput,
     setInterestInput,
-    successMessage,
     handleInputChange,
     handleNext,
     handleBack,

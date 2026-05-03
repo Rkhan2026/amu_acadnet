@@ -148,7 +148,7 @@ const ModalSidebar = ({
 
         <div>
           <h4 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-8 flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-amu-green" /> Interests
+            <BookOpen className="h-5 w-5 text-amu-green" /> Interests & Skills
           </h4>
           <div className="flex flex-wrap gap-3">
             {interests.map((interest, idx) => (

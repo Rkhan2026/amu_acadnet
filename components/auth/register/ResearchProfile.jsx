@@ -16,7 +16,7 @@ const ResearchProfile = ({
     <div className="space-y-4">
       <div className="space-y-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Research Interests
+          Interests & Skills
         </label>
         <div className="flex flex-wrap gap-2 mb-2">
           {interests.map((interest, index) => (
@@ -64,7 +64,7 @@ const ResearchProfile = ({
           <p className="text-red-500 text-sm mt-1">{errors.domain}</p>
         )}
         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-          Add as many interests as you want
+          Add as many interests & skills as you want
         </p>
       </div>
 

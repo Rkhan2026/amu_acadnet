@@ -54,14 +54,14 @@ export default function AdminDashboard() {
           href="/admin/verifications?mode=PENDING"
         />
         <StatsCard
-          title="Total Research Projects"
+          title="Total Academic Projects"
           value={stats.totalPublications}
           icon={BookOpen}
           color="bg-amu-green/10 text-amu-green"
           href="/admin/moderation?mode=APPROVED"
         />
         <StatsCard
-          title="Pending Research Project Moderations"
+          title="Pending Academic Project Moderations"
           value={stats.pendingModerations}
           icon={FileCheck}
           color="bg-purple-50 text-purple-500"

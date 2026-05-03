@@ -28,9 +28,9 @@ export const ModerationList = ({
         }
         description={
           mode === "PENDING"
-            ? "No pending research projects to review."
+            ? "No pending academic projects to review."
             : mode === "APPROVED"
-              ? "The institutional research registry currently has no approved projects."
+              ? "The institutional academic registry currently has no approved projects."
               : "There are no projects in the rejection audit history."
         }
       />

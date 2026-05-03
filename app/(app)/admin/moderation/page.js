@@ -46,7 +46,7 @@ function ModerationContent() {
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
       <AdminHeader
         title="Admin Moderation"
-        description="Manage institutional data integrity for research projects."
+        description="Manage institutional data integrity for academic projects."
         activeTab={mode}
         onTabChange={setMode}
         counts={counts}
