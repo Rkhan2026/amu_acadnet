@@ -80,7 +80,7 @@ export function useHomeData() {
                   role: rec.user.role,
                   avatar: "/default-avatar.svg",
                   universityID: rec.user.universityID,
-                  researchInterests: rec.user.researchInterests,
+                  interestsSkills: rec.user.interestsSkills,
                   score: Math.round(rec.score * 100),
                   followingStatus: followMap[rec.user.universityID] || null,
                 })),

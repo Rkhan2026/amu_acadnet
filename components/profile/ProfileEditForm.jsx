@@ -26,7 +26,7 @@ const ProfileEditForm = ({
     name: user.name,
     department: user.department,
     biography: user.academicProfile?.biography || "",
-    researchInterests: user.academicProfile?.researchInterests || "",
+    interestsSkills: user.academicProfile?.interestsSkills || [],
     profilePhoto: "",
   });
   const [tagInput, setTagInput] = useState("");
@@ -41,29 +41,30 @@ const ProfileEditForm = ({
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       const tag = tagInput.trim();
-      const existingTags = formData.researchInterests
-        .split(",")
-        .map((t) => t.trim().toLowerCase());
       if (tag) {
-        if (existingTags.includes(tag.toLowerCase())) {
+        if (
+          formData.interestsSkills.some(
+            (t) => t.toLowerCase() === tag.toLowerCase(),
+          )
+        ) {
           toast.error(`${tag} is already added`);
           setTagInput("");
           return;
         }
-        const newInterests = formData.researchInterests
-          ? `${formData.researchInterests},${tag}`
-          : tag;
-        setFormData((prev) => ({ ...prev, researchInterests: newInterests }));
+        setFormData((prev) => ({
+          ...prev,
+          interestsSkills: [...prev.interestsSkills, tag],
+        }));
         setTagInput("");
       }
     }
   };
 
   const removeTag = (tagToRemove) => {
-    const tags = formData.researchInterests
-      .split(",")
-      .filter((t) => t !== tagToRemove);
-    setFormData((prev) => ({ ...prev, researchInterests: tags.join(",") }));
+    setFormData((prev) => ({
+      ...prev,
+      interestsSkills: prev.interestsSkills.filter((t) => t !== tagToRemove),
+    }));
   };
 
   const handleFileChange = (e) => {
@@ -164,8 +165,8 @@ const ProfileEditForm = ({
               Research Interests
             </label>
             <div className="flex flex-wrap gap-2 mb-3 min-h-[40px] p-4 bg-gray-50/50 rounded-2xl border-2 border-dashed border-gray-200">
-              {formData.researchInterests ? (
-                formData.researchInterests.split(",").map((interest, idx) => (
+              {formData.interestsSkills.length > 0 ? (
+                formData.interestsSkills.map((interest, idx) => (
                   <span
                     key={idx}
                     className="flex items-center gap-2 px-4 py-2 bg-white text-amu-green font-bold text-xs rounded-xl border border-amu-green/20 shadow-sm group hover:border-amu-green/40 transition-all"
@@ -199,21 +200,19 @@ const ProfileEditForm = ({
                 type="button"
                 onClick={() => {
                   const tag = tagInput.trim();
-                  const existingTags = formData.researchInterests
-                    .split(",")
-                    .map((t) => t.trim().toLowerCase());
                   if (tag) {
-                    if (existingTags.includes(tag.toLowerCase())) {
+                    if (
+                      formData.interestsSkills.some(
+                        (t) => t.toLowerCase() === tag.toLowerCase(),
+                      )
+                    ) {
                       toast.error(`${tag} is already added`);
                       setTagInput("");
                       return;
                     }
-                    const newInterests = formData.researchInterests
-                      ? `${formData.researchInterests},${tag}`
-                      : tag;
                     setFormData((prev) => ({
                       ...prev,
-                      researchInterests: newInterests,
+                      interestsSkills: [...prev.interestsSkills, tag],
                     }));
                     setTagInput("");
                   }

@@ -14,7 +14,7 @@ export function useResubmitProfile() {
     universityID: "",
     department: "",
     biography: "",
-    researchInterests: "",
+    interestsSkills: "",
     profilePhoto: "",
     identityProof: "",
   });
@@ -51,8 +51,8 @@ export function useResubmitProfile() {
             universityID: profileData.universityID || "",
             department: profileData.department || "",
             biography: profileData.academicProfile?.biography || "",
-            researchInterests:
-              profileData.academicProfile?.researchInterests || "",
+            interestsSkills:
+              profileData.academicProfile?.interestsSkills?.join(", ") || "",
             profilePhoto: "",
             identityProof: "",
           });

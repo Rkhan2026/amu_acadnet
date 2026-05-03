@@ -23,9 +23,7 @@ const ModalSidebar = ({
   onInvite,
   formatDate,
 }) => {
-  const interests = user.academicProfile?.researchInterests
-    ? user.academicProfile.researchInterests.split(",").map((i) => i.trim())
-    : [];
+  const interests = user.academicProfile?.interestsSkills || [];
 
   return (
     <div className="space-y-8">

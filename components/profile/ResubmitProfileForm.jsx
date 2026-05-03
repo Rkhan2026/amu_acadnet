@@ -161,8 +161,8 @@ const ResubmitProfileForm = ({
           </div>
           <input
             type="text"
-            name="researchInterests"
-            value={formData.researchInterests}
+            name="interestsSkills"
+            value={formData.interestsSkills}
             onChange={handleChange}
             className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-amu-green focus:border-amu-green outline-none transition-all"
             placeholder="e.g. Machine Learning, NLP, Computer Vision (comma separated)"

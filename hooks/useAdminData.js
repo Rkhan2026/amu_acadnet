@@ -112,11 +112,9 @@ export function useVerificationData(initialMode) {
               identityProof: u.identityProof,
               biography:
                 u.academicProfile?.biography || "No biography provided.",
-              researchInterests: u.academicProfile?.researchInterests
-                ? u.academicProfile.researchInterests
-                    .split(",")
-                    .map((s) => s.trim())
-                : ["Unspecified"],
+              researchInterests: u.academicProfile?.interestsSkills || [
+                "Unspecified",
+              ],
             })),
           );
         }

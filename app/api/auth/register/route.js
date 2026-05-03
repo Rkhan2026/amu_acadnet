@@ -83,7 +83,7 @@ export async function POST(request) {
         profilePhoto: profilePhotoUrl,
         academicProfile: {
           create: {
-            researchInterests: data.domain ? data.domain.toLowerCase() : "",
+            interestsSkills: data.domain ? [data.domain.toLowerCase()] : [],
             biography: data.biography || "",
           },
         },

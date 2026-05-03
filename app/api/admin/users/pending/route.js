@@ -27,7 +27,7 @@ export async function GET() {
         academicProfile: {
           select: {
             biography: true,
-            researchInterests: true,
+            interestsSkills: true,
           },
         },
         createdAt: true,

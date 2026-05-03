@@ -32,7 +32,7 @@ export async function GET(request) {
         academicProfile: {
           select: {
             biography: true,
-            researchInterests: true,
+            interestsSkills: true,
           },
         },
         createdAt: true,

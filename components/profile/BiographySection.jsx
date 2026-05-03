@@ -2,13 +2,7 @@ import React, { memo } from "react";
 import { User, BookOpen } from "lucide-react";
 
 const BiographySection = memo(({ user }) => {
-  const interests = (
-    user.researchInterests ||
-    user.academicProfile?.researchInterests ||
-    ""
-  )
-    .split(",")
-    .filter((i) => i.trim() !== "");
+  const interests = user.academicProfile?.interestsSkills || [];
 
   return (
     <div className="lg:col-span-2 space-y-8">

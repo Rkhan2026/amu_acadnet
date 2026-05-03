@@ -27,9 +27,8 @@ export async function GET(request) {
       if (topics.length > 0) {
         whereClause.academicProfile = {
           OR: topics.map((topic) => ({
-            researchInterests: {
-              contains: topic,
-              mode: "insensitive",
+            interestsSkills: {
+              has: topic,
             },
           })),
         };
@@ -46,7 +45,7 @@ export async function GET(request) {
         profilePhoto: true,
         academicProfile: {
           select: {
-            researchInterests: true,
+            interestsSkills: true,
             biography: true,
           },
         },

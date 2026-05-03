@@ -201,11 +201,15 @@ export async function PUT(request, { params }) {
     const {
       name,
       department,
-      researchInterests: interests,
+      interestsSkills: interests,
       biography,
       profilePhoto,
     } = body;
-    const researchInterests = interests ? interests.toLowerCase() : "";
+    const interestsSkills = Array.isArray(interests)
+      ? interests
+      : interests
+        ? interests.split(",").map((i) => i.trim().toLowerCase())
+        : [];
 
     let profilePhotoUrl = undefined;
     if (profilePhoto && profilePhoto.startsWith("data:")) {
@@ -236,12 +240,12 @@ export async function PUT(request, { params }) {
     await prisma.academicProfile.upsert({
       where: { universityID },
       update: {
-        ...(researchInterests !== undefined && { researchInterests }),
+        ...(interestsSkills !== undefined && { interestsSkills }),
         ...(biography !== undefined && { biography }),
       },
       create: {
         universityID,
-        researchInterests: researchInterests || "",
+        interestsSkills: interestsSkills || [],
         biography: biography || "",
       },
     });

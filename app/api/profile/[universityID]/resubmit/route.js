@@ -31,7 +31,7 @@ export async function POST(request, { params }) {
       role,
       department,
       biography,
-      researchInterests,
+      interestsSkills,
       profilePhoto,
       identityProof,
       universityID: newUniversityID,
@@ -84,20 +84,22 @@ export async function POST(request, { params }) {
     });
 
     const targetUniversityID = newUniversityID || universityID;
-    const lowerInterests = researchInterests
-      ? researchInterests.toLowerCase()
-      : "";
+    const interestsArray = Array.isArray(interestsSkills)
+      ? interestsSkills
+      : interestsSkills
+        ? interestsSkills.split(",").map((i) => i.trim().toLowerCase())
+        : [];
 
     await prisma.academicProfile.upsert({
       where: { universityID: targetUniversityID },
       create: {
         universityID: targetUniversityID,
         biography: biography || "",
-        researchInterests: lowerInterests,
+        interestsSkills: interestsArray,
       },
       update: {
         biography: biography,
-        researchInterests: lowerInterests,
+        interestsSkills: interestsArray,
       },
     });
 

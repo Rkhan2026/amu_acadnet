@@ -194,25 +194,25 @@ async function main() {
     data: [
       {
         universityID: alice.universityID,
-        researchInterests: "machine learning, computer vision, nlp",
+        interestsSkills: ["machine learning", "computer vision", "nlp"],
         biography:
           "Final year CS student passionate about AI applications in healthcare and education.",
       },
       {
         universityID: bob.universityID,
-        researchInterests: "iot, embedded systems, signal processing",
+        interestsSkills: ["iot", "embedded systems", "signal processing"],
         biography:
           "Faculty member with 10+ years of industry experience in smart grid technology.",
       },
       {
         universityID: carol.universityID,
-        researchInterests: "genomics, bioinformatics, crispr",
+        interestsSkills: ["genomics", "bioinformatics", "crispr"],
         biography:
           "Postgraduate researcher exploring gene-editing techniques for disease prevention.",
       },
       {
         universityID: eve.universityID,
-        researchInterests: "graph theory, cryptography, quantum algorithms",
+        interestsSkills: ["graph theory", "cryptography", "quantum algorithms"],
         biography:
           "Associate Professor specializing in applied mathematics and theoretical computer science.",
       },

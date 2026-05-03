@@ -71,11 +71,7 @@ export function useDiscoveryFilters() {
               name: u.name,
               role: u.role,
               department: u.department,
-              interests: u.academicProfile?.researchInterests
-                ? u.academicProfile.researchInterests
-                    .split(",")
-                    .map((s) => s.trim().toLowerCase())
-                : [],
+              interests: u.academicProfile?.interestsSkills || [],
               domain: u.department,
               avatar: u.profilePhoto || "/default-avatar.svg",
               projectCount:

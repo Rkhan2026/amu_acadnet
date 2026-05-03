@@ -54,7 +54,7 @@ export function useProfileData() {
           name: updatedData.name,
           department: updatedData.department,
           biography: updatedData.biography,
-          researchInterests: updatedData.researchInterests,
+          interestsSkills: updatedData.interestsSkills,
           profilePhoto: updatedData.profilePhoto,
         }),
       });

@@ -56,7 +56,9 @@ const SuggestedCollaborators = ({
                   {user.role} - {user.score}% Match
                 </p>
                 <p className="text-xs text-gray-500 line-clamp-1 mt-1">
-                  {user.researchInterests}
+                  {Array.isArray(user.interestsSkills)
+                    ? user.interestsSkills.join(", ")
+                    : user.interestsSkills}
                 </p>
               </div>
             </div>
