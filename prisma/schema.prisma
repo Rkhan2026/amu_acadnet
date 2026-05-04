@@ -28,7 +28,7 @@ model User {
   followers              Follows[]         @relation("FollowingRelation")
   createdProjects        AcademicProject[] @relation("UserCreatesProject")
   workingProjects        AcademicProject[] @relation("UserWorksOnProject")
-  identityProof          String?
+  identityProof          String            @default("Pending Verification")
   profilePhoto           String?           @default("/default-avatar.svg")
   adminFeedback          String?           @default("No feedback yet")
   createdAt              DateTime          @default(now())
