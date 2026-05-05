@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { getHashedId } from "@/lib/session";
 
 export async function POST(request) {
   try {
@@ -49,9 +50,11 @@ export async function POST(request) {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const hashedID = getHashedId(universityID);
+
     let identityProofUrl = null;
     if (identityProof) {
-      const identityPublicId = `${universityID}_Identity_Proof`;
+      const identityPublicId = `${hashedID}_identity_proof`;
       identityProofUrl = await uploadToCloudinary(
         identityProof,
         "acadnet/identity_proofs",
@@ -61,7 +64,7 @@ export async function POST(request) {
 
     let profilePhotoUrl = "/default-avatar.svg";
     if (profilePhoto) {
-      const profilePublicId = `${universityID}_Profile_Photo`;
+      const profilePublicId = `${hashedID}_profile_photo`;
       profilePhotoUrl = await uploadToCloudinary(
         profilePhoto,
         "acadnet/profile_photos",

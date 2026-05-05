@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { getSession, getHashedId } from "@/lib/session";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
 export async function POST(request, { params }) {
@@ -37,9 +37,12 @@ export async function POST(request, { params }) {
       universityID: newUniversityID,
     } = body;
 
+    const targetUniversityID = newUniversityID || universityID;
+    const hashedID = getHashedId(targetUniversityID);
+
     let profilePhotoUrl = user.profilePhoto;
     if (profilePhoto) {
-      const profilePublicId = `${newUniversityID || universityID}_Profile_Photo`;
+      const profilePublicId = `${hashedID}_profile_photo`;
       console.log(
         `Resubmit: Uploading profile photo to acadnet/profile_photos/${profilePublicId}`,
       );
@@ -54,7 +57,7 @@ export async function POST(request, { params }) {
 
     let identityProofUrl = user.identityProof;
     if (identityProof) {
-      const identityPublicId = `${newUniversityID || universityID}_Identity_Proof`;
+      const identityPublicId = `${hashedID}_identity_proof`;
       console.log(
         `Resubmit: Uploading identity proof to acadnet/identity_proofs/${identityPublicId}`,
       );
@@ -83,7 +86,6 @@ export async function POST(request, { params }) {
       },
     });
 
-    const targetUniversityID = newUniversityID || universityID;
     const interestsArray = Array.isArray(interestsSkills)
       ? interestsSkills
       : interestsSkills

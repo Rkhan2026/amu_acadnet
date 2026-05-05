@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { getSession, getHashedId } from "@/lib/session";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
 export async function GET(request, { params }) {
@@ -213,7 +213,8 @@ export async function PUT(request, { params }) {
 
     let profilePhotoUrl = undefined;
     if (profilePhoto && profilePhoto.startsWith("data:")) {
-      const profilePublicId = `${universityID}_Profile_Photo`;
+      const hashedID = getHashedId(universityID);
+      const profilePublicId = `${hashedID}_profile_photo`;
       console.log(
         `Uploading to Cloudinary: folder="acadnet/profile_photos", public_id="${profilePublicId}"`,
       );
