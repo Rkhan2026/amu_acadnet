@@ -1,8 +1,14 @@
 import React, { memo } from "react";
-import { Briefcase, UserMinus, Clock, CheckCircle2 } from "lucide-react";
+import {
+  Briefcase,
+  UserMinus,
+  Clock,
+  CheckCircle2,
+  Loader2,
+} from "lucide-react";
 
 const CollaborationCard = memo(
-  ({ collab, onLeave, onViewProfile, onViewProject }) => {
+  ({ collab, onLeave, onViewProfile, onViewProject, isProcessing }) => {
     const displayTeam = collab.team.slice(0, 2);
     const hasMore = collab.team.length > 2;
 
@@ -83,10 +89,15 @@ const CollaborationCard = memo(
           {!collab.isCreatorMe && (
             <button
               onClick={onLeave}
-              className="px-4 py-3 bg-gray-50 text-gray-400 font-bold rounded-xl hover:bg-red-50 hover:text-red-500 transition-all"
+              disabled={isProcessing}
+              className="px-4 py-3 bg-gray-50 text-gray-400 font-bold rounded-xl hover:bg-red-50 hover:text-red-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               title="Leave Collaboration"
             >
-              <UserMinus className="h-5 w-5" />
+              {isProcessing ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <UserMinus className="h-5 w-5" />
+              )}
             </button>
           )}
         </div>

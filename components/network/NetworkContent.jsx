@@ -18,6 +18,7 @@ const EmptyState = ({ message, subMessage, icon: Icon = Clock }) => (
 
 const NetworkContent = ({
   loading,
+  processingId,
   activeTab,
   subTab,
   data,
@@ -64,6 +65,7 @@ const NetworkContent = ({
           type="following"
           onAction={onUnfollowRequest}
           onViewProfile={onViewProfile}
+          isProcessing={processingId === u.universityID}
         />
       ) : (
         <FollowRequestCard
@@ -72,6 +74,7 @@ const NetworkContent = ({
           type="sent"
           onAction={onFollowAction}
           onViewProfile={onViewProfile}
+          isProcessing={processingId === u.universityID}
         />
       ),
     );
@@ -105,6 +108,7 @@ const NetworkContent = ({
           type="follower"
           onAction={(id) => onUnfollowRequest(id, true)}
           onViewProfile={onViewProfile}
+          isProcessing={processingId === u.universityID}
         />
       ) : (
         <FollowRequestCard
@@ -113,6 +117,7 @@ const NetworkContent = ({
           type="received"
           onAction={onFollowAction}
           onViewProfile={onViewProfile}
+          isProcessing={processingId === u.id}
         />
       ),
     );
@@ -146,6 +151,7 @@ const NetworkContent = ({
         onLeave={() => onLeaveCollab(c.id)}
         onViewProfile={onViewProfile}
         onViewProject={onViewProject}
+        isProcessing={processingId === c.id}
       />
     ) : (
       <CollabRequestCard
@@ -155,6 +161,7 @@ const NetworkContent = ({
         onAction={onCollabAction}
         onViewProfile={onViewProfile}
         onViewProject={onViewProject}
+        isProcessing={processingId === c.id}
       />
     ),
   );

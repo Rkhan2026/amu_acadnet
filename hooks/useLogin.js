@@ -7,14 +7,18 @@ export function useLogin() {
     email: "",
     password: "",
     role: "user",
+    rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
     if (error) setError("");
   };
 
@@ -30,6 +34,7 @@ export function useLogin() {
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
+          rememberMe: formData.rememberMe,
         }),
       });
 

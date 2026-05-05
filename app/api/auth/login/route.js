@@ -5,7 +5,7 @@ import { setSession } from "@/lib/session";
 
 export async function POST(request) {
   try {
-    const { email, password } = await request.json();
+    const { email, password, rememberMe } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -25,7 +25,7 @@ export async function POST(request) {
           email: adminUser.email,
           role: "ADMIN",
         };
-        await setSession(sessionUser);
+        await setSession(sessionUser, rememberMe);
         return NextResponse.json({ user: sessionUser }, { status: 200 });
       } else {
         return NextResponse.json(
@@ -59,7 +59,7 @@ export async function POST(request) {
           accountStatus: standardUser.accountStatus,
           department: standardUser.department,
         };
-        await setSession(sessionUser);
+        await setSession(sessionUser, rememberMe);
         return NextResponse.json({ user: sessionUser }, { status: 200 });
       } else {
         return NextResponse.json(

@@ -9,6 +9,7 @@ export function useNetworkData() {
     currentUser: null,
   });
   const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState(null);
 
   const fetchNetworkData = () => {
     setLoading(true);
@@ -42,6 +43,7 @@ export function useNetworkData() {
       }));
     }
 
+    setProcessingId(requestID);
     try {
       const res = await fetch("/api/network/collaboration", {
         method: action === "cancel" ? "DELETE" : "PATCH",
@@ -61,6 +63,8 @@ export function useNetworkData() {
     } catch (_e) {
       alert("Something went wrong");
       fetchNetworkData();
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -77,6 +81,7 @@ export function useNetworkData() {
       }));
     }
 
+    setProcessingId(id);
     try {
       const isCancel = action === "cancel";
       const res = await fetch("/api/network/follow", {
@@ -98,10 +103,13 @@ export function useNetworkData() {
     } catch (_e) {
       alert("Something went wrong");
       fetchNetworkData();
+    } finally {
+      setProcessingId(null);
     }
   };
 
   const executeUnfollow = async (targetID, direction = "following") => {
+    setProcessingId(targetID);
     try {
       const res = await fetch("/api/network/follow", {
         method: "DELETE",
@@ -116,13 +124,15 @@ export function useNetworkData() {
       }
     } catch (_e) {
       alert("Something went wrong");
+    } finally {
+      setProcessingId(null);
     }
   };
 
   const followingAccepted = networkData.following
     .filter((f) => f.requestStatus === "ACCEPTED")
     .map((f) => ({
-      id: f.id,
+      id: f.followID,
       universityID: f.followingID,
       name: f.following.name,
       department: f.following.department,
@@ -134,7 +144,7 @@ export function useNetworkData() {
   const followingSent = networkData.following
     .filter((f) => f.requestStatus === "PENDING")
     .map((f) => ({
-      id: f.id,
+      id: f.followID,
       universityID: f.followingID,
       name: f.following.name,
       department: f.following.department,
@@ -146,7 +156,7 @@ export function useNetworkData() {
   const followersAccepted = networkData.followers
     .filter((f) => f.requestStatus === "ACCEPTED")
     .map((f) => ({
-      id: f.id,
+      id: f.followID,
       universityID: f.followerID,
       name: f.follower.name,
       department: f.follower.department,
@@ -158,7 +168,7 @@ export function useNetworkData() {
   const followersReceived = networkData.followers
     .filter((f) => f.requestStatus === "PENDING")
     .map((f) => ({
-      id: f.id,
+      id: f.followID,
       universityID: f.followerID,
       name: f.follower.name,
       department: f.follower.department,
@@ -301,6 +311,7 @@ export function useNetworkData() {
   return {
     networkData,
     loading,
+    processingId,
     fetchNetworkData,
     executeCollabAction,
     executeFollowAction,

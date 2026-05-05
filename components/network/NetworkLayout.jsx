@@ -15,6 +15,7 @@ const NetworkLayout = ({
   setSubTab,
   tabs,
   loading,
+  processingId,
   onReload,
   data,
   handlers,
@@ -104,6 +105,7 @@ const NetworkLayout = ({
       )}
       <NetworkContent
         loading={loading}
+        processingId={processingId}
         activeTab={activeTab}
         subTab={subTab}
         data={data}

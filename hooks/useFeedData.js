@@ -4,6 +4,16 @@ export function useFeedData(activeTab, sortOption) {
   const [feedData, setFeedData] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [prevParams, setPrevParams] = useState({ activeTab, sortOption });
+
+  if (
+    prevParams.activeTab !== activeTab ||
+    prevParams.sortOption !== sortOption
+  ) {
+    setPrevParams({ activeTab, sortOption });
+    setFeedData([]);
+    setLoading(true);
+  }
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -15,7 +25,6 @@ export function useFeedData(activeTab, sortOption) {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(true), 0);
     Promise.all([fetch("/api/projects"), fetch("/api/network")])
       .then(async ([projectsRes, networkRes]) => {
         const projectsData = await projectsRes.json();
@@ -72,8 +81,6 @@ export function useFeedData(activeTab, sortOption) {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-
-    return () => clearTimeout(timer);
   }, [activeTab, sortOption]);
 
   return { feedData, currentUser, loading };

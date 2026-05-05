@@ -8,6 +8,7 @@ import { useNetworkModals } from "@/hooks/useNetworkModals";
 export default function NetworkPage() {
   const {
     loading,
+    processingId,
     fetchNetworkData,
     executeCollabAction,
     executeFollowAction,
@@ -68,6 +69,7 @@ export default function NetworkPage() {
       setSubTab={setSubTab}
       tabs={tabs}
       loading={loading}
+      processingId={processingId}
       onReload={fetchNetworkData}
       data={{
         followingAccepted,

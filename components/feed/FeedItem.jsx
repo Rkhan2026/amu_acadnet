@@ -74,7 +74,7 @@ const FeedItem = memo(
             >
               {post.title}
             </h3>
-            {post.matchScore > 0 && (
+            {post.matchScore !== undefined && post.matchScore !== null && (
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-sm font-black text-amber-900 bg-amber-100 px-4 py-1.5 rounded-full border border-amber-300 uppercase tracking-wide shadow-sm">
                   {post.matchScore}% Match

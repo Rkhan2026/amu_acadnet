@@ -111,8 +111,10 @@ export default function LoginForm() {
           <div className="flex items-center">
             <input
               id="remember-me"
-              name="remember-me"
+              name="rememberMe"
               type="checkbox"
+              checked={formData.rememberMe}
+              onChange={handleChange}
               className="h-4 w-4 text-amu-green focus:ring-amu-green border-gray-300 rounded cursor-pointer accent-amu-green"
             />
             <label
