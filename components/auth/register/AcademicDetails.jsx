@@ -1,5 +1,5 @@
 import React from "react";
-import { cn, AMU_DEPARTMENTS } from "@/lib/utils";
+import { cn, AMU_DEPARTMENTS } from "@/lib/constants";
 
 const AcademicDetails = ({
   formData,

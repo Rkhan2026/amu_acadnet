@@ -17,9 +17,7 @@ const RequirementList = memo(
             <div className="w-10 h-10 bg-amu-gold/10 rounded-xl flex items-center justify-center">
               <ListChecks className="h-5 w-5 text-amu-gold" />
             </div>
-            <h2 className="text-2xl font-black text-gray-900">
-              Technical Requirements
-            </h2>
+            <h2 className="text-2xl font-black text-gray-900">Requirements</h2>
           </div>
         </div>
 
@@ -44,7 +42,7 @@ const RequirementList = memo(
             ))}
             {requirements.length === 0 && (
               <p className="text-gray-400 font-medium italic">
-                No technical requirements specified.
+                No requirements specified.
               </p>
             )}
           </div>

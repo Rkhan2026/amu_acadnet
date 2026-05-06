@@ -1,6 +1,6 @@
 import React from "react";
 import { Check } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/constants";
 
 const RoleSelection = ({ roles, formData, setFormData, errors }) => {
   return (

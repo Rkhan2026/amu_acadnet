@@ -6,6 +6,7 @@ import CreateProjectHeader from "@/components/project/CreateProjectHeader";
 import CreateProjectActions from "@/components/project/CreateProjectActions";
 import ActionSuccess from "@/components/ui/ActionSuccess";
 import { useCreateProject } from "@/hooks/useCreateProject";
+import { PROJECT_DOMAINS } from "@/lib/constants";
 
 const CreateProjectPage = () => {
   const {
@@ -20,16 +21,7 @@ const CreateProjectPage = () => {
     router,
   } = useCreateProject();
 
-  const domains = [
-    "Artificial Intelligence",
-    "Social Sciences",
-    "Physics",
-    "Sustainable Development",
-    "Medieval History",
-    "Computer Science",
-    "Law",
-    "Biotechnology",
-  ];
+  const domains = PROJECT_DOMAINS;
   const statuses = ["Proposed", "Active", "On Hold", "Completed", "Archived"];
 
   return (
@@ -37,7 +29,7 @@ const CreateProjectPage = () => {
       <ActionSuccess
         isOpen={isSubmitted}
         title="Project Created!"
-        description="Your research project has been submitted for moderation. You'll be notified once it's live on the network."
+        description="Your research project has been submitted for moderation. Check back later to see if your project has been approved or rejected."
         redirectingText="Redirecting to Home..."
       />
 

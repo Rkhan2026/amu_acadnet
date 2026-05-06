@@ -16,7 +16,7 @@ const CreateProjectActions = ({ isSubmitting, onCancel }) => {
           </>
         ) : (
           <>
-            <PlusCircle className="h-5 w-5" /> Register Research Project{" "}
+            <PlusCircle className="h-5 w-5" /> Submit Project{" "}
             <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
           </>
         )}

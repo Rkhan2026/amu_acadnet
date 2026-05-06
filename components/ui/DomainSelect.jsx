@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { RESEARCH_DOMAINS } from "@/lib/utils";
+import { PROJECT_DOMAINS } from "@/lib/constants";
 
 const DomainSelect = ({
   value,
@@ -8,7 +8,7 @@ const DomainSelect = ({
   className = "",
 }) => {
   const [isCustom, setIsCustom] = useState(() => {
-    return value && !RESEARCH_DOMAINS.includes(value);
+    return value && !PROJECT_DOMAINS.includes(value);
   });
 
   const handleSelectChange = (e) => {
@@ -30,7 +30,7 @@ const DomainSelect = ({
         className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-amu-green focus:bg-white rounded-2xl text-sm font-bold text-gray-700 outline-none transition-all appearance-none cursor-pointer shadow-inner"
       >
         <option value="">{placeholder}</option>
-        {RESEARCH_DOMAINS.map((d) => (
+        {PROJECT_DOMAINS.map((d) => (
           <option key={d} value={d}>
             {d}
           </option>

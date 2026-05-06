@@ -15,7 +15,7 @@ const ModalProjectContent = ({ project }) => {
 
       {/* Technical Requirements */}
       {project.requirements && project.requirements.length > 0 && (
-        <Section title="Technical Requirements" icon={ListChecks}>
+        <Section title="Requirements" icon={ListChecks}>
           <div className="flex flex-wrap gap-3">
             {project.requirements.map((req, i) => (
               <Badge

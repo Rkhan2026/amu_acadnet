@@ -7,7 +7,7 @@ import {
   Building2,
   BookOpen,
 } from "lucide-react";
-import { AMU_DEPARTMENTS } from "@/lib/utils";
+import { AMU_DEPARTMENTS } from "@/lib/constants";
 import FileUpload from "./FileUpload";
 
 const ResubmitProfileForm = ({

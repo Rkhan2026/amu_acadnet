@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
-import { AMU_DEPARTMENTS } from "@/lib/utils";
+import { AMU_DEPARTMENTS } from "@/lib/constants";
 
 const ProfileEditForm = ({
   user,

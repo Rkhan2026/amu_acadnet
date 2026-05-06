@@ -1,7 +1,7 @@
 import React from "react";
 import { Filter, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { AMU_DEPARTMENTS } from "@/lib/utils";
+import { AMU_DEPARTMENTS } from "@/lib/constants";
 import DomainSelect from "@/components/ui/DomainSelect";
 import TagInput from "@/components/ui/TagInput";
 

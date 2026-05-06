@@ -15,7 +15,7 @@ const RequirementsInput = ({ requirements, setRequirements }) => {
     <div className="space-y-4">
       <div className="flex items-center justify-between ml-1">
         <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">
-          Technical Requirements
+          Requirements
         </label>
         <span className="text-[10px] text-gray-300 font-bold italic">
           Press Enter to add

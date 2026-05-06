@@ -10,7 +10,7 @@ import {
   User,
   Loader2,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/constants";
 import Link from "next/link";
 
 import RoleSelection from "./register/RoleSelection";
