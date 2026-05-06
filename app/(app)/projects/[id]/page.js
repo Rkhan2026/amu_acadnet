@@ -8,6 +8,7 @@ import ProjectDetailMain from "@/components/project/ProjectDetailMain";
 import ProjectSidebar from "@/components/project/ProjectSidebar";
 import ProjectNotFound from "@/components/project/ProjectNotFound";
 import UserProfileModal from "@/components/profile/UserProfileModal";
+import ConfirmationModal from "@/components/ui/ConfirmationModal";
 import { useProjectActions } from "@/hooks/useProjectActions";
 
 export default function ProjectDetailPage() {
@@ -37,6 +38,10 @@ export default function ProjectDetailPage() {
     addExternalLink,
     removeExternalLink,
     updateExternalLink,
+    isDeleteModalOpen,
+    setIsDeleteModalOpen,
+    isLeaveModalOpen,
+    setIsLeaveModalOpen,
   } = useProjectActions(projectId);
 
   const [selectedUserID, setSelectedUserID] = React.useState(null);
@@ -84,11 +89,11 @@ export default function ProjectDetailPage() {
           isSaving={isSaving}
           onSave={isEditing ? handleSave : () => setIsEditing(true)}
           onCancel={() => setIsEditing(false)}
-          onDelete={handleDelete}
+          onDelete={() => setIsDeleteModalOpen(true)}
           requested={requested}
           requestLoading={requestLoading}
           onSendRequest={handleSendRequest}
-          onLeaveCollaboration={handleLeaveCollaboration}
+          onLeaveCollaboration={() => setIsLeaveModalOpen(true)}
           onProfileClick={openProfile}
         />
       </div>
@@ -98,6 +103,26 @@ export default function ProjectDetailPage() {
         onClose={() => setIsUserModalOpen(false)}
         universityID={selectedUserID}
         zIndex="z-[300]"
+      />
+
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        title="Delete Project"
+        message="Are you sure you want to delete this project? This action cannot be undone and all collaboration data will be lost."
+        confirmText="Delete Project"
+        variant="danger"
+      />
+
+      <ConfirmationModal
+        isOpen={isLeaveModalOpen}
+        onClose={() => setIsLeaveModalOpen(false)}
+        onConfirm={handleLeaveCollaboration}
+        title="Leave Project"
+        message="Are you sure you want to leave this project? You will need to request collaboration again if you change your mind."
+        confirmText="Leave Project"
+        variant="warning"
       />
     </div>
   );

@@ -12,6 +12,8 @@ export function useProjectActions(projectId) {
   const [requestLoading, setRequestLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [collaborationID, setCollaborationID] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
 
   const fetchProjectData = useCallback(() => {
     // Use functional update or check to avoid unnecessary sets
@@ -116,7 +118,6 @@ export function useProjectActions(projectId) {
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this project?")) return;
     try {
       const res = await fetch(`/api/projects/${projectId}`, {
         method: "DELETE",
@@ -128,7 +129,6 @@ export function useProjectActions(projectId) {
   };
 
   const handleLeaveCollaboration = async () => {
-    if (!confirm("Are you sure you want to leave this project?")) return;
     setRequestLoading(true);
     try {
       const res = await fetch("/api/network/collaboration", {
@@ -233,5 +233,9 @@ export function useProjectActions(projectId) {
     addExternalLink,
     removeExternalLink,
     updateExternalLink,
+    isDeleteModalOpen,
+    setIsDeleteModalOpen,
+    isLeaveModalOpen,
+    setIsLeaveModalOpen,
   };
 }
