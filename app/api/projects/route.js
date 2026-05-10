@@ -1,159 +1,64 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
-import { getProjectRecommendations } from "@/lib/recommendations/engine";
+import {
+  withAuth,
+  successResponse,
+  errorResponse,
+  normalizeTags,
+} from "@/lib/api-utils";
+import { getProjectsList, createProject } from "@/lib/services/project";
 
-export async function GET(request) {
-  try {
+export const GET = withAuth(
+  async (request, session) => {
     const { searchParams } = new URL(request.url);
-    const universityID = searchParams.get("universityID");
-    const moderationStatus = searchParams.get("moderationStatus");
-    const projectDomain = searchParams.get("projectDomain");
-
-    const session = await getSession();
-    const isOwner = universityID && session?.universityID === universityID;
-    const isAdmin = session?.role?.toUpperCase() === "ADMIN";
-
-    const whereClause = {};
-    if (universityID) whereClause.universityID = universityID;
-    if (projectDomain) whereClause.projectDomain = projectDomain;
-
-    // Visibility logic: Outsiders only see APPROVED projects
-    if (!isOwner && !isAdmin) {
-      if (universityID) {
-        // Specifically viewing another user's projects
-        whereClause.moderationStatus = "APPROVED";
-      } else {
-        // General fetch - show APPROVED projects OR requester's own projects
-        whereClause.OR = [
-          { moderationStatus: "APPROVED" },
-          ...(session?.universityID
-            ? [{ universityID: session.universityID }]
-            : []),
-        ];
-      }
-    } else if (moderationStatus) {
-      // Owners and Admins can filter by status if they want
-      whereClause.moderationStatus = moderationStatus;
-    }
-
-    const projects = await prisma.academicProject.findMany({
-      where: whereClause,
-      include: {
-        creator: {
-          select: { name: true, department: true, profilePhoto: true },
-        },
-        teamMembers: {
-          select: {
-            name: true,
-            universityID: true,
-            email: true,
-            role: true,
-            department: true,
-            profilePhoto: true,
-          },
-        },
-        collaborations: {
-          where: { requestStatus: "ACCEPTED" },
-          select: {
-            sender: {
-              select: {
-                name: true,
-                universityID: true,
-                profilePhoto: true,
-              },
-            },
-            receiver: {
-              select: {
-                name: true,
-                universityID: true,
-                profilePhoto: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
+    const projects = await getProjectsList({
+      domain: searchParams.get("domain"),
+      search: searchParams.get("search"),
+      mine: searchParams.get("mine"),
+      status: searchParams.get("status"),
+      following: searchParams.get("following"),
+      userRole: session?.role,
+      universityID:
+        searchParams.get("universityID") ||
+        (["true", "following"].includes(
+          searchParams.get("mine") || searchParams.get("following"),
+        )
+          ? session?.universityID
+          : null),
+      excludeMe:
+        !searchParams.get("universityID") && searchParams.get("mine") !== "true"
+          ? session?.universityID
+          : null,
     });
 
-    // Add match scores if a session exists
-    if (session && session.universityID) {
-      const projectsWithScores = await getProjectRecommendations(
+    // If user is logged in, calculate match scores for general feed
+    if (
+      session?.universityID &&
+      !searchParams.get("universityID") &&
+      searchParams.get("mine") !== "true"
+    ) {
+      const { getProjectRecommendations } =
+        await import("@/lib/recommendations/engine");
+      const recommendedProjects = await getProjectRecommendations(
         session.universityID,
         projects,
       );
-      return NextResponse.json(projectsWithScores);
+      return successResponse(recommendedProjects);
     }
 
-    return NextResponse.json(projects);
-  } catch (error) {
-    console.error("Projects GET Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
-  }
-}
+    return successResponse(projects);
+  },
+  { required: false },
+);
 
-export async function POST(request) {
-  try {
-    const session = await getSession();
-    if (
-      !session ||
-      (session.role !== "USER" &&
-        session.role !== "FACULTY" &&
-        session.role !== "STUDENT")
-    ) {
-      // Allow any user role except maybe Admin? Let's just check if session has universityID
-      if (!session?.universityID) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-    }
+export const POST = withAuth(async (request, session) => {
+  const allowedRoles = ["FACULTY", "RESEARCH_SCHOLAR", "USER", "STUDENT"];
+  if (!allowedRoles.includes(session.role))
+    return errorResponse("Only verified members can create projects", 403);
 
-    const data = await request.json();
-    const {
-      title,
-      description,
-      projectDomain: domain,
-      externalLinks,
-      projectStatus,
-    } = data;
+  const data = await request.json();
+  if (!data.title || !data.description || !data.projectDomain)
+    return errorResponse("Missing required fields", 400);
 
-    const projectDomain = domain ? domain.toLowerCase() : "";
-
-    if (!title || !description || !projectDomain) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      );
-    }
-
-    const newProject = await prisma.academicProject.create({
-      data: {
-        title,
-        description,
-        projectDomain,
-        externalLinks: Array.isArray(externalLinks) ? externalLinks : [],
-        requirements: Array.isArray(data.requirements)
-          ? data.requirements.map((r) => r.toLowerCase())
-          : [],
-        universityID: session.universityID,
-        moderationStatus: "PENDING",
-        projectStatus:
-          projectStatus === "On Hold"
-            ? "ON_HOLD"
-            : projectStatus
-              ? projectStatus.toUpperCase()
-              : "PROPOSED",
-      },
-    });
-
-    return NextResponse.json(newProject, { status: 201 });
-  } catch (error) {
-    console.error("Projects POST Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
-  }
-}
+  data.requirements = normalizeTags(data.requirements);
+  const project = await createProject(session.universityID, data);
+  return successResponse(project, 201);
+});

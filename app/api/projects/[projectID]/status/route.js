@@ -1,47 +1,20 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { withAuth, successResponse, errorResponse } from "@/lib/api-utils";
+import { moderateProject } from "@/lib/services/admin";
 
-export async function PATCH(request, { params }) {
-  try {
-    const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
-      return NextResponse.json(
-        { error: "Unauthorized: Admin access required" },
-        { status: 403 },
-      );
-    }
-
-    const resolvedParams = await params;
-    const { projectID } = resolvedParams;
-    const body = await request.json();
-    const { moderationStatus, adminFeedback } = body; // 'APPROVED' | 'REJECTED'
+export const PATCH = withAuth(
+  async (request, session, { params }) => {
+    const { projectID } = await params;
+    const data = await request.json();
 
     if (
-      !moderationStatus ||
-      !["APPROVED", "REJECTED", "PENDING"].includes(moderationStatus)
+      !data.moderationStatus ||
+      !["APPROVED", "REJECTED", "PENDING"].includes(data.moderationStatus)
     ) {
-      return NextResponse.json(
-        { error: "Invalid moderation status" },
-        { status: 400 },
-      );
+      return errorResponse("Invalid moderation status", 400);
     }
 
-    const updatedProject = await prisma.academicProject.update({
-      where: { projectID },
-      data: {
-        moderationStatus,
-        projectStatus: moderationStatus === "APPROVED" ? "ACTIVE" : "ON_HOLD",
-        ...(adminFeedback !== undefined && { adminFeedback }),
-      },
-    });
-
-    return NextResponse.json(updatedProject);
-  } catch (error) {
-    console.error("Project Moderation Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
-  }
-}
+    const updatedProject = await moderateProject(projectID, data);
+    return successResponse(updatedProject);
+  },
+  { allowedRoles: ["ADMIN"] },
+);

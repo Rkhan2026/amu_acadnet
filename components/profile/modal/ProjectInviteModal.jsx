@@ -16,7 +16,7 @@ const ProjectInviteModal = ({ isOpen, onClose, targetUser }) => {
 
       Promise.all([
         fetch("/api/auth/me").then((r) => r.json()),
-        fetch("/api/projects").then((r) => r.json()),
+        fetch("/api/projects?mine=true").then((r) => r.json()),
         fetch("/api/network").then((r) => r.json()),
       ])
         .then(([authData, projectData, networkData]) => {
@@ -24,7 +24,11 @@ const ProjectInviteModal = ({ isOpen, onClose, targetUser }) => {
             const myID = authData.user?.universityID;
 
             const myOwnedProjects = projectData.filter(
-              (p) => p.universityID === myID,
+              (p) =>
+                p &&
+                p.universityID === myID &&
+                (p.moderationStatus === "APPROVED" ||
+                  String(p.moderationStatus).toUpperCase() === "APPROVED"),
             );
 
             const projectsWithStatus = myOwnedProjects.map((p) => {

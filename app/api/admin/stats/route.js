@@ -1,62 +1,10 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { withAuth, successResponse } from "@/lib/api-utils";
+import { getAdminStats } from "@/lib/services/admin";
 
-export async function GET() {
-  try {
-    const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Fetch all users to calculate distribution in-memory for better robustness
-    const [users, projects, totalCollaborations] = await Promise.all([
-      prisma.user.findMany({
-        select: { role: true, accountStatus: true },
-      }),
-      prisma.academicProject.findMany({
-        select: { moderationStatus: true },
-      }),
-      prisma.academicProject.count({
-        where: {
-          teamMembers: {
-            some: {},
-          },
-        },
-      }),
-    ]);
-
-    const totalUsers = users.length;
-    const pendingVerifications = users.filter(
-      (u) => u.accountStatus === "PENDING",
-    ).length;
-    const totalPublications = projects.length;
-    const pendingModerations = projects.filter(
-      (p) => p.moderationStatus === "PENDING",
-    ).length;
-
-    // Dynamically calculate distribution based on current roles in DB
-    const students = users.filter((u) => u.role === "STUDENT").length;
-    const faculty = users.filter((u) => u.role === "FACULTY").length;
-    const scholars = users.filter((u) => u.role === "RESEARCH SCHOLAR").length;
-
-    return NextResponse.json({
-      totalUsers,
-      pendingVerifications,
-      totalPublications,
-      pendingModerations,
-      totalCollaborations,
-      profileDistribution: [
-        { label: "Students", value: students, color: "bg-amu-green" },
-        { label: "Faculty", value: faculty, color: "bg-amu-gold" },
-        { label: "Research Scholars", value: scholars, color: "bg-blue-500" },
-      ],
-    });
-  } catch (error) {
-    console.error("Admin Stats GET Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
-  }
-}
+export const GET = withAuth(
+  async () => {
+    const stats = await getAdminStats();
+    return successResponse(stats);
+  },
+  { allowedRoles: ["ADMIN"] },
+);

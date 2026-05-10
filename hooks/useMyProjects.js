@@ -22,7 +22,7 @@ export function useMyProjects() {
   useEffect(() => {
     Promise.all([
       fetch("/api/auth/me").then((r) => r.json()),
-      fetch("/api/projects").then((r) => r.json()),
+      fetch("/api/projects?mine=true").then((r) => r.json()),
     ])
       .then(([authRes, projRes]) => {
         if (!authRes.error && !projRes.error) {

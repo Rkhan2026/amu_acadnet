@@ -13,7 +13,7 @@ import { useProjectActions } from "@/hooks/useProjectActions";
 
 export default function ProjectDetailPage() {
   const params = useParams();
-  const projectId = params.id;
+  const projectId = params.projectID;
 
   const {
     project,

@@ -1,41 +1,16 @@
-import { NextResponse } from "next/server";
-import { getSession } from "@/lib/session";
-import { prisma } from "@/lib/prisma";
+import { withAuth, successResponse, errorResponse } from "@/lib/api-utils";
+import { getFreshUser } from "@/lib/services/auth";
 
-export async function GET() {
-  try {
-    const session = await getSession();
-    if (!session) {
-      return NextResponse.json({ user: null });
+export const GET = withAuth(
+  async (request, session) => {
+    if (!session) return successResponse({ user: null });
+
+    try {
+      const user = await getFreshUser(session);
+      return successResponse({ user });
+    } catch (error) {
+      return errorResponse(error.message, 404);
     }
-
-    let user = null;
-    if (session.role === "ADMIN") {
-      user = await prisma.admin.findUnique({
-        where: { adminID: session.adminID },
-      });
-    } else {
-      user = await prisma.user.findUnique({
-        where: { universityID: session.universityID },
-      });
-    }
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({
-      user: {
-        ...session,
-        profilePhoto: user.profilePhoto,
-        accountStatus: user.accountStatus, // Always fresh
-      },
-    });
-  } catch (error) {
-    console.error("Session GET Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
-  }
-}
+  },
+  { required: false },
+);

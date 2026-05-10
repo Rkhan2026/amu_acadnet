@@ -1,163 +1,52 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { withAuth, successResponse, errorResponse } from "@/lib/api-utils";
+import { manageCollaboration } from "@/lib/services/network";
 
-export async function POST(request) {
+export const POST = withAuth(async (request, session) => {
+  const data = await request.json();
+  if (!data.projectID || !data.receiverID)
+    return errorResponse("Missing required fields", 400);
+
   try {
-    const session = await getSession();
-    if (!session || !session.universityID)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const { projectID, receiverID } = await request.json();
-
-    if (!projectID || !receiverID) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      );
-    }
-
-    const existing = await prisma.collaboration.findFirst({
-      where: { projectID, senderID: session.universityID, receiverID },
-    });
-
-    console.log("Creating collaboration request:", {
-      projectID,
-      senderID: session.universityID,
-      receiverID,
-    });
-
-    if (existing) {
-      console.log("Collaboration request already exists:", existing.requestID);
-      return NextResponse.json(
-        { error: "Collaboration request already sent" },
-        { status: 409 },
-      );
-    }
-
-    const collab = await prisma.collaboration.create({
-      data: {
-        projectID,
-        senderID: session.universityID,
-        receiverID,
-        requestStatus: "PENDING",
-      },
-    });
-
-    console.log(
-      "Collaboration request created successfully:",
-      collab.requestID,
+    const collab = await manageCollaboration(
+      "CREATE",
+      data,
+      session.universityID,
     );
-    return NextResponse.json(collab, { status: 201 });
-  } catch (error) {
-    console.error("Collaboration POST error", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return successResponse(collab, 201);
+  } catch (err) {
+    return errorResponse(err.message, 409);
   }
-}
+});
 
-export async function PATCH(request) {
+export const PATCH = withAuth(async (request, session) => {
+  const data = await request.json();
+  if (
+    !data.requestID ||
+    !["ACCEPTED", "REJECTED"].includes(data.requestStatus)
+  ) {
+    return errorResponse("Invalid data", 400);
+  }
+
   try {
-    const session = await getSession();
-    if (!session || !session.universityID)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const { requestID, requestStatus } = await request.json();
-
-    if (!requestID || !["ACCEPTED", "REJECTED"].includes(requestStatus)) {
-      return NextResponse.json({ error: "Invalid data" }, { status: 400 });
-    }
-
-    const collabReq = await prisma.collaboration.findUnique({
-      where: { requestID },
-      include: { project: true },
-    });
-    if (!collabReq || collabReq.receiverID !== session.universityID) {
-      return NextResponse.json(
-        { error: "Not authorized or request not found" },
-        { status: 403 },
-      );
-    }
-
-    const updatedCollab = await prisma.collaboration.update({
-      where: { requestID },
-      data: { requestStatus },
-    });
-
-    // If accepted, add to team members
-    if (requestStatus === "ACCEPTED") {
-      const isInvite = collabReq.senderID === collabReq.project?.universityID;
-      const newMemberID = isInvite ? collabReq.receiverID : collabReq.senderID;
-
-      await prisma.academicProject.update({
-        where: { projectID: collabReq.projectID },
-        data: {
-          teamMembers: {
-            connect: { universityID: newMemberID },
-          },
-        },
-      });
-    }
-
-    return NextResponse.json(updatedCollab);
-  } catch (error) {
-    console.error("Collaboration PATCH error", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+    const updated = await manageCollaboration(
+      "UPDATE",
+      data,
+      session.universityID,
     );
+    return successResponse(updated);
+  } catch (err) {
+    return errorResponse(err.message, 403);
   }
-}
+});
 
-export async function DELETE(request) {
+export const DELETE = withAuth(async (request, session) => {
+  const data = await request.json();
+  if (!data.requestID) return errorResponse("Missing request ID", 400);
+
   try {
-    const session = await getSession();
-    if (!session || !session.universityID)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const { requestID } = await request.json();
-
-    if (!requestID) {
-      return NextResponse.json(
-        { error: "Missing request ID" },
-        { status: 400 },
-      );
-    }
-
-    const collabReq = await prisma.collaboration.findUnique({
-      where: { requestID },
-    });
-
-    if (!collabReq) {
-      return NextResponse.json({ error: "Request not found" }, { status: 404 });
-    }
-
-    // Allow both sender and receiver to delete/leave the collaboration
-    if (
-      collabReq.senderID !== session.universityID &&
-      collabReq.receiverID !== session.universityID
-    ) {
-      return NextResponse.json(
-        { error: "Not authorized to modify this collaboration" },
-        { status: 403 },
-      );
-    }
-
-    await prisma.collaboration.delete({
-      where: { requestID },
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: "Collaboration removed",
-    });
-  } catch (error) {
-    console.error("Collaboration DELETE error", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    await manageCollaboration("DELETE", data, session.universityID);
+    return successResponse({ success: true, message: "Collaboration removed" });
+  } catch (err) {
+    return errorResponse(err.message, 403);
   }
-}
+});

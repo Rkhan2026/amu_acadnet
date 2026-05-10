@@ -1,121 +1,42 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { withAuth, successResponse, errorResponse } from "@/lib/api-utils";
+import { manageFollow } from "@/lib/services/network";
 
-export async function POST(request) {
+export const POST = withAuth(async (request, session) => {
+  const { targetID } = await request.json();
+  if (!targetID) return errorResponse("Missing target user ID", 400);
+
+  const follow = await manageFollow("FOLLOW", {
+    followerID: session.universityID,
+    followingID: targetID,
+  });
+  return successResponse(follow, 201);
+});
+
+export const PATCH = withAuth(async (request, session) => {
+  const { followID, requestStatus } = await request.json();
+  if (!followID || !["ACCEPTED", "REJECTED"].includes(requestStatus))
+    return errorResponse("Invalid data", 400);
+
   try {
-    const session = await getSession();
-    if (!session || !session.universityID)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const { targetID } = await request.json();
-    if (!targetID)
-      return NextResponse.json(
-        { error: "Missing target user ID" },
-        { status: 400 },
-      );
-
-    const existing = await prisma.follows.findUnique({
-      where: {
-        followerID_followingID: {
-          followerID: session.universityID,
-          followingID: targetID,
-        },
-      },
+    const updated = await manageFollow("UPDATE", {
+      followID,
+      requestStatus,
+      followerID: session.universityID,
     });
-
-    if (existing)
-      return NextResponse.json({ error: "Already following" }, { status: 409 });
-
-    const follow = await prisma.follows.create({
-      data: {
-        followerID: session.universityID,
-        followingID: targetID,
-        requestStatus: "PENDING",
-      },
-    });
-
-    return NextResponse.json(follow, { status: 201 });
+    return successResponse(updated);
   } catch (error) {
-    console.error("Follow POST Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return errorResponse(error.message, 403);
   }
-}
+});
 
-export async function DELETE(request) {
-  try {
-    const session = await getSession();
-    if (!session || !session.universityID)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export const DELETE = withAuth(async (request, session) => {
+  const { targetID, direction } = await request.json();
+  if (!targetID) return errorResponse("Missing target user ID", 400);
 
-    const { targetID, direction } = await request.json();
-    if (!targetID)
-      return NextResponse.json(
-        { error: "Missing target user ID" },
-        { status: 400 },
-      );
-
-    const where = {};
-    if (direction === "follower") {
-      // Removing a follower
-      where.followerID = targetID;
-      where.followingID = session.universityID;
-    } else {
-      // Unfollowing someone (default)
-      where.followerID = session.universityID;
-      where.followingID = targetID;
-    }
-
-    await prisma.follows.deleteMany({
-      where,
-    });
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Follow DELETE Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
-  }
-}
-export async function PATCH(request) {
-  try {
-    const session = await getSession();
-    if (!session || !session.universityID)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const { followID, requestStatus } = await request.json();
-
-    if (!followID || !["ACCEPTED", "REJECTED"].includes(requestStatus)) {
-      return NextResponse.json({ error: "Invalid data" }, { status: 400 });
-    }
-
-    const followReq = await prisma.follows.findUnique({
-      where: { followID },
-    });
-
-    if (!followReq || followReq.followingID !== session.universityID) {
-      return NextResponse.json(
-        { error: "Not authorized or request not found" },
-        { status: 403 },
-      );
-    }
-
-    const updatedFollow = await prisma.follows.update({
-      where: { followID },
-      data: { requestStatus },
-    });
-
-    return NextResponse.json(updatedFollow);
-  } catch (error) {
-    console.error("Follow PATCH error", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
-  }
-}
+  const params =
+    direction === "follower"
+      ? { followerID: targetID, followingID: session.universityID }
+      : { followerID: session.universityID, followingID: targetID };
+  await manageFollow("UNFOLLOW", params);
+  return successResponse({ success: true });
+});

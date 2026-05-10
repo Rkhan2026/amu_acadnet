@@ -7,7 +7,11 @@ const NetworkSubTabs = ({ activeTab, subTab, setSubTab, counts }) => (
       [
         { id: "ongoing", label: "Ongoing", count: counts.collabOngoing },
         { id: "finished", label: "Finished", count: counts.collabFinished },
-        { id: "received", label: "Requests", count: counts.collabReceived },
+        {
+          id: "received",
+          label: "Received Requests",
+          count: counts.collabReceived,
+        },
         {
           id: "invites_rec",
           label: "Invites Received",

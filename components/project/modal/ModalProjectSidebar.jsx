@@ -178,7 +178,7 @@ const ModalProjectSidebar = ({
           </div>
         </div>
 
-        {currentUser && !isAdmin && (
+        {currentUser && !isAdmin && project.status !== "COMPLETED" && (
           <div className="mt-10 pt-8 border-t border-gray-50">
             {isOwner ? (
               <Button

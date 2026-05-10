@@ -6,6 +6,7 @@ export function useNetworkData() {
     followers: [],
     sentCollaborations: [],
     receivedCollaborations: [],
+    workingProjects: [],
     currentUser: null,
   });
   const [loading, setLoading] = useState(true);
@@ -196,7 +197,7 @@ export function useNetworkData() {
         const isCreatorMe = creatorID === myID;
         grouped[pid] = {
           isCreatorMe,
-          id: c.requestID,
+          id: c.requestID || `wp-${pid}`,
           projectId: pid,
           name: c.project?.title || "Project",
           creator: isCreatorMe
@@ -209,15 +210,36 @@ export function useNetworkData() {
           createdAt: c.project?.createdAt,
         };
 
+        // Add me if I'm not the creator
         if (myID && myID !== creatorID) {
           const myNameWithYou = networkData.currentUser?.name
             ? `${networkData.currentUser.name} (You)`
             : "You";
           grouped[pid].team.push({ name: myNameWithYou, universityID: myID });
         }
+
+        // Add confirmed team members from the project itself
+        if (c.project?.teamMembers) {
+          c.project.teamMembers.forEach((m) => {
+            if (
+              m.universityID !== creatorID &&
+              m.universityID !== myID &&
+              !grouped[pid].team.some(
+                (tm) => tm.universityID === m.universityID,
+              )
+            ) {
+              grouped[pid].team.push({
+                name: m.name,
+                universityID: m.universityID,
+              });
+            }
+          });
+        }
       }
 
+      // Add partner from the collaboration record if not already added
       if (
+        partnerID &&
         partnerID !== creatorID &&
         partnerID !== myID &&
         !grouped[pid].team.some((m) => m.universityID === partnerID)
@@ -229,6 +251,15 @@ export function useNetworkData() {
   };
 
   const allAcceptedCollabs = [
+    ...(networkData.workingProjects || []).map((p) => ({
+      projectID: p.projectID,
+      project: p,
+      requestStatus: "ACCEPTED",
+      sender: p.creator,
+      senderID: p.universityID,
+      receiver: networkData.currentUser,
+      receiverID: networkData.currentUser?.universityID,
+    })),
     ...networkData.sentCollaborations.filter(
       (c) => c.requestStatus === "ACCEPTED",
     ),

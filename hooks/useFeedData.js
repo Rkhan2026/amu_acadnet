@@ -25,7 +25,9 @@ export function useFeedData(activeTab, sortOption) {
   }, []);
 
   useEffect(() => {
-    Promise.all([fetch("/api/projects"), fetch("/api/network")])
+    const projectsUrl = `/api/projects${activeTab === "following" ? "?following=true" : ""}`;
+
+    Promise.all([fetch(projectsUrl), fetch("/api/network")])
       .then(async ([projectsRes, networkRes]) => {
         const projectsData = await projectsRes.json();
         const networkData = await networkRes.json();
@@ -34,39 +36,28 @@ export function useFeedData(activeTab, sortOption) {
           const sentCollabIds = new Set(
             (networkData.sentCollaborations || []).map((c) => c.projectID),
           );
-          const followingIds = new Set(
-            (networkData.following || [])
-              .filter((f) => f.requestStatus === "ACCEPTED")
-              .map((f) => f.followingID),
-          );
 
-          const filtered = projectsData
-            .filter((p) => p.moderationStatus === "APPROVED")
-            .filter(
-              (p) =>
-                activeTab === "for-you" || followingIds.has(p.universityID),
-            )
-            .map((p) => ({
-              id: p.projectID,
-              title: p.title,
-              domain: p.projectDomain,
-              description: p.description,
-              projectCreator: p.creator?.name || "Member",
-              ownerID: p.universityID,
-              projectStatus:
-                p.projectStatus === "ACTIVE"
-                  ? "Active"
-                  : p.projectStatus === "ON_HOLD"
-                    ? "On Hold"
-                    : p.projectStatus === "PROPOSED"
-                      ? "Proposed"
-                      : p.projectStatus === "COMPLETED"
-                        ? "Completed"
-                        : "Archived",
-              matchScore: p.matchScore || 0,
-              createdAt: p.createdAt,
-              hasRequested: sentCollabIds.has(p.projectID),
-            }));
+          const filtered = projectsData.map((p) => ({
+            id: p.projectID,
+            title: p.title,
+            domain: p.projectDomain,
+            description: p.description,
+            projectCreator: p.creator?.name || "Member",
+            ownerID: p.universityID,
+            projectStatus:
+              p.projectStatus === "ACTIVE"
+                ? "Active"
+                : p.projectStatus === "ON_HOLD"
+                  ? "On Hold"
+                  : p.projectStatus === "PROPOSED"
+                    ? "Proposed"
+                    : p.projectStatus === "COMPLETED"
+                      ? "Completed"
+                      : "Archived",
+            matchScore: p.matchScore || 0,
+            createdAt: p.createdAt,
+            hasRequested: sentCollabIds.has(p.projectID),
+          }));
 
           const sorted = [...filtered].sort((a, b) => {
             if (sortOption === "Recent")

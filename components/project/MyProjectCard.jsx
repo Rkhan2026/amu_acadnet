@@ -30,7 +30,9 @@ const MyProjectCard = ({ project, onOpen }) => (
                 className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 ${
                   project.approvalStatus === "Approved"
                     ? "bg-emerald-100 text-emerald-700"
-                    : "bg-amber-100 text-amber-700"
+                    : project.approvalStatus === "Rejected"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-amber-100 text-amber-700"
                 }`}
               >
                 {project.approvalStatus === "Pending" && (

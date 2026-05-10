@@ -1,70 +1,16 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthContext } from "@/lib/session";
+import { withAuth, successResponse, normalizeTags } from "@/lib/api-utils";
+import { searchUsers } from "@/lib/services/profile";
 
-export async function GET(request) {
-  try {
-    const { universityID: sessionID } = await getAuthContext();
-    // We allow guests to browse users but with limited features in UI
-
+export const GET = withAuth(
+  async (request, session) => {
     const { searchParams } = new URL(request.url);
-    const all = searchParams.get("all") === "true";
-    const interests = searchParams.get("interests");
-
-    const whereClause = {
-      accountStatus: "APPROVED",
+    const filters = {
+      all: searchParams.get("all") === "true",
+      interests: normalizeTags(searchParams.get("interests")),
     };
 
-    if (sessionID) {
-      whereClause.universityID = { not: sessionID };
-    }
-
-    if (interests) {
-      const topics = interests
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean);
-      if (topics.length > 0) {
-        whereClause.academicProfile = {
-          OR: topics.map((topic) => ({
-            interestsSkills: {
-              has: topic,
-            },
-          })),
-        };
-      }
-    }
-
-    const users = await prisma.user.findMany({
-      where: whereClause,
-      select: {
-        universityID: true,
-        name: true,
-        role: true,
-        department: true,
-        profilePhoto: true,
-        academicProfile: {
-          select: {
-            interestsSkills: true,
-            biography: true,
-          },
-        },
-        _count: {
-          select: {
-            createdProjects: true,
-            workingProjects: true,
-          },
-        },
-      },
-      ...(!all && { take: 5 }),
-    });
-
-    return NextResponse.json(users);
-  } catch (error) {
-    console.error("Users GET Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
-  }
-}
+    const users = await searchUsers(filters, session?.universityID);
+    return successResponse(users);
+  },
+  { required: false },
+);

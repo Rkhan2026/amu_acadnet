@@ -83,8 +83,8 @@ const NetworkLayout = ({
           <h2 className="text-lg font-black text-gray-900 mb-1 capitalize">
             {subTab === "invites_rec"
               ? "Invites Received"
-              : subTab === "invites_sent"
-                ? "Invites Sent"
+              : subTab === "received"
+                ? "Received Requests"
                 : subTab.replace("_", " ")}
           </h2>
           <p className="text-sm text-gray-500 font-medium">
