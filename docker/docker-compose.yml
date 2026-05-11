@@ -1,0 +1,27 @@
+services:
+  migration:
+    image: amu-acadnet-migration
+    container_name: amu-migration
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: builder
+    env_file:
+      - ../.env
+    command: npx prisma migrate deploy
+
+  app:
+    image: amu-acadnet-app
+    container_name: amu-app
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../.env
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      migration:
+        condition: service_completed_successfully
