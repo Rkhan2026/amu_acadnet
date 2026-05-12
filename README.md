@@ -65,53 +65,6 @@
 
 ## Getting Started
 
-### Installation
-
-1. **Clone the Repository**
-
-   ```bash
-   git clone https://github.com/your-username/amu_acadnet.git
-   cd amu_acadnet
-   ```
-
-2. **Install Dependencies**
-
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment Variables**
-   Create a `.env` file in the root directory and add the following:
-
-   ```env
-   DATABASE_URL="your-postgresql-url"
-   GEMINI_API_KEY="your-gemini-api-key"
-   JWT_SECRET="your-jwt-secret"
-
-   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your-cloud-name"
-   CLOUDINARY_URL="your-cloudinary-url"
-   NEXT_PUBLIC_CLOUDINARY_API_KEY="your-api-key"
-   CLOUDINARY_API_SECRET="your-api-secret"
-
-   NEXT_PUBLIC_EMAILJS_SERVICE_ID="your-service-id"
-   NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_RESET_PASSWORD="your-template-id"
-   NEXT_PUBLIC_EMAILJS_PUBLIC_KEY="your-public-key"
-   ```
-
-4. **Initialize Database**
-
-   ```bash
-   npx prisma db push
-   npm run seed
-   ```
-
-5. **Run the Application**
-   ```bash
-   npm run dev
-   ```
-
----
-
 ### Docker Setup
 
 For a containerized environment, you can use Docker Compose:
@@ -128,7 +81,6 @@ For a containerized environment, you can use Docker Compose:
 
 This will:
 
-- Set up a PostgreSQL 15 database container.
 - Build the Next.js application image.
 - Automatically run Prisma migrations.
 - Start the application at `http://localhost:3000`.
